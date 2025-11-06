@@ -1,0 +1,24 @@
+{
+  "name": "Pra Que Escola Eu Vou?",
+  "short_name": "Escolas",
+  "description": "Organize suas prioridades de escolas para atribuição de aulas",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0f7f9",
+  "theme_color": "#1ba3c6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
