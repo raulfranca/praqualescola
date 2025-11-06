@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { useState, useCallback } from "react";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { School } from "@/types/school";
 import { SchoolDetailModal } from "./SchoolDetailModal";
 
@@ -11,147 +10,98 @@ interface MapViewProps {
 }
 
 // Default to Pindamonhangaba center
-const DEFAULT_CENTER: [number, number] = [-45.4612, -22.9249];
+const DEFAULT_CENTER = { lat: -22.9249, lng: -45.4612 };
+
+const mapContainerStyle = {
+  width: "100%",
+  height: "100%",
+};
+
+const mapOptions = {
+  disableDefaultUI: false,
+  zoomControl: true,
+  streetViewControl: false,
+  mapTypeControl: false,
+  fullscreenControl: false,
+};
 
 export function MapView({ schools, favorites, onToggleFavorite }: MapViewProps) {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<mapboxgl.Marker[]>([]);
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>("");
-  const [showTokenInput, setShowTokenInput] = useState(false);
+  const [googleMapsApiKey, setGoogleMapsApiKey] = useState<string>(() => {
+    return localStorage.getItem("google-maps-api-key") || "";
+  });
+  const [showKeyInput, setShowKeyInput] = useState(!googleMapsApiKey);
 
-  // Check for token in localStorage or show input
-  useEffect(() => {
-    const storedToken = localStorage.getItem("mapbox-token");
-    if (storedToken) {
-      setMapboxToken(storedToken);
-    } else {
-      setShowTokenInput(true);
-    }
-  }, []);
-
-  const handleTokenSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleKeySubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const token = formData.get("token") as string;
-    if (token) {
-      localStorage.setItem("mapbox-token", token);
-      setMapboxToken(token);
-      setShowTokenInput(false);
+    const key = formData.get("apiKey") as string;
+    if (key) {
+      localStorage.setItem("google-maps-api-key", key);
+      setGoogleMapsApiKey(key);
+      setShowKeyInput(false);
     }
   };
 
-  useEffect(() => {
-    if (!mapContainer.current || !mapboxToken) return;
+  const onMarkerClick = useCallback((school: School) => {
+    setSelectedSchool(school);
+  }, []);
 
-    mapboxgl.accessToken = mapboxToken;
-
-    try {
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: "mapbox://styles/mapbox/light-v11",
-        center: DEFAULT_CENTER,
-        zoom: 13,
-      });
-
-      map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
-
-      // Add markers for schools
-      schools.forEach((school) => {
-        if (!school.lat || !school.lng) return;
-
-        const isFavorite = favorites.includes(school.id);
-        
-        // Create custom marker element
-        const el = document.createElement("div");
-        el.className = "school-marker";
-        el.style.width = "32px";
-        el.style.height = "32px";
-        el.style.cursor = "pointer";
-        el.style.transition = "transform 0.2s";
-        
-        el.innerHTML = isFavorite
-          ? `<svg width="32" height="32" viewBox="0 0 24 24" fill="hsl(45, 100%, 51%)" stroke="hsl(45, 100%, 35%)" stroke-width="1.5">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>`
-          : `<svg width="32" height="32" viewBox="0 0 24 24" fill="hsl(195, 85%, 45%)" stroke="hsl(195, 85%, 35%)" stroke-width="1.5">
-              <circle cx="12" cy="12" r="8"/>
-            </svg>`;
-
-        el.addEventListener("mouseenter", () => {
-          el.style.transform = "scale(1.2)";
-        });
-        
-        el.addEventListener("mouseleave", () => {
-          el.style.transform = "scale(1)";
-        });
-
-        const marker = new mapboxgl.Marker(el)
-          .setLngLat([school.lng, school.lat])
-          .addTo(map.current!);
-
-        el.addEventListener("click", () => {
-          setSelectedSchool(school);
-        });
-
-        markers.current.push(marker);
-      });
-    } catch (error) {
-      console.error("Error initializing map:", error);
-      setShowTokenInput(true);
+  // Create custom marker icons
+  const createMarkerIcon = (isFavorite: boolean) => {
+    if (isFavorite) {
+      // Golden star for favorites
+      return {
+        path: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+        fillColor: "#fbbf24",
+        fillOpacity: 1,
+        strokeColor: "#d97706",
+        strokeWeight: 2,
+        scale: 1.5,
+        anchor: { x: 12, y: 12 } as google.maps.Point,
+      };
+    } else {
+      // Blue circle for regular schools
+      return {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillColor: "#1ba3c6",
+        fillOpacity: 1,
+        strokeColor: "#0e7490",
+        strokeWeight: 2,
+        scale: 10,
+      };
     }
+  };
 
-    return () => {
-      markers.current.forEach((marker) => marker.remove());
-      markers.current = [];
-      map.current?.remove();
-    };
-  }, [schools, mapboxToken]);
-
-  // Update markers when favorites change
-  useEffect(() => {
-    if (!map.current) return;
-
-    markers.current.forEach((marker, index) => {
-      const school = schools[index];
-      if (!school) return;
-
-      const isFavorite = favorites.includes(school.id);
-      const el = marker.getElement();
-      
-      el.innerHTML = isFavorite
-        ? `<svg width="32" height="32" viewBox="0 0 24 24" fill="hsl(45, 100%, 51%)" stroke="hsl(45, 100%, 35%)" stroke-width="1.5">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-          </svg>`
-        : `<svg width="32" height="32" viewBox="0 0 24 24" fill="hsl(195, 85%, 45%)" stroke="hsl(195, 85%, 35%)" stroke-width="1.5">
-            <circle cx="12" cy="12" r="8"/>
-          </svg>`;
-    });
-  }, [favorites, schools]);
-
-  if (showTokenInput) {
+  if (showKeyInput || !googleMapsApiKey) {
     return (
       <div className="flex-1 flex items-center justify-center p-6 bg-muted/30">
         <div className="max-w-md w-full bg-card rounded-lg shadow-lg p-6 border border-border">
-          <h3 className="text-lg font-semibold mb-2 text-foreground">Token do Mapbox Necessário</h3>
+          <h3 className="text-lg font-semibold mb-2 text-foreground">
+            Chave do Google Maps Necessária
+          </h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Para visualizar o mapa, você precisa fornecer um token público do Mapbox. 
-            Obtenha um em{" "}
+            Para visualizar o mapa, você precisa fornecer uma chave de API do Google Maps.
+            Obtenha gratuitamente em{" "}
             <a
-              href="https://mapbox.com/"
+              href="https://console.cloud.google.com/google/maps-apis"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
-              mapbox.com
+              Google Cloud Console
             </a>
           </p>
-          <form onSubmit={handleTokenSubmit}>
+          <div className="mb-4 p-3 bg-primary/5 rounded border border-primary/20">
+            <p className="text-xs text-muted-foreground">
+              <strong>Dica:</strong> Ative a API "Maps JavaScript API" no console do Google Cloud.
+            </p>
+          </div>
+          <form onSubmit={handleKeySubmit}>
             <input
               type="text"
-              name="token"
-              placeholder="Cole seu token público aqui..."
+              name="apiKey"
+              placeholder="Cole sua chave de API aqui..."
               className="w-full px-3 py-2 border border-input rounded-md mb-3 bg-background text-foreground"
               required
             />
@@ -159,7 +109,7 @@ export function MapView({ schools, favorites, onToggleFavorite }: MapViewProps) 
               type="submit"
               className="w-full bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 transition-colors font-medium"
             >
-              Salvar Token
+              Salvar Chave
             </button>
           </form>
         </div>
@@ -169,8 +119,31 @@ export function MapView({ schools, favorites, onToggleFavorite }: MapViewProps) 
 
   return (
     <>
-      <div ref={mapContainer} className="flex-1 w-full" />
-      
+      <LoadScript googleMapsApiKey={googleMapsApiKey}>
+        <GoogleMap
+          mapContainerStyle={mapContainerStyle}
+          center={DEFAULT_CENTER}
+          zoom={13}
+          options={mapOptions}
+        >
+          {schools.map((school) => {
+            if (!school.lat || !school.lng) return null;
+
+            const isFavorite = favorites.includes(school.id);
+            
+            return (
+              <Marker
+                key={school.id}
+                position={{ lat: school.lat, lng: school.lng }}
+                icon={createMarkerIcon(isFavorite)}
+                onClick={() => onMarkerClick(school)}
+                title={school.name}
+              />
+            );
+          })}
+        </GoogleMap>
+      </LoadScript>
+
       {selectedSchool && (
         <SchoolDetailModal
           school={selectedSchool}
