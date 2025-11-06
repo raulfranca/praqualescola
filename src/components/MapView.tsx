@@ -30,6 +30,7 @@ const mapOptions = {
 
 export function MapView({ schools, favorites, onToggleFavorite }: MapViewProps) {
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const onMarkerClick = useCallback((school: School) => {
     setSelectedSchool(school);
@@ -37,6 +38,8 @@ export function MapView({ schools, favorites, onToggleFavorite }: MapViewProps) 
 
   // Create custom marker icons
   const createMarkerIcon = (isFavorite: boolean) => {
+    if (!isLoaded) return undefined;
+    
     if (isFavorite) {
       // Golden star for favorites
       return {
@@ -46,7 +49,7 @@ export function MapView({ schools, favorites, onToggleFavorite }: MapViewProps) 
         strokeColor: "#d97706",
         strokeWeight: 2,
         scale: 1.5,
-        anchor: { x: 12, y: 12 } as google.maps.Point,
+        anchor: new google.maps.Point(12, 12),
       };
     } else {
       // Blue circle for regular schools
@@ -63,14 +66,17 @@ export function MapView({ schools, favorites, onToggleFavorite }: MapViewProps) 
 
   return (
     <>
-      <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY}>
+      <LoadScript 
+        googleMapsApiKey={GOOGLE_MAPS_API_KEY}
+        onLoad={() => setIsLoaded(true)}
+      >
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           center={DEFAULT_CENTER}
           zoom={13}
           options={mapOptions}
         >
-          {schools.map((school) => {
+          {isLoaded && schools.map((school) => {
             if (!school.lat || !school.lng) return null;
 
             const isFavorite = favorites.includes(school.id);
