@@ -3,6 +3,9 @@ import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { School } from "@/types/school";
 import { SchoolDetailModal } from "./SchoolDetailModal";
 
+// Google Maps API Key
+const GOOGLE_MAPS_API_KEY = "AIzaSyAB6PNWQ6m8gkTSRXKfXtfvBthU50sljA8";
+
 interface MapViewProps {
   schools: School[];
   favorites: number[];
@@ -27,21 +30,6 @@ const mapOptions = {
 
 export function MapView({ schools, favorites, onToggleFavorite }: MapViewProps) {
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
-  const [googleMapsApiKey, setGoogleMapsApiKey] = useState<string>(() => {
-    return localStorage.getItem("google-maps-api-key") || "";
-  });
-  const [showKeyInput, setShowKeyInput] = useState(!googleMapsApiKey);
-
-  const handleKeySubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const key = formData.get("apiKey") as string;
-    if (key) {
-      localStorage.setItem("google-maps-api-key", key);
-      setGoogleMapsApiKey(key);
-      setShowKeyInput(false);
-    }
-  };
 
   const onMarkerClick = useCallback((school: School) => {
     setSelectedSchool(school);
@@ -73,53 +61,9 @@ export function MapView({ schools, favorites, onToggleFavorite }: MapViewProps) 
     }
   };
 
-  if (showKeyInput || !googleMapsApiKey) {
-    return (
-      <div className="flex-1 flex items-center justify-center p-6 bg-muted/30">
-        <div className="max-w-md w-full bg-card rounded-lg shadow-lg p-6 border border-border">
-          <h3 className="text-lg font-semibold mb-2 text-foreground">
-            Chave do Google Maps Necessária
-          </h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Para visualizar o mapa, você precisa fornecer uma chave de API do Google Maps.
-            Obtenha gratuitamente em{" "}
-            <a
-              href="https://console.cloud.google.com/google/maps-apis"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              Google Cloud Console
-            </a>
-          </p>
-          <div className="mb-4 p-3 bg-primary/5 rounded border border-primary/20">
-            <p className="text-xs text-muted-foreground">
-              <strong>Dica:</strong> Ative a API "Maps JavaScript API" no console do Google Cloud.
-            </p>
-          </div>
-          <form onSubmit={handleKeySubmit}>
-            <input
-              type="text"
-              name="apiKey"
-              placeholder="Cole sua chave de API aqui..."
-              className="w-full px-3 py-2 border border-input rounded-md mb-3 bg-background text-foreground"
-              required
-            />
-            <button
-              type="submit"
-              className="w-full bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 transition-colors font-medium"
-            >
-              Salvar Chave
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
-      <LoadScript googleMapsApiKey={googleMapsApiKey}>
+      <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY}>
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           center={DEFAULT_CENTER}
