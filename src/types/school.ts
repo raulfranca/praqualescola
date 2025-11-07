@@ -3,11 +3,15 @@ export interface School {
   type: string;
   name: string;
   address: string;
+  cep: string;
+  phone: string;
+  extension?: string;
   neighborhood: string;
+  lat: number;
+  lng: number;
   sector: string;
-  lat?: number;
-  lng?: number;
-  phone?: string;
+  polo: string;
+  outsourced?: string;
 }
 
 export interface FavoriteSchool {

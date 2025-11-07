@@ -11,7 +11,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
     <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
       <div className="px-4 py-3">
         <h1 className="text-lg font-semibold text-center text-foreground mb-3">
-          Pra Que Escola Eu Vou?
+          Pra Qual Escola Eu Vou?
         </h1>
         
         <nav className="flex gap-2 bg-muted rounded-lg p-1">

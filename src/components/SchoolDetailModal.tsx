@@ -1,7 +1,6 @@
-import { Star, MapPin, Phone, X } from "lucide-react";
 import { School } from "@/types/school";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { X, Star, MapPin, Phone, Building2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface SchoolDetailModalProps {
   school: School;
@@ -16,82 +15,137 @@ export function SchoolDetailModal({
   onToggleFavorite,
   onClose,
 }: SchoolDetailModalProps) {
-  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    school.address
-  )}`;
+  const handleOpenInMaps = () => {
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      school.address
+    )}`;
+    window.open(mapsUrl, "_blank");
+  };
+
+  const formatPhone = (phone: string, extension?: string) => {
+    if (!phone) return "Não disponível";
+    if (extension) {
+      return `${phone} (Ramal ${extension})`;
+    }
+    return phone;
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={onClose}
+    >
       <div
-        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      
-      <Card className="relative w-full max-w-lg mx-4 mb-4 sm:mb-0 p-6 shadow-2xl border-border animate-in fade-in slide-in-from-bottom-4 duration-300">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted transition-colors"
-        >
-          <X className="w-5 h-5 text-muted-foreground" />
-        </button>
-
-        <div className="pr-10">
-          <div className="flex items-start gap-2 mb-2">
-            <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-primary/10 text-primary">
-              {school.type}
-            </span>
-            <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-secondary text-secondary-foreground">
-              Setor {school.sector}
-            </span>
-          </div>
-
-          <h2 className="text-xl font-bold text-foreground mb-3">
+        className="w-full max-w-2xl bg-card rounded-t-2xl shadow-xl animate-in slide-in-from-bottom duration-300 max-h-[85vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between rounded-t-2xl">
+          <h2 className="text-xl font-bold text-foreground pr-8">
             {school.name}
           </h2>
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted transition-colors"
+            aria-label="Fechar"
+          >
+            <X className="w-5 h-5 text-muted-foreground" />
+          </button>
+        </div>
 
-          <div className="space-y-3 mb-6">
-            <div className="flex gap-3 text-sm">
-              <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-muted-foreground">{school.address}</p>
-                <p className="text-foreground font-medium mt-1">
-                  {school.neighborhood}
-                </p>
-              </div>
-            </div>
-
-            {school.phone && (
-              <div className="flex gap-3 text-sm">
-                <Phone className="w-4 h-4 text-primary flex-shrink-0" />
-                <p className="text-muted-foreground">{school.phone}</p>
-              </div>
+        <div className="p-6 space-y-4">
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="default" className="text-sm">
+              {school.type}
+            </Badge>
+            <Badge variant="secondary" className="text-sm">
+              Setor {school.sector}
+            </Badge>
+            {school.outsourced && (
+              <Badge 
+                variant="outline" 
+                className="text-sm bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-100"
+              >
+                {school.outsourced}
+              </Badge>
             )}
           </div>
 
-          <div className="flex gap-3">
-            <Button
+          {/* Bairro Badge */}
+          <div className="flex items-start gap-2">
+            <Building2 className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-muted-foreground">Bairro</p>
+              <Badge variant="outline" className="mt-1">
+                {school.neighborhood}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Endereço */}
+          <div className="flex items-start gap-2">
+            <MapPin className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-muted-foreground">Endereço</p>
+              <p className="text-sm text-foreground mt-1">{school.address}</p>
+              {school.cep && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  CEP: {school.cep}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Telefone */}
+          {school.phone && (
+            <div className="flex items-start gap-2">
+              <Phone className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Telefone</p>
+                <p className="text-sm text-foreground mt-1">
+                  {formatPhone(school.phone, school.extension)}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Polo */}
+          <div className="flex items-start gap-2">
+            <Building2 className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-muted-foreground">
+                Secretaria Polo
+              </p>
+              <p className="text-sm text-foreground mt-1">{school.polo}</p>
+            </div>
+          </div>
+
+          {/* Botões */}
+          <div className="flex gap-3 pt-4">
+            <button
               onClick={() => onToggleFavorite(school.id)}
-              variant={isFavorite ? "default" : "outline"}
-              className="flex-1"
+              className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors ${
+                isFavorite
+                  ? "bg-amber-500 text-white hover:bg-amber-600"
+                  : "bg-muted text-foreground hover:bg-muted/80"
+              }`}
             >
               <Star
-                className={`w-4 h-4 mr-2 ${
-                  isFavorite ? "fill-current" : ""
-                }`}
+                className={`w-5 h-5 ${isFavorite ? "fill-white" : ""}`}
               />
-              {isFavorite ? "Favoritada" : "Favoritar"}
-            </Button>
-
-            <Button
-              onClick={() => window.open(googleMapsUrl, "_blank")}
-              variant="outline"
+              {isFavorite ? "Remover dos Favoritos" : "Adicionar aos Favoritos"}
+            </button>
+            
+            <button
+              onClick={handleOpenInMaps}
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              <MapPin className="w-4 h-4 mr-2" />
-              Ver no Mapa
-            </Button>
+              <MapPin className="w-5 h-5" />
+              Ver no Google Maps
+            </button>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
