@@ -5,10 +5,12 @@ import { MapView } from "@/components/MapView";
 import { PrioritiesList } from "@/components/PrioritiesList";
 import { schools } from "@/data/schoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
+import { School } from "@/types/school";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"map" | "priorities">("map");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
   const { favorites, toggleFavorite, reorderFavorites } = useFavorites();
 
   const filteredSchools = useMemo(() => {
@@ -23,17 +25,28 @@ const Index = () => {
     );
   }, [searchQuery]);
 
+  const handleSelectSchool = (school: School) => {
+    setSelectedSchool(school);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background">
       <Header activeTab={activeTab} onTabChange={setActiveTab} />
 
       {activeTab === "map" && (
         <>
-          <SearchBar value={searchQuery} onChange={setSearchQuery} />
+          <SearchBar 
+            value={searchQuery} 
+            onChange={setSearchQuery}
+            schools={schools}
+            onSelectSchool={handleSelectSchool}
+          />
           <MapView
             schools={filteredSchools}
             favorites={favorites}
             onToggleFavorite={toggleFavorite}
+            selectedSchool={selectedSchool}
+            onSchoolViewed={() => setSelectedSchool(null)}
           />
         </>
       )}

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { School } from "@/types/school";
 import { SchoolDetailModal } from "./SchoolDetailModal";
@@ -10,6 +10,8 @@ interface MapViewProps {
   schools: School[];
   favorites: number[];
   onToggleFavorite: (schoolId: number) => void;
+  selectedSchool: School | null;
+  onSchoolViewed: () => void;
 }
 
 // Default to Pindamonhangaba center
@@ -28,13 +30,31 @@ const mapOptions = {
   fullscreenControl: false,
 };
 
-export function MapView({ schools, favorites, onToggleFavorite }: MapViewProps) {
-  const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
+export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolViewed }: MapViewProps) {
+  const [clickedSchool, setClickedSchool] = useState<School | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  const displayedSchool = selectedSchool || clickedSchool;
 
   const onMarkerClick = useCallback((school: School) => {
-    setSelectedSchool(school);
+    setClickedSchool(school);
   }, []);
+
+  // When a school is selected from search, center map and show details
+  useEffect(() => {
+    if (selectedSchool && mapRef.current) {
+      mapRef.current.panTo({ lat: selectedSchool.lat, lng: selectedSchool.lng });
+      mapRef.current.setZoom(16);
+    }
+  }, [selectedSchool]);
+
+  const handleCloseModal = () => {
+    setClickedSchool(null);
+    if (selectedSchool) {
+      onSchoolViewed();
+    }
+  };
 
   // Create custom marker icons
   const createMarkerIcon = (isFavorite: boolean) => {
@@ -75,6 +95,9 @@ export function MapView({ schools, favorites, onToggleFavorite }: MapViewProps) 
           center={DEFAULT_CENTER}
           zoom={13}
           options={mapOptions}
+          onLoad={(map) => {
+            mapRef.current = map;
+          }}
         >
           {isLoaded && schools.map((school) => {
             if (!school.lat || !school.lng) return null;
@@ -94,12 +117,12 @@ export function MapView({ schools, favorites, onToggleFavorite }: MapViewProps) 
         </GoogleMap>
       </LoadScript>
 
-      {selectedSchool && (
+      {displayedSchool && (
         <SchoolDetailModal
-          school={selectedSchool}
-          isFavorite={favorites.includes(selectedSchool.id)}
+          school={displayedSchool}
+          isFavorite={favorites.includes(displayedSchool.id)}
           onToggleFavorite={onToggleFavorite}
-          onClose={() => setSelectedSchool(null)}
+          onClose={handleCloseModal}
         />
       )}
     </>
