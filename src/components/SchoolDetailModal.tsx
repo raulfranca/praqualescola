@@ -32,15 +32,15 @@ export function SchoolDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-card rounded-t-2xl shadow-xl animate-in slide-in-from-bottom duration-300 max-h-[85vh] overflow-y-auto"
+        className="w-full max-w-lg bg-card rounded-xl shadow-xl animate-in zoom-in-95 duration-300 max-h-[80vh] sm:max-h-[85vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between rounded-t-2xl">
-          <h2 className="text-xl font-bold text-foreground pr-8">
+        <div className="sticky top-0 bg-card border-b border-border px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-xl">
+          <h2 className="text-base sm:text-xl font-bold text-foreground pr-8 leading-tight">
             {school.name}
           </h2>
           <button
@@ -52,7 +52,7 @@ export function SchoolDetailModal({
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
           {/* Tags */}
           <div className="flex flex-wrap gap-2">
             <Badge variant="default" className="text-sm">
@@ -121,27 +121,27 @@ export function SchoolDetailModal({
           </div>
 
           {/* Botões */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4">
             <button
               onClick={() => onToggleFavorite(school.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors ${
+              className={`flex items-center justify-center gap-2 py-2.5 sm:py-3 px-4 rounded-lg text-sm sm:text-base font-medium transition-colors ${
                 isFavorite
                   ? "bg-amber-500 text-white hover:bg-amber-600"
                   : "bg-muted text-foreground hover:bg-muted/80"
               }`}
             >
               <Star
-                className={`w-5 h-5 ${isFavorite ? "fill-white" : ""}`}
+                className={`w-4 h-4 sm:w-5 sm:h-5 ${isFavorite ? "fill-white" : ""}`}
               />
-              {isFavorite ? "Remover dos Favoritos" : "Adicionar aos Favoritos"}
+              <span className="whitespace-nowrap">{isFavorite ? "Remover dos Favoritos" : "Adicionar aos Favoritos"}</span>
             </button>
             
             <button
               onClick={handleOpenInMaps}
-              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="flex items-center justify-center gap-2 py-2.5 sm:py-3 px-4 rounded-lg text-sm sm:text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              <MapPin className="w-5 h-5" />
-              Ver no Google Maps
+              <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="whitespace-nowrap">Ver no Google Maps</span>
             </button>
           </div>
         </div>
