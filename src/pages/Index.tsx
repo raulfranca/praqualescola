@@ -58,10 +58,10 @@ const Index = () => {
                   onClick={() => setShowHomeInput(true)}
                   variant="default"
                   size="sm"
-                  className="gap-2"
+                  className="gap-2 w-full"
                 >
                   <Home className="w-4 h-4" />
-                  🏠 Definir Minha Casa
+                  Definir Minha Casa
                 </Button>
               ) : (
                 <div className="flex items-center gap-2 flex-1">
