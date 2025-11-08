@@ -104,11 +104,11 @@ function SortableSchoolItem({
           <h3 className="font-semibold text-foreground truncate mb-1">
             {school.name}
           </h3>
-          <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2">
             <p className="text-sm text-muted-foreground">
               {school.neighborhood}
             </p>
-            <span className="inline-block px-2 py-0.5 text-xs rounded bg-primary/10 text-primary whitespace-nowrap shrink-0">
+            <span className="inline-block px-2 py-0.5 text-xs rounded bg-primary/10 text-primary whitespace-nowrap">
               {school.type}
             </span>
           </div>
