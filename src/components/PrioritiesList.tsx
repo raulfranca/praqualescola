@@ -53,13 +53,13 @@ function SortableSchoolItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-card border border-border rounded-lg p-4 hover:shadow-md transition-shadow"
+      className="bg-card border border-border rounded-lg p-3 hover:shadow-md transition-shadow"
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-center gap-3">
         <div
           {...attributes}
           {...listeners}
-          className="flex items-center gap-2 cursor-grab active:cursor-grabbing touch-none"
+          className="flex items-center gap-2 cursor-grab active:cursor-grabbing touch-none shrink-0"
         >
           <GripVertical className="w-5 h-5 text-muted-foreground" />
           <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
@@ -68,25 +68,27 @@ function SortableSchoolItem({
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-foreground mb-1">
-            {school.name}
-          </h3>
-          <p className="text-sm text-muted-foreground mb-1">
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <h3 className="font-semibold text-foreground truncate">
+              {school.name}
+            </h3>
+            <div className="flex gap-1.5 shrink-0">
+              <span className="inline-block px-2 py-0.5 text-xs rounded bg-primary/10 text-primary whitespace-nowrap">
+                {school.type}
+              </span>
+              <span className="inline-block px-2 py-0.5 text-xs rounded bg-secondary text-secondary-foreground whitespace-nowrap">
+                Setor {school.sector}
+              </span>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">
             {school.neighborhood}
           </p>
-          <div className="flex gap-2">
-            <span className="inline-block px-2 py-0.5 text-xs rounded bg-primary/10 text-primary">
-              {school.type}
-            </span>
-            <span className="inline-block px-2 py-0.5 text-xs rounded bg-secondary text-secondary-foreground">
-              Setor {school.sector}
-            </span>
-          </div>
         </div>
 
         <button
           onClick={() => onRemove(school.id)}
-          className="p-2 rounded-full hover:bg-destructive/10 transition-colors group"
+          className="p-2 rounded-full hover:bg-destructive/10 transition-colors group shrink-0"
           title="Remover dos favoritos"
         >
           <X className="w-5 h-5 text-muted-foreground group-hover:text-destructive" />
@@ -109,9 +111,10 @@ export function PrioritiesList({
     })
   );
 
-  const favoriteSchools = schools.filter((school) =>
-    favorites.includes(school.id)
-  );
+  // Sort schools by the order in favorites array
+  const favoriteSchools = favorites
+    .map((id) => schools.find((school) => school.id === id))
+    .filter((school): school is School => school !== undefined);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
