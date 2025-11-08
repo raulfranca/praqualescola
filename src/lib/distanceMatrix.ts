@@ -17,17 +17,17 @@ export async function calculateDistance(
         return;
       }
 
-      const service = new google.maps.DistanceMatrixService();
+      const service = new window.google.maps.DistanceMatrixService();
 
       service.getDistanceMatrix(
         {
-          origins: [new google.maps.LatLng(origin.lat, origin.lng)],
-          destinations: [new google.maps.LatLng(destination.lat, destination.lng)],
-          travelMode: google.maps.TravelMode.DRIVING,
-          unitSystem: google.maps.UnitSystem.METRIC,
+          origins: [new window.google.maps.LatLng(origin.lat, origin.lng)],
+          destinations: [new window.google.maps.LatLng(destination.lat, destination.lng)],
+          travelMode: window.google.maps.TravelMode.DRIVING,
+          unitSystem: window.google.maps.UnitSystem.METRIC,
         },
         (response, status) => {
-          if (status !== google.maps.DistanceMatrixStatus.OK) {
+          if (status !== window.google.maps.DistanceMatrixStatus.OK) {
             console.error("Distance Matrix API error:", status);
             resolve(null);
             return;
@@ -35,7 +35,7 @@ export async function calculateDistance(
 
           const element = response?.rows[0]?.elements[0];
 
-          if (!element || element.status !== google.maps.DistanceMatrixElementStatus.OK) {
+          if (!element || element.status !== window.google.maps.DistanceMatrixElementStatus.OK) {
             console.error("Distance Matrix element error:", element?.status);
             resolve(null);
             return;
