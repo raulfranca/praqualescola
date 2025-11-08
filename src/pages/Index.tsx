@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { SearchBar } from "@/components/SearchBar";
 import { MapView } from "@/components/MapView";
@@ -12,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Home, X } from "lucide-react";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"map" | "priorities">("map");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
@@ -90,14 +92,27 @@ const Index = () => {
             schools={schools}
             onSelectSchool={handleSelectSchool}
           />
-          <MapView
-            schools={filteredSchools}
-            favorites={favorites}
-            onToggleFavorite={toggleFavorite}
-            selectedSchool={selectedSchool}
-            onSchoolViewed={() => setSelectedSchool(null)}
-            homeLocation={homeLocation}
-          />
+          <div className="relative flex-1">
+            <MapView
+              schools={filteredSchools}
+              favorites={favorites}
+              onToggleFavorite={toggleFavorite}
+              selectedSchool={selectedSchool}
+              onSchoolViewed={() => setSelectedSchool(null)}
+              homeLocation={homeLocation}
+            />
+            
+            {/* Feedback Button */}
+            <div className="fixed bottom-4 left-4 right-4 z-10">
+              <Button
+                onClick={() => navigate("/feedback")}
+                className="w-full shadow-lg"
+                size="lg"
+              >
+                Sugerir uma correção ou ideia
+              </Button>
+            </div>
+          </div>
         </>
       )}
 
