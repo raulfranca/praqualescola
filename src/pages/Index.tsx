@@ -103,7 +103,7 @@ const Index = () => {
             />
             
             {/* Feedback Button */}
-            <div className="absolute bottom-4 left-4 right-4 z-10">
+            <div className="fixed bottom-4 left-4 right-4 z-10">
               <Button
                 onClick={() => navigate("/feedback")}
                 className="w-full shadow-lg"
