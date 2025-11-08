@@ -45,16 +45,28 @@ function SortableSchoolItem({
 
   useEffect(() => {
     if (homeLocation) {
+      console.log(`[School ${school.name}] Starting calculation for home location`);
       setIsCalculating(true);
+      
       calculateDistance(
         { lat: homeLocation.lat, lng: homeLocation.lng },
         { lat: school.lat, lng: school.lng }
-      ).then((result) => {
-        setDistanceInfo(result);
-        setIsCalculating(false);
-      });
+      )
+        .then((result) => {
+          console.log(`[School ${school.name}] Distance result:`, result);
+          setDistanceInfo(result);
+          setIsCalculating(false);
+        })
+        .catch((error) => {
+          console.error(`[School ${school.name}] Error calculating distance:`, error);
+          setDistanceInfo(null);
+          setIsCalculating(false);
+        });
+    } else {
+      console.log("No home location set, skipping distance calculation");
+      setIsCalculating(false);
     }
-  }, [homeLocation, school.lat, school.lng]);
+  }, [homeLocation, school.lat, school.lng, school.name]);
   const {
     attributes,
     listeners,
