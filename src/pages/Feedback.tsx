@@ -23,11 +23,12 @@ const Feedback = () => {
       {/* Close Button */}
       <Button
         onClick={() => navigate("/")}
-        variant="ghost"
-        size="icon"
-        className="absolute top-4 right-4 z-50 bg-background/80 backdrop-blur-sm hover:bg-background"
+        variant="default"
+        size="default"
+        className="absolute top-4 right-4 z-50 shadow-lg"
       >
-        <X className="w-5 h-5" />
+        <X className="w-4 h-4" />
+        Fechar
       </Button>
 
       {/* Tally Embed */}
