@@ -33,15 +33,15 @@ export async function calculateDistance(
         (response, status) => {
           console.log("Distance Matrix response:", { status, response });
           
-          if (status !== window.google.maps.DistanceMatrixStatus.OK) {
+          if (status !== 'OK') {
             console.error("Distance Matrix API error:", status);
             resolve(null);
             return;
           }
 
-          const element = response?.rows[0]?.elements[0];
+          const element = response?.rows?.[0]?.elements?.[0];
 
-          if (!element || element.status !== window.google.maps.DistanceMatrixElementStatus.OK) {
+          if (!element || element.status !== 'OK') {
             console.error("Distance Matrix element error:", element?.status);
             resolve(null);
             return;
