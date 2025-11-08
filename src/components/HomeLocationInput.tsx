@@ -66,11 +66,11 @@ export function HomeLocationInput({ onLocationSelected, onClose }: HomeLocationI
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20 overflow-y-auto bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-card rounded-xl shadow-xl animate-in zoom-in-95 duration-300"
+        className="w-full max-w-md bg-card rounded-xl shadow-xl animate-in zoom-in-95 duration-300 mb-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
