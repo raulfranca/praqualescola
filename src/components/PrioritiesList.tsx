@@ -1,5 +1,8 @@
-import { Star, GripVertical, X } from "lucide-react";
+import { Star, GripVertical, X, MapPin, Clock } from "lucide-react";
 import { School } from "@/types/school";
+import { HomeLocation } from "@/hooks/useHomeLocation";
+import { useState, useEffect } from "react";
+import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
 import {
   DndContext,
   closestCenter,
@@ -23,17 +26,47 @@ interface PrioritiesListProps {
   favorites: number[];
   onReorder: (newOrder: number[]) => void;
   onRemoveFavorite: (schoolId: number) => void;
+  homeLocation: HomeLocation | null;
 }
 
 function SortableSchoolItem({
   school,
   order,
   onRemove,
+  homeLocation,
 }: {
   school: School;
   order: number;
   onRemove: (id: number) => void;
+  homeLocation: HomeLocation | null;
 }) {
+  const [distanceInfo, setDistanceInfo] = useState<DistanceMatrixResult | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+
+  useEffect(() => {
+    if (homeLocation) {
+      console.log(`[School ${school.name}] Starting calculation for home location`);
+      setIsCalculating(true);
+      
+      calculateDistance(
+        { lat: homeLocation.lat, lng: homeLocation.lng },
+        { lat: school.lat, lng: school.lng }
+      )
+        .then((result) => {
+          console.log(`[School ${school.name}] Distance result:`, result);
+          setDistanceInfo(result);
+          setIsCalculating(false);
+        })
+        .catch((error) => {
+          console.error(`[School ${school.name}] Error calculating distance:`, error);
+          setDistanceInfo(null);
+          setIsCalculating(false);
+        });
+    } else {
+      console.log("No home location set, skipping distance calculation");
+      setIsCalculating(false);
+    }
+  }, [homeLocation, school.lat, school.lng, school.name]);
   const {
     attributes,
     listeners,
@@ -53,13 +86,13 @@ function SortableSchoolItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-card border border-border rounded-lg p-4 hover:shadow-md transition-shadow"
+      className="bg-card border border-border rounded-lg p-3 hover:shadow-md transition-shadow"
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-center gap-3">
         <div
           {...attributes}
           {...listeners}
-          className="flex items-center gap-2 cursor-grab active:cursor-grabbing touch-none"
+          className="flex items-center gap-2 cursor-grab active:cursor-grabbing touch-none shrink-0"
         >
           <GripVertical className="w-5 h-5 text-muted-foreground" />
           <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
@@ -68,25 +101,42 @@ function SortableSchoolItem({
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-foreground mb-1">
+          <h3 className="font-semibold text-foreground truncate mb-1">
             {school.name}
           </h3>
-          <p className="text-sm text-muted-foreground mb-1">
-            {school.neighborhood}
-          </p>
-          <div className="flex gap-2">
-            <span className="inline-block px-2 py-0.5 text-xs rounded bg-primary/10 text-primary">
+          <div className="flex items-center gap-2 mb-2">
+            <p className="text-sm text-muted-foreground">
+              {school.neighborhood}
+            </p>
+            <span className="inline-block px-2 py-0.5 text-xs rounded bg-primary/10 text-primary whitespace-nowrap">
               {school.type}
             </span>
-            <span className="inline-block px-2 py-0.5 text-xs rounded bg-secondary text-secondary-foreground">
-              Setor {school.sector}
-            </span>
           </div>
+          {homeLocation && (
+            <div className="flex flex-wrap gap-1.5">
+              {isCalculating ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-muted text-muted-foreground whitespace-nowrap">
+                  Calculando...
+                </span>
+              ) : distanceInfo ? (
+                <>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-orange/10 text-orange font-medium whitespace-nowrap">
+                    <MapPin className="w-3 h-3" />
+                    {distanceInfo.distance}
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-orange/10 text-orange font-medium whitespace-nowrap">
+                    <Clock className="w-3 h-3" />
+                    {distanceInfo.duration}
+                  </span>
+                </>
+              ) : null}
+            </div>
+          )}
         </div>
 
         <button
           onClick={() => onRemove(school.id)}
-          className="p-2 rounded-full hover:bg-destructive/10 transition-colors group"
+          className="p-2 rounded-full hover:bg-destructive/10 transition-colors group shrink-0"
           title="Remover dos favoritos"
         >
           <X className="w-5 h-5 text-muted-foreground group-hover:text-destructive" />
@@ -101,6 +151,7 @@ export function PrioritiesList({
   favorites,
   onReorder,
   onRemoveFavorite,
+  homeLocation,
 }: PrioritiesListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -109,9 +160,10 @@ export function PrioritiesList({
     })
   );
 
-  const favoriteSchools = schools.filter((school) =>
-    favorites.includes(school.id)
-  );
+  // Sort schools by the order in favorites array
+  const favoriteSchools = favorites
+    .map((id) => schools.find((school) => school.id === id))
+    .filter((school): school is School => school !== undefined);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -166,6 +218,7 @@ export function PrioritiesList({
                   school={school}
                   order={index + 1}
                   onRemove={onRemoveFavorite}
+                  homeLocation={homeLocation}
                 />
               ))}
             </div>

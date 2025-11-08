@@ -1,12 +1,16 @@
 import { School } from "@/types/school";
-import { X, Star, MapPin, Phone, Building2 } from "lucide-react";
+import { X, Star, MapPin, Phone, Building2, Car, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { HomeLocation } from "@/hooks/useHomeLocation";
+import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
+import { useState, useEffect } from "react";
 
 interface SchoolDetailModalProps {
   school: School;
   isFavorite: boolean;
   onToggleFavorite: (schoolId: number) => void;
   onClose: () => void;
+  homeLocation: HomeLocation | null;
 }
 
 export function SchoolDetailModal({
@@ -14,7 +18,32 @@ export function SchoolDetailModal({
   isFavorite,
   onToggleFavorite,
   onClose,
+  homeLocation,
 }: SchoolDetailModalProps) {
+  const [distanceInfo, setDistanceInfo] = useState<DistanceMatrixResult | null>(null);
+  const [loadingDistance, setLoadingDistance] = useState(false);
+
+  useEffect(() => {
+    if (!homeLocation || !school.lat || !school.lng) {
+      setDistanceInfo(null);
+      return;
+    }
+
+    setLoadingDistance(true);
+    calculateDistance(
+      { lat: homeLocation.lat, lng: homeLocation.lng },
+      { lat: school.lat, lng: school.lng }
+    )
+      .then((result) => {
+        setDistanceInfo(result);
+      })
+      .catch((error) => {
+        console.error("Error calculating distance:", error);
+      })
+      .finally(() => {
+        setLoadingDistance(false);
+      });
+  }, [homeLocation, school.lat, school.lng]);
   const handleOpenInMaps = () => {
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
       school.address
@@ -119,6 +148,42 @@ export function SchoolDetailModal({
               <p className="text-sm text-foreground mt-1">{school.polo}</p>
             </div>
           </div>
+
+          {/* Distance and Duration */}
+          {homeLocation && (
+            <div className="bg-muted/50 rounded-lg p-3 border border-border">
+              <div className="flex items-center gap-2 mb-2">
+                <MapPin className="w-4 h-4 text-primary" />
+                <p className="text-sm font-medium text-foreground">Distância de Casa</p>
+              </div>
+              
+              {loadingDistance ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  Calculando rota...
+                </div>
+              ) : distanceInfo ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center gap-2">
+                    <Car className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Distância</p>
+                      <p className="text-sm font-semibold text-foreground">{distanceInfo.distance}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Tempo</p>
+                      <p className="text-sm font-semibold text-foreground">{distanceInfo.duration}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Não foi possível calcular a distância</p>
+              )}
+            </div>
+          )}
 
           {/* Botões */}
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4">

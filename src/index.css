@@ -41,6 +41,9 @@ All colors MUST be HSL.
     --favorite: 45 100% 51%;
     --favorite-foreground: 0 0% 100%;
     
+    --orange: 25 95% 53%;
+    --orange-foreground: 0 0% 100%;
+    
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
