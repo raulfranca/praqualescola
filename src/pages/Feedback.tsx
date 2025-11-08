@@ -24,10 +24,10 @@ const Feedback = () => {
       <Button
         onClick={() => navigate("/")}
         variant="default"
-        size="default"
-        className="absolute top-4 right-4 z-50 shadow-lg"
+        size="sm"
+        className="absolute top-2 right-2 z-50 shadow-lg"
       >
-        <X className="w-4 h-4" />
+        <X className="w-3 h-3" />
         Fechar
       </Button>
 
