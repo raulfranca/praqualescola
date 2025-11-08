@@ -1,0 +1,57 @@
+export interface DistanceMatrixResult {
+  distance: string;
+  duration: string;
+  distanceValue: number; // in meters
+  durationValue: number; // in seconds
+}
+
+export async function calculateDistance(
+  origin: { lat: number; lng: number },
+  destination: { lat: number; lng: number }
+): Promise<DistanceMatrixResult | null> {
+  return new Promise((resolve) => {
+    try {
+      if (!window.google?.maps?.DistanceMatrixService) {
+        console.error("Google Maps Distance Matrix Service not loaded");
+        resolve(null);
+        return;
+      }
+
+      const service = new google.maps.DistanceMatrixService();
+
+      service.getDistanceMatrix(
+        {
+          origins: [new google.maps.LatLng(origin.lat, origin.lng)],
+          destinations: [new google.maps.LatLng(destination.lat, destination.lng)],
+          travelMode: google.maps.TravelMode.DRIVING,
+          unitSystem: google.maps.UnitSystem.METRIC,
+        },
+        (response, status) => {
+          if (status !== google.maps.DistanceMatrixStatus.OK) {
+            console.error("Distance Matrix API error:", status);
+            resolve(null);
+            return;
+          }
+
+          const element = response?.rows[0]?.elements[0];
+
+          if (!element || element.status !== google.maps.DistanceMatrixElementStatus.OK) {
+            console.error("Distance Matrix element error:", element?.status);
+            resolve(null);
+            return;
+          }
+
+          resolve({
+            distance: element.distance.text,
+            duration: element.duration.text,
+            distanceValue: element.distance.value,
+            durationValue: element.duration.value,
+          });
+        }
+      );
+    } catch (error) {
+      console.error("Error calculating distance:", error);
+      resolve(null);
+    }
+  });
+}

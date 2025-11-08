@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { School } from "@/types/school";
 import { SchoolDetailModal } from "./SchoolDetailModal";
+import { HomeLocation } from "@/hooks/useHomeLocation";
 
 // Google Maps API Key
 const GOOGLE_MAPS_API_KEY = "AIzaSyAB6PNWQ6m8gkTSRXKfXtfvBthU50sljA8";
@@ -12,6 +13,7 @@ interface MapViewProps {
   onToggleFavorite: (schoolId: number) => void;
   selectedSchool: School | null;
   onSchoolViewed: () => void;
+  homeLocation: HomeLocation | null;
 }
 
 // Default to Pindamonhangaba center
@@ -30,7 +32,7 @@ const mapOptions = {
   fullscreenControl: false,
 };
 
-export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolViewed }: MapViewProps) {
+export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolViewed, homeLocation }: MapViewProps) {
   const [clickedSchool, setClickedSchool] = useState<School | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -89,6 +91,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       <LoadScript 
         googleMapsApiKey={GOOGLE_MAPS_API_KEY}
         onLoad={() => setIsLoaded(true)}
+        libraries={["places"]}
       >
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
@@ -114,6 +117,23 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
               />
             );
           })}
+
+          {/* Home location marker */}
+          {isLoaded && homeLocation && (
+            <Marker
+              position={{ lat: homeLocation.lat, lng: homeLocation.lng }}
+              icon={{
+                path: "M12 2L2 12h3v8h14v-8h3L12 2zm0 2.5L18 10v8h-3v-5H9v5H6v-8l6-5.5z",
+                fillColor: "#22c55e",
+                fillOpacity: 1,
+                strokeColor: "#16a34a",
+                strokeWeight: 2,
+                scale: 1.8,
+                anchor: new google.maps.Point(12, 24),
+              }}
+              title="🏠 Minha Casa"
+            />
+          )}
         </GoogleMap>
       </LoadScript>
 
@@ -123,6 +143,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
           isFavorite={favorites.includes(displayedSchool.id)}
           onToggleFavorite={onToggleFavorite}
           onClose={handleCloseModal}
+          homeLocation={homeLocation}
         />
       )}
     </>
