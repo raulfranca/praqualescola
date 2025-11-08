@@ -41,14 +41,17 @@ function SortableSchoolItem({
   homeLocation: HomeLocation | null;
 }) {
   const [distanceInfo, setDistanceInfo] = useState<DistanceMatrixResult | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
 
   useEffect(() => {
     if (homeLocation) {
+      setIsCalculating(true);
       calculateDistance(
         { lat: homeLocation.lat, lng: homeLocation.lng },
         { lat: school.lat, lng: school.lng }
       ).then((result) => {
         setDistanceInfo(result);
+        setIsCalculating(false);
       });
     }
   }, [homeLocation, school.lat, school.lng]);
@@ -98,16 +101,24 @@ function SortableSchoolItem({
             <p className="text-sm text-muted-foreground truncate">
               {school.neighborhood}
             </p>
-            {homeLocation && distanceInfo && (
+            {homeLocation && (
               <div className="flex gap-1.5 shrink-0">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-accent/50 text-accent-foreground whitespace-nowrap">
-                  <MapPin className="w-3 h-3" />
-                  {distanceInfo.distance}
-                </span>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-accent/50 text-accent-foreground whitespace-nowrap">
-                  <Clock className="w-3 h-3" />
-                  {distanceInfo.duration}
-                </span>
+                {isCalculating ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-muted text-muted-foreground whitespace-nowrap">
+                    Calculando...
+                  </span>
+                ) : distanceInfo ? (
+                  <>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-orange/10 text-orange font-medium whitespace-nowrap">
+                      <MapPin className="w-3 h-3" />
+                      {distanceInfo.distance}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-orange/10 text-orange font-medium whitespace-nowrap">
+                      <Clock className="w-3 h-3" />
+                      {distanceInfo.duration}
+                    </span>
+                  </>
+                ) : null}
               </div>
             )}
           </div>

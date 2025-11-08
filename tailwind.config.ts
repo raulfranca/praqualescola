@@ -51,6 +51,10 @@ export default {
           DEFAULT: "hsl(var(--favorite))",
           foreground: "hsl(var(--favorite-foreground))",
         },
+        orange: {
+          DEFAULT: "hsl(var(--orange))",
+          foreground: "hsl(var(--orange-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
