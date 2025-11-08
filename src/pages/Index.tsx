@@ -3,7 +3,7 @@ import { Header } from "@/components/Header";
 import { SearchBar } from "@/components/SearchBar";
 import { MapView } from "@/components/MapView";
 import { PrioritiesList } from "@/components/PrioritiesList";
-import { schools } from "@/data/schoolsData";
+import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { School } from "@/types/school";
 
@@ -11,6 +11,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<"map" | "priorities">("map");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
+  const { schools, loading } = useSchoolsData();
   const { favorites, toggleFavorite, reorderFavorites } = useFavorites();
 
   const filteredSchools = useMemo(() => {
@@ -23,7 +24,7 @@ const Index = () => {
         school.address.toLowerCase().includes(query) ||
         school.neighborhood.toLowerCase().includes(query)
     );
-  }, [searchQuery]);
+  }, [searchQuery, schools]);
 
   const handleSelectSchool = (school: School) => {
     setSelectedSchool(school);
@@ -33,7 +34,16 @@ const Index = () => {
     <div className="flex flex-col h-screen bg-background">
       <Header activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {activeTab === "map" && (
+      {loading && (
+        <div className="flex items-center justify-center flex-1">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Carregando escolas...</p>
+          </div>
+        </div>
+      )}
+
+      {!loading && activeTab === "map" && (
         <>
           <SearchBar 
             value={searchQuery} 
@@ -51,7 +61,7 @@ const Index = () => {
         </>
       )}
 
-      {activeTab === "priorities" && (
+      {!loading && activeTab === "priorities" && (
         <PrioritiesList
           schools={schools}
           favorites={favorites}
