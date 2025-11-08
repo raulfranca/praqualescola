@@ -64,10 +64,12 @@ const Index = () => {
                   Definir Minha Casa
                 </Button>
               ) : (
-                <div className="flex items-center gap-2 flex-1">
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-sm flex-1">
-                    <Home className="w-4 h-4" />
-                    <span className="truncate">{homeLocation.address}</span>
+                <div className="flex items-center gap-2 w-full">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-sm flex-1 min-w-0">
+                    <Home className="w-4 h-4 shrink-0" />
+                    <span className="truncate">
+                      {homeLocation.address.split('-')[0].trim()}
+                    </span>
                   </div>
                   <Button
                     onClick={clearHome}
