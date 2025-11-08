@@ -117,6 +117,7 @@ const Index = () => {
           favorites={favorites}
           onReorder={reorderFavorites}
           onRemoveFavorite={toggleFavorite}
+          homeLocation={homeLocation}
         />
       )}
     </div>

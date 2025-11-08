@@ -1,5 +1,8 @@
-import { Star, GripVertical, X } from "lucide-react";
+import { Star, GripVertical, X, MapPin, Clock } from "lucide-react";
 import { School } from "@/types/school";
+import { HomeLocation } from "@/hooks/useHomeLocation";
+import { useState, useEffect } from "react";
+import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
 import {
   DndContext,
   closestCenter,
@@ -23,17 +26,32 @@ interface PrioritiesListProps {
   favorites: number[];
   onReorder: (newOrder: number[]) => void;
   onRemoveFavorite: (schoolId: number) => void;
+  homeLocation: HomeLocation | null;
 }
 
 function SortableSchoolItem({
   school,
   order,
   onRemove,
+  homeLocation,
 }: {
   school: School;
   order: number;
   onRemove: (id: number) => void;
+  homeLocation: HomeLocation | null;
 }) {
+  const [distanceInfo, setDistanceInfo] = useState<DistanceMatrixResult | null>(null);
+
+  useEffect(() => {
+    if (homeLocation) {
+      calculateDistance(
+        { lat: homeLocation.lat, lng: homeLocation.lng },
+        { lat: school.lat, lng: school.lng }
+      ).then((result) => {
+        setDistanceInfo(result);
+      });
+    }
+  }, [homeLocation, school.lat, school.lng]);
   const {
     attributes,
     listeners,
@@ -72,18 +90,27 @@ function SortableSchoolItem({
             <h3 className="font-semibold text-foreground truncate">
               {school.name}
             </h3>
-            <div className="flex gap-1.5 shrink-0">
-              <span className="inline-block px-2 py-0.5 text-xs rounded bg-primary/10 text-primary whitespace-nowrap">
-                {school.type}
-              </span>
-              <span className="inline-block px-2 py-0.5 text-xs rounded bg-secondary text-secondary-foreground whitespace-nowrap">
-                Setor {school.sector}
-              </span>
-            </div>
+            <span className="inline-block px-2 py-0.5 text-xs rounded bg-primary/10 text-primary whitespace-nowrap shrink-0">
+              {school.type}
+            </span>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {school.neighborhood}
-          </p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm text-muted-foreground truncate">
+              {school.neighborhood}
+            </p>
+            {homeLocation && distanceInfo && (
+              <div className="flex gap-1.5 shrink-0">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-accent/50 text-accent-foreground whitespace-nowrap">
+                  <MapPin className="w-3 h-3" />
+                  {distanceInfo.distance}
+                </span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-accent/50 text-accent-foreground whitespace-nowrap">
+                  <Clock className="w-3 h-3" />
+                  {distanceInfo.duration}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
         <button
@@ -103,6 +130,7 @@ export function PrioritiesList({
   favorites,
   onReorder,
   onRemoveFavorite,
+  homeLocation,
 }: PrioritiesListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -169,6 +197,7 @@ export function PrioritiesList({
                   school={school}
                   order={index + 1}
                   onRemove={onRemoveFavorite}
+                  homeLocation={homeLocation}
                 />
               ))}
             </div>
