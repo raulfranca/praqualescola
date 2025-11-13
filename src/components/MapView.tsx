@@ -40,7 +40,11 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
   const displayedSchool = selectedSchool || clickedSchool;
 
   const onMarkerClick = useCallback((school: School) => {
-    setClickedSchool(school);
+    try {
+      setClickedSchool(school);
+    } catch (error) {
+      console.error("Error setting clicked school:", error);
+    }
   }, []);
 
   // When a school is selected from search, center map and show details
