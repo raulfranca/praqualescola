@@ -12,6 +12,16 @@ export interface School {
   sector: string;
   polo: string;
   outsourced?: string;
+  bercario?: number;
+  infantil1?: number;
+  infantil2?: number;
+  pre1?: number;
+  pre2?: number;
+  ano1?: number;
+  ano2?: number;
+  ano3?: number;
+  ano4?: number;
+  ano5?: number;
 }
 
 export interface FavoriteSchool {

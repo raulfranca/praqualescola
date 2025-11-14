@@ -1,12 +1,21 @@
 import { School } from "@/types/school";
-import { X, Star, MapPin, Phone, Building2, Car, Clock } from "lucide-react";
+import { Star, MapPin, Phone, Building2, Car, Clock, School2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { HomeLocation } from "@/hooks/useHomeLocation";
 import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
 import { useState, useEffect } from "react";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button";
 
 interface SchoolDetailModalProps {
-  school: School;
+  school: School | null;
   isFavorite: boolean;
   onToggleFavorite: (schoolId: number) => void;
   onClose: () => void;
@@ -24,7 +33,7 @@ export function SchoolDetailModal({
   const [loadingDistance, setLoadingDistance] = useState(false);
 
   useEffect(() => {
-    if (!homeLocation || !school.lat || !school.lng) {
+    if (!homeLocation || !school?.lat || !school?.lng) {
       setDistanceInfo(null);
       return;
     }
@@ -39,12 +48,14 @@ export function SchoolDetailModal({
       })
       .catch((error) => {
         console.error("Error calculating distance:", error);
+        setDistanceInfo(null);
       })
       .finally(() => {
         setLoadingDistance(false);
       });
-  }, [homeLocation, school.lat, school.lng]);
+  }, [homeLocation, school?.lat, school?.lng]);
   const handleOpenInMaps = () => {
+    if (!school?.address) return;
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
       school.address
     )}`;
@@ -59,27 +70,19 @@ export function SchoolDetailModal({
     return phone;
   };
 
+  if (!school) return null;
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-lg bg-card rounded-xl shadow-xl animate-in zoom-in-95 duration-300 max-h-[80vh] sm:max-h-[85vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="sticky top-0 bg-card border-b border-border px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-xl">
-          <h2 className="text-base sm:text-xl font-bold text-foreground pr-8 leading-tight">
+    <Drawer open={!!school} onOpenChange={(open) => !open && onClose()}>
+      <DrawerContent className="max-h-[90vh]">
+        <DrawerHeader className="text-left border-b">
+          <DrawerTitle className="text-lg sm:text-xl leading-tight pr-8">
             {school.name}
-          </h2>
-          <button
-            onClick={onClose}
-            className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted transition-colors"
-            aria-label="Fechar"
-          >
-            <X className="w-5 h-5 text-muted-foreground" />
-          </button>
-        </div>
+          </DrawerTitle>
+          <DrawerDescription className="sr-only">
+            Detalhes da escola {school.name}
+          </DrawerDescription>
+        </DrawerHeader>
 
         <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
           {/* Tags */}
@@ -99,6 +102,40 @@ export function SchoolDetailModal({
               </Badge>
             )}
           </div>
+
+          {/* Salas */}
+          {(school.bercario > 0 || school.infantil1 > 0 || school.infantil2 > 0 || 
+            school.pre1 > 0 || school.pre2 > 0 || school.ano1 > 0 || 
+            school.ano2 > 0 || school.ano3 > 0 || school.ano4 > 0 || school.ano5 > 0) && (
+            <div className="flex items-start gap-2">
+              <School2 className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Salas</p>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {school.bercario > 0 && (
+                    <Badge className="bg-infantil text-infantil-foreground hover:bg-infantil/90">
+                      Berçário
+                    </Badge>
+                  )}
+                  {(school.infantil1 > 0 || school.infantil2 > 0) && (
+                    <Badge className="bg-infantil text-infantil-foreground hover:bg-infantil/90">
+                      Inf. 1 e 2
+                    </Badge>
+                  )}
+                  {(school.pre1 > 0 || school.pre2 > 0) && (
+                    <Badge className="bg-pre text-pre-foreground hover:bg-pre/90">
+                      Pré 1 e 2
+                    </Badge>
+                  )}
+                  {(school.ano1 > 0 || school.ano2 > 0 || school.ano3 > 0 || school.ano4 > 0 || school.ano5 > 0) && (
+                    <Badge className="bg-fundamental text-fundamental-foreground hover:bg-fundamental/90">
+                      1º ao 5º ano
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Bairro Badge */}
           <div className="flex items-start gap-2">
@@ -186,31 +223,32 @@ export function SchoolDetailModal({
           )}
 
           {/* Botões */}
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4">
-            <button
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4 pb-4">
+            <Button
               onClick={() => onToggleFavorite(school.id)}
-              className={`flex items-center justify-center gap-2 py-2.5 sm:py-3 px-4 rounded-lg text-sm sm:text-base font-medium transition-colors ${
+              variant={isFavorite ? "default" : "outline"}
+              className={`flex items-center justify-center gap-2 ${
                 isFavorite
                   ? "bg-amber-500 text-white hover:bg-amber-600"
-                  : "bg-muted text-foreground hover:bg-muted/80"
+                  : ""
               }`}
             >
               <Star
                 className={`w-4 h-4 sm:w-5 sm:h-5 ${isFavorite ? "fill-white" : ""}`}
               />
               <span className="whitespace-nowrap">{isFavorite ? "Remover dos Favoritos" : "Adicionar aos Favoritos"}</span>
-            </button>
+            </Button>
             
-            <button
+            <Button
               onClick={handleOpenInMaps}
-              className="flex items-center justify-center gap-2 py-2.5 sm:py-3 px-4 rounded-lg text-sm sm:text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="flex items-center justify-center gap-2"
             >
               <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="whitespace-nowrap">Ver no Google Maps</span>
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
-    </div>
+      </DrawerContent>
+    </Drawer>
   );
 }

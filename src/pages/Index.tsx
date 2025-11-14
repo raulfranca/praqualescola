@@ -5,6 +5,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { MapView } from "@/components/MapView";
 import { PrioritiesList } from "@/components/PrioritiesList";
 import { HomeLocationInput } from "@/components/HomeLocationInput";
+import { SchoolDetailModal } from "@/components/SchoolDetailModal";
 import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
@@ -132,6 +133,17 @@ const Index = () => {
           favorites={favorites}
           onReorder={reorderFavorites}
           onRemoveFavorite={toggleFavorite}
+          homeLocation={homeLocation}
+          onSchoolClick={setSelectedSchool}
+        />
+      )}
+
+      {selectedSchool && (
+        <SchoolDetailModal
+          school={selectedSchool}
+          isFavorite={favorites.includes(selectedSchool.id)}
+          onToggleFavorite={toggleFavorite}
+          onClose={() => setSelectedSchool(null)}
           homeLocation={homeLocation}
         />
       )}
