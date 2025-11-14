@@ -55,6 +55,18 @@ export default {
           DEFAULT: "hsl(var(--orange))",
           foreground: "hsl(var(--orange-foreground))",
         },
+        infantil: {
+          DEFAULT: "hsl(var(--infantil))",
+          foreground: "hsl(var(--infantil-foreground))",
+        },
+        pre: {
+          DEFAULT: "hsl(var(--pre))",
+          foreground: "hsl(var(--pre-foreground))",
+        },
+        fundamental: {
+          DEFAULT: "hsl(var(--fundamental))",
+          foreground: "hsl(var(--fundamental-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
