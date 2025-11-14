@@ -104,8 +104,8 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     // Dynamic size based on zoom level - smaller at city view, larger at street view
     // Streets with arrows typically appear at zoom 17+
     const baseSize = currentZoom < 16 ? 
-      Math.max(14, 8 + (currentZoom * 0.5)) : // Small at city/neighborhood level
-      Math.max(20, 12 + (currentZoom * 1.5)); // Grow faster at street level
+      Math.max(18, 10 + (currentZoom * 0.8)) : // Slightly larger at city/neighborhood level
+      Math.max(24, 14 + (currentZoom * 1.5)); // Grow faster at street level
     const size = baseSize;
     const radius = size / 2;
     
@@ -141,8 +141,8 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
               <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
             </filter>
           </defs>
-          <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
-                  fill="${color}" stroke="#ffffff" stroke-width="2.5" 
+          <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
+                  fill="${color}" stroke="#ffffff" stroke-width="1.5" 
                   filter="url(#shadow)"/>
         </svg>
       `;
@@ -184,12 +184,12 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             </clipPath>
           </defs>
           <g filter="url(#shadow)">
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
                     fill="${leftColor}" clip-path="url(#leftHalf)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
                     fill="${rightColor}" clip-path="url(#rightHalf)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
-                    fill="none" stroke="#ffffff" stroke-width="2.5"/>
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
+                    fill="none" stroke="#ffffff" stroke-width="1.5"/>
           </g>
         </svg>
       `;
@@ -220,14 +220,14 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             </clipPath>
           </defs>
           <g filter="url(#shadow)">
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
                     fill="${crecheColor}" clip-path="url(#leftThird)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
                     fill="${preColor}" clip-path="url(#middleThird)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
                     fill="${fundamentalColor}" clip-path="url(#rightThird)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
-                    fill="none" stroke="#ffffff" stroke-width="2.5"/>
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
+                    fill="none" stroke="#ffffff" stroke-width="1.5"/>
           </g>
         </svg>
       `;
@@ -247,8 +247,8 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
           </filter>
         </defs>
-        <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
-                fill="${primaryColor}" stroke="#ffffff" stroke-width="2.5" 
+        <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
+                fill="${primaryColor}" stroke="#ffffff" stroke-width="1.5" 
                 filter="url(#shadow)"/>
       </svg>
     `;
