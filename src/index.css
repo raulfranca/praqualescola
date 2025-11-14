@@ -44,6 +44,15 @@ All colors MUST be HSL.
     --orange: 25 95% 53%;
     --orange-foreground: 0 0% 100%;
     
+    --infantil: 150 60% 75%;
+    --infantil-foreground: 150 60% 20%;
+    
+    --pre: 48 95% 65%;
+    --pre-foreground: 48 95% 25%;
+    
+    --fundamental: 345 65% 45%;
+    --fundamental-foreground: 0 0% 100%;
+    
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;

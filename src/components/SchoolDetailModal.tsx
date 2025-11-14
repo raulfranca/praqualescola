@@ -1,5 +1,5 @@
 import { School } from "@/types/school";
-import { Star, MapPin, Phone, Building2, Car, Clock } from "lucide-react";
+import { Star, MapPin, Phone, Building2, Car, Clock, School2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { HomeLocation } from "@/hooks/useHomeLocation";
 import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
@@ -101,6 +101,66 @@ export function SchoolDetailModal({
                 {school.outsourced}
               </Badge>
             )}
+          </div>
+
+          {/* Salas */}
+          <div className="flex items-start gap-2">
+            <School2 className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-muted-foreground">Salas</p>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {school.bercario && school.bercario > 0 && (
+                  <Badge className="bg-infantil text-infantil-foreground hover:bg-infantil/90">
+                    Berçário
+                  </Badge>
+                )}
+                {school.infantil1 && school.infantil1 > 0 && (
+                  <Badge className="bg-infantil text-infantil-foreground hover:bg-infantil/90">
+                    Inf. 1
+                  </Badge>
+                )}
+                {school.infantil2 && school.infantil2 > 0 && (
+                  <Badge className="bg-infantil text-infantil-foreground hover:bg-infantil/90">
+                    Inf. 2
+                  </Badge>
+                )}
+                {school.pre1 && school.pre1 > 0 && (
+                  <Badge className="bg-pre text-pre-foreground hover:bg-pre/90">
+                    Pré 1
+                  </Badge>
+                )}
+                {school.pre2 && school.pre2 > 0 && (
+                  <Badge className="bg-pre text-pre-foreground hover:bg-pre/90">
+                    Pré 2
+                  </Badge>
+                )}
+                {school.ano1 && school.ano1 > 0 && (
+                  <Badge className="bg-fundamental text-fundamental-foreground hover:bg-fundamental/90">
+                    1º
+                  </Badge>
+                )}
+                {school.ano2 && school.ano2 > 0 && (
+                  <Badge className="bg-fundamental text-fundamental-foreground hover:bg-fundamental/90">
+                    2º
+                  </Badge>
+                )}
+                {school.ano3 && school.ano3 > 0 && (
+                  <Badge className="bg-fundamental text-fundamental-foreground hover:bg-fundamental/90">
+                    3º
+                  </Badge>
+                )}
+                {school.ano4 && school.ano4 > 0 && (
+                  <Badge className="bg-fundamental text-fundamental-foreground hover:bg-fundamental/90">
+                    4º
+                  </Badge>
+                )}
+                {school.ano5 && school.ano5 > 0 && (
+                  <Badge className="bg-fundamental text-fundamental-foreground hover:bg-fundamental/90">
+                    5º
+                  </Badge>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Bairro Badge */}
