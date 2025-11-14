@@ -44,13 +44,13 @@ All colors MUST be HSL.
     --orange: 25 95% 53%;
     --orange-foreground: 0 0% 100%;
     
-    --infantil: 150 60% 75%;
-    --infantil-foreground: 150 60% 20%;
+    --infantil: 174 42% 65%;
+    --infantil-foreground: 0 0% 20%;
     
-    --pre: 48 95% 65%;
-    --pre-foreground: 48 95% 25%;
+    --pre: 45 100% 65%;
+    --pre-foreground: 0 0% 20%;
     
-    --fundamental: 345 65% 45%;
+    --fundamental: 186 72% 60%;
     --fundamental-foreground: 0 0% 100%;
     
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
