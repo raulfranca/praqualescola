@@ -101,18 +101,25 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     const fundamentalColor = "#3D7C85"; // Azul petróleo (Fundamental)
     const primaryColor = "#1ba3c6"; // Azul principal do sistema
     
-    const size = 32; // Increased size for better visibility
+    // Dynamic size based on zoom level
+    const baseSize = Math.max(20, Math.min(40, 10 + (currentZoom * 2)));
+    const size = baseSize;
     const radius = size / 2;
     
+    // Increase canvas size to prevent shadow clipping
+    const canvasSize = size + 16; // Extra space for shadow blur
+    const offset = 8; // Center the circle in the larger canvas
+    
     if (isFavorite) {
-      // Golden star for favorites
+      // Golden star for favorites - dynamic scale
+      const starScale = 0.8 + (currentZoom * 0.04);
       return {
         path: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
         fillColor: "#fbbf24",
         fillOpacity: 1,
         strokeColor: "#d97706",
         strokeWeight: 1.5,
-        scale: 1.4,
+        scale: starScale,
         anchor: new google.maps.Point(12, 12),
       };
     }
@@ -125,13 +132,13 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       else if (hasFundamental) color = fundamentalColor;
       
       const svg = `
-        <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+        <svg width="${canvasSize}" height="${canvasSize}" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
               <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
             </filter>
           </defs>
-          <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+          <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
                   fill="${color}" stroke="#ffffff" stroke-width="2.5" 
                   filter="url(#shadow)"/>
         </svg>
@@ -139,8 +146,8 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       
       return {
         url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-        scaledSize: new google.maps.Size(size, size),
-        anchor: new google.maps.Point(radius, radius),
+        scaledSize: new google.maps.Size(canvasSize, canvasSize),
+        anchor: new google.maps.Point(radius + offset, radius + offset),
       };
     }
     
@@ -161,24 +168,24 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       }
       
       const svg = `
-        <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+        <svg width="${canvasSize}" height="${canvasSize}" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
               <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
             </filter>
             <clipPath id="leftHalf">
-              <rect x="0" y="0" width="${radius}" height="${size}"/>
+              <rect x="${offset}" y="${offset}" width="${radius}" height="${size}"/>
             </clipPath>
             <clipPath id="rightHalf">
-              <rect x="${radius}" y="0" width="${radius}" height="${size}"/>
+              <rect x="${radius + offset}" y="${offset}" width="${radius}" height="${size}"/>
             </clipPath>
           </defs>
           <g filter="url(#shadow)">
-            <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
                     fill="${leftColor}" clip-path="url(#leftHalf)"/>
-            <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
                     fill="${rightColor}" clip-path="url(#rightHalf)"/>
-            <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
                     fill="none" stroke="#ffffff" stroke-width="2.5"/>
           </g>
         </svg>
@@ -186,37 +193,37 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       
       return {
         url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-        scaledSize: new google.maps.Size(size, size),
-        anchor: new google.maps.Point(radius, radius),
+        scaledSize: new google.maps.Size(canvasSize, canvasSize),
+        anchor: new google.maps.Point(radius + offset, radius + offset),
       };
     }
     
     // Three categories - tri-split circle (vertical thirds)
     if (categories === 3) {
       const svg = `
-        <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+        <svg width="${canvasSize}" height="${canvasSize}" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
               <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
             </filter>
             <clipPath id="leftThird">
-              <rect x="0" y="0" width="${size / 3}" height="${size}"/>
+              <rect x="${offset}" y="${offset}" width="${size / 3}" height="${size}"/>
             </clipPath>
             <clipPath id="middleThird">
-              <rect x="${size / 3}" y="0" width="${size / 3}" height="${size}"/>
+              <rect x="${size / 3 + offset}" y="${offset}" width="${size / 3}" height="${size}"/>
             </clipPath>
             <clipPath id="rightThird">
-              <rect x="${(size / 3) * 2}" y="0" width="${size / 3}" height="${size}"/>
+              <rect x="${(size / 3) * 2 + offset}" y="${offset}" width="${size / 3}" height="${size}"/>
             </clipPath>
           </defs>
           <g filter="url(#shadow)">
-            <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
                     fill="${crecheColor}" clip-path="url(#leftThird)"/>
-            <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
                     fill="${preColor}" clip-path="url(#middleThird)"/>
-            <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
                     fill="${fundamentalColor}" clip-path="url(#rightThird)"/>
-            <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
                     fill="none" stroke="#ffffff" stroke-width="2.5"/>
           </g>
         </svg>
@@ -224,20 +231,20 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       
       return {
         url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-        scaledSize: new google.maps.Size(size, size),
-        anchor: new google.maps.Point(radius, radius),
+        scaledSize: new google.maps.Size(canvasSize, canvasSize),
+        anchor: new google.maps.Point(radius + offset, radius + offset),
       };
     }
     
     // Fallback - solid primary color circle
     const svg = `
-      <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+      <svg width="${canvasSize}" height="${canvasSize}" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
             <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
           </filter>
         </defs>
-        <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+        <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
                 fill="${primaryColor}" stroke="#ffffff" stroke-width="2.5" 
                 filter="url(#shadow)"/>
       </svg>
@@ -245,8 +252,8 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     
     return {
       url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-      scaledSize: new google.maps.Size(size, size),
-      anchor: new google.maps.Point(radius, radius),
+      scaledSize: new google.maps.Size(canvasSize, canvasSize),
+      anchor: new google.maps.Point(radius + offset, radius + offset),
     };
   };
 
@@ -290,9 +297,9 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 zIndex={isFavorite ? 1000 : 1}
                 label={showLabel ? {
                   text: school.name,
-                  color: '#1f2937',
+                  color: '#3D7C85',
                   fontSize: '12px',
-                  fontWeight: '600',
+                  fontWeight: '400',
                   className: 'marker-label'
                 } : undefined}
               />
