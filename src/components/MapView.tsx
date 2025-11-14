@@ -101,8 +101,11 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     const fundamentalColor = "#3D7C85"; // Azul petróleo (Fundamental)
     const primaryColor = "#1ba3c6"; // Azul principal do sistema
     
-    // Dynamic size based on zoom level
-    const baseSize = Math.max(20, Math.min(40, 10 + (currentZoom * 2)));
+    // Dynamic size based on zoom level - smaller at city view, larger at street view
+    // Streets with arrows typically appear at zoom 17+
+    const baseSize = currentZoom < 16 ? 
+      Math.max(14, 8 + (currentZoom * 0.5)) : // Small at city/neighborhood level
+      Math.max(20, 12 + (currentZoom * 1.5)); // Grow faster at street level
     const size = baseSize;
     const radius = size / 2;
     
