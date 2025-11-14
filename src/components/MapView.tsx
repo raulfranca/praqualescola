@@ -30,11 +30,28 @@ const mapOptions = {
   streetViewControl: false,
   mapTypeControl: false,
   fullscreenControl: false,
+  styles: [
+    {
+      featureType: "poi",
+      elementType: "labels",
+      stylers: [{ visibility: "off" }],
+    },
+    {
+      featureType: "poi.business",
+      stylers: [{ visibility: "off" }],
+    },
+    {
+      featureType: "transit",
+      elementType: "labels.icon",
+      stylers: [{ visibility: "off" }],
+    },
+  ],
 };
 
 export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolViewed, homeLocation }: MapViewProps) {
   const [clickedSchool, setClickedSchool] = useState<School | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [currentZoom, setCurrentZoom] = useState(13);
   const mapRef = useRef<google.maps.Map | null>(null);
 
   const displayedSchool = selectedSchool || clickedSchool;
@@ -71,7 +88,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     return { hasCreche, hasPre, hasFundamental };
   };
 
-  // Create custom marker icons with color coding
+  // Create custom marker icons with color coding (circles)
   const createMarkerIcon = (school: School, isFavorite: boolean) => {
     if (!isLoaded) return undefined;
     
@@ -84,42 +101,50 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     const fundamentalColor = "#3D7C85"; // Azul petróleo (Fundamental)
     const primaryColor = "#1ba3c6"; // Azul principal do sistema
     
-    // Pin shape SVG path (classic map pin/drop shape)
-    const pinPath = "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z";
+    const size = 32; // Increased size for better visibility
+    const radius = size / 2;
     
     if (isFavorite) {
-      // Golden star for favorites (smaller and thinner)
+      // Golden star for favorites
       return {
         path: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
         fillColor: "#fbbf24",
         fillOpacity: 1,
         strokeColor: "#d97706",
         strokeWeight: 1.5,
-        scale: 1.2,
+        scale: 1.4,
         anchor: new google.maps.Point(12, 12),
       };
     }
     
-    // Single category - solid color pin
+    // Single category - solid color circle
     if (categories === 1) {
       let color = primaryColor;
       if (hasCreche) color = crecheColor;
       else if (hasPre) color = preColor;
       else if (hasFundamental) color = fundamentalColor;
       
+      const svg = `
+        <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
+            </filter>
+          </defs>
+          <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+                  fill="${color}" stroke="#ffffff" stroke-width="2.5" 
+                  filter="url(#shadow)"/>
+        </svg>
+      `;
+      
       return {
-        path: pinPath,
-        fillColor: color,
-        fillOpacity: 1,
-        strokeColor: "#ffffff",
-        strokeWeight: 1.5,
-        scale: 1.3,
-        anchor: new google.maps.Point(12, 22),
-        labelOrigin: new google.maps.Point(12, 10),
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+        scaledSize: new google.maps.Size(size, size),
+        anchor: new google.maps.Point(radius, radius),
       };
     }
     
-    // Multiple categories - use SVG data URL for split colors
+    // Two categories - split circle (vertical half)
     if (categories === 2) {
       let leftColor = crecheColor;
       let rightColor = fundamentalColor;
@@ -136,64 +161,92 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       }
       
       const svg = `
-        <svg width="24" height="32" xmlns="http://www.w3.org/2000/svg">
+        <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
             </filter>
+            <clipPath id="leftHalf">
+              <rect x="0" y="0" width="${radius}" height="${size}"/>
+            </clipPath>
+            <clipPath id="rightHalf">
+              <rect x="${radius}" y="0" width="${radius}" height="${size}"/>
+            </clipPath>
           </defs>
           <g filter="url(#shadow)">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" 
-                  fill="${leftColor}" stroke="#ffffff" stroke-width="1.5"/>
-            <path d="M12 2v20s7-7.75 7-13c0-3.87-3.13-7-7-7z" 
-                  fill="${rightColor}" stroke="#ffffff" stroke-width="1.5"/>
+            <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+                    fill="${leftColor}" clip-path="url(#leftHalf)"/>
+            <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+                    fill="${rightColor}" clip-path="url(#rightHalf)"/>
+            <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+                    fill="none" stroke="#ffffff" stroke-width="2.5"/>
           </g>
         </svg>
       `;
       
       return {
         url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-        scaledSize: new google.maps.Size(31, 42),
-        anchor: new google.maps.Point(15.5, 42),
+        scaledSize: new google.maps.Size(size, size),
+        anchor: new google.maps.Point(radius, radius),
       };
     }
     
-    // Three categories - tricolor or neutral
+    // Three categories - tri-split circle (vertical thirds)
     if (categories === 3) {
       const svg = `
-        <svg width="24" height="32" xmlns="http://www.w3.org/2000/svg">
+        <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
             </filter>
+            <clipPath id="leftThird">
+              <rect x="0" y="0" width="${size / 3}" height="${size}"/>
+            </clipPath>
+            <clipPath id="middleThird">
+              <rect x="${size / 3}" y="0" width="${size / 3}" height="${size}"/>
+            </clipPath>
+            <clipPath id="rightThird">
+              <rect x="${(size / 3) * 2}" y="0" width="${size / 3}" height="${size}"/>
+            </clipPath>
           </defs>
           <g filter="url(#shadow)">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" 
-                  fill="${crecheColor}" stroke="#ffffff" stroke-width="1.5"/>
-            <path d="M9 2.5C7.5 3.2 6.2 4.3 5.3 5.7L12 22s3-3.5 5-7.5L9 2.5z" 
-                  fill="${preColor}"/>
-            <path d="M15 2.5c1.5 0.7 2.8 1.8 3.7 3.2L12 22s-3-3.5-5-7.5L15 2.5z" 
-                  fill="${fundamentalColor}"/>
+            <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+                    fill="${crecheColor}" clip-path="url(#leftThird)"/>
+            <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+                    fill="${preColor}" clip-path="url(#middleThird)"/>
+            <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+                    fill="${fundamentalColor}" clip-path="url(#rightThird)"/>
+            <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+                    fill="none" stroke="#ffffff" stroke-width="2.5"/>
           </g>
         </svg>
       `;
       
       return {
         url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-        scaledSize: new google.maps.Size(31, 42),
-        anchor: new google.maps.Point(15.5, 42),
+        scaledSize: new google.maps.Size(size, size),
+        anchor: new google.maps.Point(radius, radius),
       };
     }
     
-    // Fallback
+    // Fallback - solid primary color circle
+    const svg = `
+      <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
+          </filter>
+        </defs>
+        <circle cx="${radius}" cy="${radius}" r="${radius - 2}" 
+                fill="${primaryColor}" stroke="#ffffff" stroke-width="2.5" 
+                filter="url(#shadow)"/>
+      </svg>
+    `;
+    
     return {
-      path: pinPath,
-      fillColor: primaryColor,
-      fillOpacity: 1,
-      strokeColor: "#ffffff",
-      strokeWeight: 1.5,
-      scale: 1.3,
-      anchor: new google.maps.Point(12, 22),
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+      scaledSize: new google.maps.Size(size, size),
+      anchor: new google.maps.Point(radius, radius),
     };
   };
 
@@ -212,11 +265,20 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
           onLoad={(map) => {
             mapRef.current = map;
           }}
+          onZoomChanged={() => {
+            if (mapRef.current) {
+              const zoom = mapRef.current.getZoom();
+              if (zoom !== undefined) {
+                setCurrentZoom(zoom);
+              }
+            }
+          }}
         >
           {isLoaded && schools.map((school) => {
             if (!school.lat || !school.lng) return null;
 
             const isFavorite = favorites.includes(school.id);
+            const showLabel = currentZoom >= 15;
             
             return (
               <Marker
@@ -226,6 +288,13 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 onClick={() => onMarkerClick(school)}
                 title={school.name}
                 zIndex={isFavorite ? 1000 : 1}
+                label={showLabel ? {
+                  text: school.name,
+                  color: '#1f2937',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  className: 'marker-label'
+                } : undefined}
               />
             );
           })}
