@@ -3,6 +3,7 @@ import { School } from "@/types/school";
 import { HomeLocation } from "@/hooks/useHomeLocation";
 import { useState, useEffect } from "react";
 import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
+import { Badge } from "@/components/ui/badge";
 import {
   DndContext,
   closestCenter,
@@ -27,6 +28,7 @@ interface PrioritiesListProps {
   onReorder: (newOrder: number[]) => void;
   onRemoveFavorite: (schoolId: number) => void;
   homeLocation: HomeLocation | null;
+  onSchoolClick: (school: School) => void;
 }
 
 function SortableSchoolItem({
@@ -34,11 +36,13 @@ function SortableSchoolItem({
   order,
   onRemove,
   homeLocation,
+  onSchoolClick,
 }: {
   school: School;
   order: number;
   onRemove: (id: number) => void;
   homeLocation: HomeLocation | null;
+  onSchoolClick: (school: School) => void;
 }) {
   const [distanceInfo, setDistanceInfo] = useState<DistanceMatrixResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -100,7 +104,10 @@ function SortableSchoolItem({
           </span>
         </div>
 
-        <div className="flex-1 min-w-0">
+        <div 
+          className="flex-1 min-w-0 cursor-pointer"
+          onClick={() => onSchoolClick(school)}
+        >
           <h3 className="font-semibold text-foreground truncate mb-1">
             {school.name}
           </h3>
@@ -112,6 +119,34 @@ function SortableSchoolItem({
               {school.type}
             </span>
           </div>
+
+          {/* Tags de Níveis */}
+          {(school.bercario > 0 || school.infantil1 > 0 || school.infantil2 > 0 || 
+            school.pre1 > 0 || school.pre2 > 0 || school.ano1 > 0 || 
+            school.ano2 > 0 || school.ano3 > 0 || school.ano4 > 0 || school.ano5 > 0) && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {school.bercario > 0 && (
+                <Badge className="bg-infantil text-infantil-foreground hover:bg-infantil/90 text-xs">
+                  Berçário
+                </Badge>
+              )}
+              {(school.infantil1 > 0 || school.infantil2 > 0) && (
+                <Badge className="bg-infantil text-infantil-foreground hover:bg-infantil/90 text-xs">
+                  Inf. 1 e 2
+                </Badge>
+              )}
+              {(school.pre1 > 0 || school.pre2 > 0) && (
+                <Badge className="bg-pre text-pre-foreground hover:bg-pre/90 text-xs">
+                  Pré 1 e 2
+                </Badge>
+              )}
+              {(school.ano1 > 0 || school.ano2 > 0 || school.ano3 > 0 || school.ano4 > 0 || school.ano5 > 0) && (
+                <Badge className="bg-fundamental text-fundamental-foreground hover:bg-fundamental/90 text-xs">
+                  1º ao 5º ano
+                </Badge>
+              )}
+            </div>
+          )}
           {homeLocation && (
             <div className="flex flex-wrap gap-1.5">
               {isCalculating ? (
@@ -152,6 +187,7 @@ export function PrioritiesList({
   onReorder,
   onRemoveFavorite,
   homeLocation,
+  onSchoolClick,
 }: PrioritiesListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -213,13 +249,14 @@ export function PrioritiesList({
           >
             <div className="space-y-3">
               {favoriteSchools.map((school, index) => (
-                <SortableSchoolItem
-                  key={school.id}
-                  school={school}
-                  order={index + 1}
-                  onRemove={onRemoveFavorite}
-                  homeLocation={homeLocation}
-                />
+              <SortableSchoolItem
+                key={school.id}
+                school={school}
+                order={index + 1}
+                onRemove={onRemoveFavorite}
+                homeLocation={homeLocation}
+                onSchoolClick={onSchoolClick}
+              />
               ))}
             </div>
           </SortableContext>
