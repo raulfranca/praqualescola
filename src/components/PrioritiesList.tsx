@@ -4,6 +4,7 @@ import { HomeLocation } from "@/hooks/useHomeLocation";
 import { useState, useEffect } from "react";
 import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
 import { Badge } from "@/components/ui/badge";
+import { getSchoolLevelTags } from "@/lib/schoolTags";
 import {
   DndContext,
   closestCenter,
@@ -121,32 +122,18 @@ function SortableSchoolItem({
           </div>
 
           {/* Tags de Níveis */}
-          {(school.bercario > 0 || school.infantil1 > 0 || school.infantil2 > 0 || 
-            school.pre1 > 0 || school.pre2 > 0 || school.ano1 > 0 || 
-            school.ano2 > 0 || school.ano3 > 0 || school.ano4 > 0 || school.ano5 > 0) && (
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {school.bercario > 0 && (
-                <Badge className="bg-infantil text-infantil-foreground hover:bg-infantil/90 text-xs">
-                  Berçário
-                </Badge>
-              )}
-              {(school.infantil1 > 0 || school.infantil2 > 0) && (
-                <Badge className="bg-infantil text-infantil-foreground hover:bg-infantil/90 text-xs">
-                  Inf. 1 e 2
-                </Badge>
-              )}
-              {(school.pre1 > 0 || school.pre2 > 0) && (
-                <Badge className="bg-pre text-pre-foreground hover:bg-pre/90 text-xs">
-                  Pré 1 e 2
-                </Badge>
-              )}
-              {(school.ano1 > 0 || school.ano2 > 0 || school.ano3 > 0 || school.ano4 > 0 || school.ano5 > 0) && (
-                <Badge className="bg-fundamental text-fundamental-foreground hover:bg-fundamental/90 text-xs">
-                  1º ao 5º ano
-                </Badge>
-              )}
-            </div>
-          )}
+          {(() => {
+            const levelTags = getSchoolLevelTags(school);
+            return levelTags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {levelTags.map((tag, index) => (
+                  <Badge key={index} className={`${tag.className} text-xs`}>
+                    {tag.label}
+                  </Badge>
+                ))}
+              </div>
+            );
+          })()}
           {homeLocation && (
             <div className="flex flex-wrap gap-1.5">
               {isCalculating ? (
