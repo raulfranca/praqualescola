@@ -90,37 +90,38 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
 
       // Approximate label dimensions (in map coordinates)
       const labelWidth = 0.0015; // ~150m at this zoom
-      const labelHeight = 0.0002; // ~20m at this zoom
+      const labelHeight = 0.0003; // ~30m at this zoom
+      const pinBuffer = 0.00015; // Buffer space to clear the pin
 
-      // Try bottom position first (default)
-      let finalPosition: 'top' | 'bottom' = 'bottom';
-      const bottomBounds = {
-        north: school.lat! - 0.0001,
-        south: school.lat! - labelHeight - 0.0001,
+      // Try TOP position first (default preferred position)
+      let finalPosition: 'top' | 'bottom' = 'top';
+      const topBounds = {
+        north: school.lat! + labelHeight + pinBuffer,
+        south: school.lat! + pinBuffer,
         east: school.lng! + labelWidth / 2,
         west: school.lng! - labelWidth / 2,
       };
 
-      // Check for collisions with bottom position
-      const hasBottomCollision = occupiedAreas.some(area => {
-        return !(bottomBounds.south > area.bounds.north ||
-                 bottomBounds.north < area.bounds.south ||
-                 bottomBounds.west > area.bounds.east ||
-                 bottomBounds.east < area.bounds.west);
+      // Check for collisions with top position
+      const hasTopCollision = occupiedAreas.some(area => {
+        return !(topBounds.south > area.bounds.north ||
+                 topBounds.north < area.bounds.south ||
+                 topBounds.west > area.bounds.east ||
+                 topBounds.east < area.bounds.west);
       });
 
-      // If bottom collides, try top
-      if (hasBottomCollision) {
-        finalPosition = 'top';
-        const topBounds = {
-          north: school.lat! + labelHeight + 0.0001,
-          south: school.lat! + 0.0001,
+      // If top collides, try bottom
+      if (hasTopCollision) {
+        finalPosition = 'bottom';
+        const bottomBounds = {
+          north: school.lat! - pinBuffer,
+          south: school.lat! - labelHeight - pinBuffer,
           east: school.lng! + labelWidth / 2,
           west: school.lng! - labelWidth / 2,
         };
-        occupiedAreas.push({ schoolId: school.id, bounds: topBounds });
-      } else {
         occupiedAreas.push({ schoolId: school.id, bounds: bottomBounds });
+      } else {
+        occupiedAreas.push({ schoolId: school.id, bounds: topBounds });
       }
 
       positions.set(school.id, finalPosition);
@@ -370,7 +371,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
           {isLoaded && currentZoom >= 15 && schools.map((school) => {
             if (!school.lat || !school.lng) return null;
 
-            const labelPosition = labelPositions.get(school.id) || 'bottom';
+            const labelPosition = labelPositions.get(school.id) || 'top';
             
             return (
               <OverlayView
@@ -384,8 +385,8 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                   style={{
                     position: 'absolute',
                     transform: labelPosition === 'top' 
-                      ? 'translate(-50%, calc(-100% - 16px))' 
-                      : 'translate(-50%, 16px)',
+                      ? 'translate(-50%, calc(-100% - 24px))' 
+                      : 'translate(-50%, 24px)',
                     backgroundColor: 'rgba(255, 255, 255, 0.95)',
                     padding: '4px 8px',
                     borderRadius: '4px',
