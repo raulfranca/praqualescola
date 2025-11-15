@@ -75,53 +75,67 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
 
     const visibleSchools = schools.filter(s => s.lat && s.lng);
     const positions = new Map<number, 'top' | 'bottom'>();
-    const occupiedAreas: Array<{ schoolId: number; bounds: { north: number; south: number; east: number; west: number } }> = [];
+    const occupiedAreas: Array<{ 
+      schoolId: number; 
+      bounds: { north: number; south: number; east: number; west: number };
+      position: 'top' | 'bottom';
+    }> = [];
 
-    // Sort schools by latitude to process from top to bottom
+    // Sort schools by latitude (north to south) to process systematically
     const sortedSchools = [...visibleSchools].sort((a, b) => (b.lat || 0) - (a.lat || 0));
 
     sortedSchools.forEach((school) => {
-      const projection = mapRef.current?.getProjection();
-      if (!projection) return;
-
-      const position = new google.maps.LatLng(school.lat!, school.lng!);
-      const point = projection.fromLatLngToPoint(position);
-      if (!point) return;
-
-      // Approximate label dimensions (in map coordinates)
-      const labelWidth = 0.0015; // ~150m at this zoom
-      const labelHeight = 0.0003; // ~30m at this zoom
-      const pinBuffer = 0.00015; // Buffer space to clear the pin
-
-      // Try TOP position first (default preferred position)
+      // Calculate label width based on text length (more accurate)
+      // Average character width ~7px at 12px font, convert to degrees at zoom 15
+      const charWidthInDegrees = 0.00008; // ~8m per character
+      const labelWidthDegrees = school.name.length * charWidthInDegrees;
+      const labelHeightDegrees = 0.00025; // Fixed height for single line text
+      
+      // Distance from pin center to label edge
+      const verticalOffset = 0.00020; // ~20m spacing from pin center
+      
+      // Try TOP position first (default)
       let finalPosition: 'top' | 'bottom' = 'top';
+      
       const topBounds = {
-        north: school.lat! + labelHeight + pinBuffer,
-        south: school.lat! + pinBuffer,
-        east: school.lng! + labelWidth / 2,
-        west: school.lng! - labelWidth / 2,
+        north: school.lat! + verticalOffset + labelHeightDegrees,
+        south: school.lat! + verticalOffset,
+        east: school.lng! + labelWidthDegrees / 2,
+        west: school.lng! - labelWidthDegrees / 2,
       };
 
       // Check for collisions with top position
       const hasTopCollision = occupiedAreas.some(area => {
-        return !(topBounds.south > area.bounds.north ||
-                 topBounds.north < area.bounds.south ||
-                 topBounds.west > area.bounds.east ||
-                 topBounds.east < area.bounds.west);
+        // Intersection check with padding
+        const intersects = !(
+          topBounds.south > area.bounds.north ||
+          topBounds.north < area.bounds.south ||
+          topBounds.west > area.bounds.east ||
+          topBounds.east < area.bounds.west
+        );
+        return intersects;
       });
 
-      // If top collides, try bottom
+      // If top collides, use bottom
       if (hasTopCollision) {
         finalPosition = 'bottom';
         const bottomBounds = {
-          north: school.lat! - pinBuffer,
-          south: school.lat! - labelHeight - pinBuffer,
-          east: school.lng! + labelWidth / 2,
-          west: school.lng! - labelWidth / 2,
+          north: school.lat! - verticalOffset,
+          south: school.lat! - verticalOffset - labelHeightDegrees,
+          east: school.lng! + labelWidthDegrees / 2,
+          west: school.lng! - labelWidthDegrees / 2,
         };
-        occupiedAreas.push({ schoolId: school.id, bounds: bottomBounds });
+        occupiedAreas.push({ 
+          schoolId: school.id, 
+          bounds: bottomBounds,
+          position: 'bottom'
+        });
       } else {
-        occupiedAreas.push({ schoolId: school.id, bounds: topBounds });
+        occupiedAreas.push({ 
+          schoolId: school.id, 
+          bounds: topBounds,
+          position: 'top'
+        });
       }
 
       positions.set(school.id, finalPosition);
