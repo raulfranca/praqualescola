@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { GoogleMap, LoadScript, Marker, OverlayView } from "@react-google-maps/api";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { School } from "@/types/school";
 import { SchoolDetailModal } from "./SchoolDetailModal";
 import { HomeLocation } from "@/hooks/useHomeLocation";
@@ -292,32 +292,21 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             const showLabel = currentZoom >= 15;
             
             return (
-              <div key={school.id}>
-                <Marker
-                  position={{ lat: school.lat, lng: school.lng }}
-                  icon={createMarkerIcon(school, isFavorite)}
-                  onClick={() => onMarkerClick(school)}
-                  title={school.name}
-                  zIndex={isFavorite ? 1000 : 1}
-                />
-                {showLabel && (
-                  <OverlayView
-                    position={{ lat: school.lat, lng: school.lng }}
-                    mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                  >
-                    <div
-                      className="marker-label"
-                      onClick={() => onMarkerClick(school)}
-                      style={{
-                        transform: 'translate(-50%, -100%)',
-                        marginTop: '-8px',
-                      }}
-                    >
-                      {school.name}
-                    </div>
-                  </OverlayView>
-                )}
-              </div>
+              <Marker
+                key={school.id}
+                position={{ lat: school.lat, lng: school.lng }}
+                icon={createMarkerIcon(school, isFavorite)}
+                onClick={() => onMarkerClick(school)}
+                title={school.name}
+                zIndex={isFavorite ? 1000 : 1}
+                label={showLabel ? {
+                  text: school.name,
+                  color: '#3D7C85',
+                  fontSize: '12px',
+                  fontWeight: '400',
+                  className: 'marker-label'
+                } : undefined}
+              />
             );
           })}
 
