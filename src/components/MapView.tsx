@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { GoogleMap, LoadScript, Marker, OverlayView } from "@react-google-maps/api";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { School } from "@/types/school";
 import { SchoolDetailModal } from "./SchoolDetailModal";
 import { HomeLocation } from "@/hooks/useHomeLocation";
@@ -54,7 +54,6 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentZoom, setCurrentZoom] = useState(13);
   const mapRef = useRef<google.maps.Map | null>(null);
-  const [labelPositions, setLabelPositions] = useState<Map<number, 'top' | 'bottom'>>(new Map());
 
   const displayedSchool = selectedSchool || clickedSchool;
 
@@ -65,84 +64,6 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       console.error("Error setting clicked school:", error);
     }
   }, []);
-
-  // Calculate label positions to avoid collisions
-  useEffect(() => {
-    if (!mapRef.current || !isLoaded || currentZoom < 15) {
-      setLabelPositions(new Map());
-      return;
-    }
-
-    const visibleSchools = schools.filter(s => s.lat && s.lng);
-    const positions = new Map<number, 'top' | 'bottom'>();
-    const occupiedAreas: Array<{ 
-      schoolId: number; 
-      bounds: { north: number; south: number; east: number; west: number };
-      position: 'top' | 'bottom';
-    }> = [];
-
-    // Sort schools by latitude (north to south) to process systematically
-    const sortedSchools = [...visibleSchools].sort((a, b) => (b.lat || 0) - (a.lat || 0));
-
-    sortedSchools.forEach((school) => {
-      // Calculate label width based on text length (more accurate)
-      // Average character width ~7px at 12px font, convert to degrees at zoom 15
-      const charWidthInDegrees = 0.00008; // ~8m per character
-      const labelWidthDegrees = school.name.length * charWidthInDegrees;
-      const labelHeightDegrees = 0.00025; // Fixed height for single line text
-      
-      // Distance from pin center to label edge
-      const verticalOffset = 0.00020; // ~20m spacing from pin center
-      
-      // Try TOP position first (default)
-      let finalPosition: 'top' | 'bottom' = 'top';
-      
-      const topBounds = {
-        north: school.lat! + verticalOffset + labelHeightDegrees,
-        south: school.lat! + verticalOffset,
-        east: school.lng! + labelWidthDegrees / 2,
-        west: school.lng! - labelWidthDegrees / 2,
-      };
-
-      // Check for collisions with top position
-      const hasTopCollision = occupiedAreas.some(area => {
-        // Intersection check with padding
-        const intersects = !(
-          topBounds.south > area.bounds.north ||
-          topBounds.north < area.bounds.south ||
-          topBounds.west > area.bounds.east ||
-          topBounds.east < area.bounds.west
-        );
-        return intersects;
-      });
-
-      // If top collides, use bottom
-      if (hasTopCollision) {
-        finalPosition = 'bottom';
-        const bottomBounds = {
-          north: school.lat! - verticalOffset,
-          south: school.lat! - verticalOffset - labelHeightDegrees,
-          east: school.lng! + labelWidthDegrees / 2,
-          west: school.lng! - labelWidthDegrees / 2,
-        };
-        occupiedAreas.push({ 
-          schoolId: school.id, 
-          bounds: bottomBounds,
-          position: 'bottom'
-        });
-      } else {
-        occupiedAreas.push({ 
-          schoolId: school.id, 
-          bounds: topBounds,
-          position: 'top'
-        });
-      }
-
-      positions.set(school.id, finalPosition);
-    });
-
-    setLabelPositions(positions);
-  }, [schools, isLoaded, currentZoom]);
 
   // When a school is selected from search, center map and show details
   useEffect(() => {
@@ -368,6 +289,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             if (!school.lat || !school.lng) return null;
 
             const isFavorite = favorites.includes(school.id);
+            const showLabel = currentZoom >= 15;
             
             return (
               <Marker
@@ -377,53 +299,14 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 onClick={() => onMarkerClick(school)}
                 title={school.name}
                 zIndex={isFavorite ? 1000 : 1}
+                label={showLabel ? {
+                  text: school.name,
+                  color: '#3D7C85',
+                  fontSize: '12px',
+                  fontWeight: '400',
+                  className: 'marker-label'
+                } : undefined}
               />
-            );
-          })}
-
-          {/* Custom clickable labels with collision detection */}
-          {isLoaded && currentZoom >= 15 && schools.map((school) => {
-            if (!school.lat || !school.lng) return null;
-
-            const labelPosition = labelPositions.get(school.id) || 'top';
-            
-            return (
-              <OverlayView
-                key={`label-${school.id}`}
-                position={{ lat: school.lat, lng: school.lng }}
-                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-              >
-                <div
-                  onClick={() => onMarkerClick(school)}
-                  className="cursor-pointer select-none whitespace-nowrap"
-                  style={{
-                    position: 'absolute',
-                    transform: labelPosition === 'top' 
-                      ? 'translate(-50%, calc(-100% - 24px))' 
-                      : 'translate(-50%, 24px)',
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    color: '#3D7C85',
-                    border: '1px solid rgba(61, 124, 133, 0.2)',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                    transition: 'all 0.2s ease',
-                    zIndex: 100,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(61, 124, 133, 0.1)';
-                    e.currentTarget.style.borderColor = 'rgba(61, 124, 133, 0.4)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
-                    e.currentTarget.style.borderColor = 'rgba(61, 124, 133, 0.2)';
-                  }}
-                >
-                  {school.name}
-                </div>
-              </OverlayView>
             );
           })}
 
