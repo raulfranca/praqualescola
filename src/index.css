@@ -123,6 +123,25 @@ All colors MUST be HSL.
     width: 100%;
     height: 100%;
   }
+
+  /* Google Maps marker labels - prevent overlap and make readable */
+  .marker-label {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(61, 124, 133, 0.3) !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    /* Offset label above marker to prevent overlap with pin */
+    transform: translateY(-32px) !important;
+  }
+
+  .marker-label:hover {
+    background-color: rgba(255, 255, 255, 1) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  }
 }
 
 /* Custom styles for map marker labels */
