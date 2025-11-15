@@ -40,7 +40,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-screen bg-background overflow-hidden">
       <Header activeTab={activeTab} onTabChange={setActiveTab} />
 
       {loading && (
@@ -104,10 +104,10 @@ const Index = () => {
             />
             
             {/* Feedback Button */}
-            <div className="fixed bottom-4 left-4 right-4 z-10">
+            <div className="fixed bottom-4 left-4 right-4 z-10 flex justify-center">
               <Button
                 onClick={() => navigate("/feedback")}
-                className="w-full shadow-lg"
+                className="shadow-lg"
                 size="lg"
               >
                 Sugerir uma correção ou ideia
