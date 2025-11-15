@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { GoogleMap, LoadScript, Marker, OverlayView } from "@react-google-maps/api";
 import { School } from "@/types/school";
 import { SchoolDetailModal } from "./SchoolDetailModal";
 import { HomeLocation } from "@/hooks/useHomeLocation";
@@ -54,6 +54,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentZoom, setCurrentZoom] = useState(13);
   const mapRef = useRef<google.maps.Map | null>(null);
+  const [labelPositions, setLabelPositions] = useState<Map<number, 'top' | 'bottom'>>(new Map());
 
   const displayedSchool = selectedSchool || clickedSchool;
 
@@ -64,6 +65,69 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       console.error("Error setting clicked school:", error);
     }
   }, []);
+
+  // Calculate label positions to avoid collisions
+  useEffect(() => {
+    if (!mapRef.current || !isLoaded || currentZoom < 15) {
+      setLabelPositions(new Map());
+      return;
+    }
+
+    const visibleSchools = schools.filter(s => s.lat && s.lng);
+    const positions = new Map<number, 'top' | 'bottom'>();
+    const occupiedAreas: Array<{ schoolId: number; bounds: { north: number; south: number; east: number; west: number } }> = [];
+
+    // Sort schools by latitude to process from top to bottom
+    const sortedSchools = [...visibleSchools].sort((a, b) => (b.lat || 0) - (a.lat || 0));
+
+    sortedSchools.forEach((school) => {
+      const projection = mapRef.current?.getProjection();
+      if (!projection) return;
+
+      const position = new google.maps.LatLng(school.lat!, school.lng!);
+      const point = projection.fromLatLngToPoint(position);
+      if (!point) return;
+
+      // Approximate label dimensions (in map coordinates)
+      const labelWidth = 0.0015; // ~150m at this zoom
+      const labelHeight = 0.0002; // ~20m at this zoom
+
+      // Try bottom position first (default)
+      let finalPosition: 'top' | 'bottom' = 'bottom';
+      const bottomBounds = {
+        north: school.lat! - 0.0001,
+        south: school.lat! - labelHeight - 0.0001,
+        east: school.lng! + labelWidth / 2,
+        west: school.lng! - labelWidth / 2,
+      };
+
+      // Check for collisions with bottom position
+      const hasBottomCollision = occupiedAreas.some(area => {
+        return !(bottomBounds.south > area.bounds.north ||
+                 bottomBounds.north < area.bounds.south ||
+                 bottomBounds.west > area.bounds.east ||
+                 bottomBounds.east < area.bounds.west);
+      });
+
+      // If bottom collides, try top
+      if (hasBottomCollision) {
+        finalPosition = 'top';
+        const topBounds = {
+          north: school.lat! + labelHeight + 0.0001,
+          south: school.lat! + 0.0001,
+          east: school.lng! + labelWidth / 2,
+          west: school.lng! - labelWidth / 2,
+        };
+        occupiedAreas.push({ schoolId: school.id, bounds: topBounds });
+      } else {
+        occupiedAreas.push({ schoolId: school.id, bounds: bottomBounds });
+      }
+
+      positions.set(school.id, finalPosition);
+    });
+
+    setLabelPositions(positions);
+  }, [schools, isLoaded, currentZoom]);
 
   // When a school is selected from search, center map and show details
   useEffect(() => {
@@ -289,7 +353,6 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             if (!school.lat || !school.lng) return null;
 
             const isFavorite = favorites.includes(school.id);
-            const showLabel = currentZoom >= 15;
             
             return (
               <Marker
@@ -299,14 +362,53 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 onClick={() => onMarkerClick(school)}
                 title={school.name}
                 zIndex={isFavorite ? 1000 : 1}
-                label={showLabel ? {
-                  text: school.name,
-                  color: '#3D7C85',
-                  fontSize: '12px',
-                  fontWeight: '400',
-                  className: 'marker-label'
-                } : undefined}
               />
+            );
+          })}
+
+          {/* Custom clickable labels with collision detection */}
+          {isLoaded && currentZoom >= 15 && schools.map((school) => {
+            if (!school.lat || !school.lng) return null;
+
+            const labelPosition = labelPositions.get(school.id) || 'bottom';
+            
+            return (
+              <OverlayView
+                key={`label-${school.id}`}
+                position={{ lat: school.lat, lng: school.lng }}
+                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+              >
+                <div
+                  onClick={() => onMarkerClick(school)}
+                  className="cursor-pointer select-none whitespace-nowrap"
+                  style={{
+                    position: 'absolute',
+                    transform: labelPosition === 'top' 
+                      ? 'translate(-50%, calc(-100% - 16px))' 
+                      : 'translate(-50%, 16px)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    color: '#3D7C85',
+                    border: '1px solid rgba(61, 124, 133, 0.2)',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    transition: 'all 0.2s ease',
+                    zIndex: 100,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(61, 124, 133, 0.1)';
+                    e.currentTarget.style.borderColor = 'rgba(61, 124, 133, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+                    e.currentTarget.style.borderColor = 'rgba(61, 124, 133, 0.2)';
+                  }}
+                >
+                  {school.name}
+                </div>
+              </OverlayView>
             );
           })}
 
