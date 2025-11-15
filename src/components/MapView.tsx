@@ -289,8 +289,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             if (!school.lat || !school.lng) return null;
 
             const isFavorite = favorites.includes(school.id);
-            // Show labels at higher zoom to reduce collision
-            const showLabel = currentZoom >= 17;
+            const showLabel = currentZoom >= 15;
             
             return (
               <Marker
@@ -303,8 +302,8 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 label={showLabel ? {
                   text: school.name,
                   color: '#3D7C85',
-                  fontSize: '13px',
-                  fontWeight: '500',
+                  fontSize: '12px',
+                  fontWeight: '400',
                   className: 'marker-label'
                 } : undefined}
               />
