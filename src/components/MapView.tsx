@@ -116,7 +116,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     
     if (isFavorite) {
       // Star for favorites with color coding and glow effect
-      const starSize = size * 1.3; // Slightly larger than circles
+      const starSize = size * 1.5; // Noticeably larger than circles
       const starCanvasSize = starSize + 24; // Extra space for glow
       const starOffset = 12;
       
@@ -145,7 +145,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
               </filter>
             </defs>
             <g transform="translate(${starOffset}, ${starOffset})" filter="url(#glow)">
-              <path d="${starPath}" fill="${fillColor}" stroke="#fbbf24" stroke-width="2"/>
+              <path d="${starPath}" fill="${fillColor}" stroke="#ffffff" stroke-width="2"/>
             </g>
           </svg>
         `;
@@ -196,7 +196,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             <g transform="translate(${starOffset}, ${starOffset})" filter="url(#glow)">
               <path d="${starPath}" fill="${leftColor}" clip-path="url(#leftHalf)"/>
               <path d="${starPath}" fill="${rightColor}" clip-path="url(#rightHalf)"/>
-              <path d="${starPath}" fill="none" stroke="#fbbf24" stroke-width="2"/>
+              <path d="${starPath}" fill="none" stroke="#ffffff" stroke-width="2"/>
             </g>
           </svg>
         `;
@@ -237,7 +237,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
               <path d="${starPath}" fill="${crecheColor}" clip-path="url(#leftThird)"/>
               <path d="${starPath}" fill="${preColor}" clip-path="url(#centerThird)"/>
               <path d="${starPath}" fill="${fundamentalColor}" clip-path="url(#rightThird)"/>
-              <path d="${starPath}" fill="none" stroke="#fbbf24" stroke-width="2"/>
+              <path d="${starPath}" fill="none" stroke="#ffffff" stroke-width="2"/>
             </g>
           </svg>
         `;
