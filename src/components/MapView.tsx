@@ -116,9 +116,10 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     
     if (isFavorite) {
       // Star for favorites with color coding and glow effect
-      const starSize = size * 1.5; // Noticeably larger than circles
+      const starSize = size * 1.8; // Significantly larger than circles (80% bigger)
       const starCanvasSize = starSize + 24; // Extra space for glow
       const starOffset = 12;
+      const starScale = starSize / 24; // Scale factor to make star actually bigger
       
       // Star path (centered at 12,12 in a 24x24 viewbox, we'll scale it)
       const starPath = "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
@@ -144,8 +145,8 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 </feMerge>
               </filter>
             </defs>
-            <g transform="translate(${starOffset}, ${starOffset})" filter="url(#glow)">
-              <path d="${starPath}" fill="${fillColor}" stroke="#ffffff" stroke-width="2"/>
+            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#glow)">
+              <path d="${starPath}" fill="${fillColor}" stroke="#ffffff" stroke-width="2" vector-effect="non-scaling-stroke"/>
             </g>
           </svg>
         `;
@@ -193,10 +194,10 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 <rect x="12" y="0" width="12" height="24"/>
               </clipPath>
             </defs>
-            <g transform="translate(${starOffset}, ${starOffset})" filter="url(#glow)">
+            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#glow)">
               <path d="${starPath}" fill="${leftColor}" clip-path="url(#leftHalf)"/>
               <path d="${starPath}" fill="${rightColor}" clip-path="url(#rightHalf)"/>
-              <path d="${starPath}" fill="none" stroke="#ffffff" stroke-width="2"/>
+              <path d="${starPath}" fill="none" stroke="#ffffff" stroke-width="2" vector-effect="non-scaling-stroke"/>
             </g>
           </svg>
         `;
@@ -233,11 +234,11 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 <rect x="16" y="0" width="8" height="24"/>
               </clipPath>
             </defs>
-            <g transform="translate(${starOffset}, ${starOffset})" filter="url(#glow)">
+            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#glow)">
               <path d="${starPath}" fill="${crecheColor}" clip-path="url(#leftThird)"/>
               <path d="${starPath}" fill="${preColor}" clip-path="url(#centerThird)"/>
               <path d="${starPath}" fill="${fundamentalColor}" clip-path="url(#rightThird)"/>
-              <path d="${starPath}" fill="none" stroke="#ffffff" stroke-width="2"/>
+              <path d="${starPath}" fill="none" stroke="#ffffff" stroke-width="2" vector-effect="non-scaling-stroke"/>
             </g>
           </svg>
         `;
