@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { School } from "@/types/school";
 import { useState, useRef, useEffect } from "react";
+import { removeAccents } from "@/lib/utils";
 
 interface SearchBarProps {
   value: string;
@@ -18,12 +19,12 @@ export function SearchBar({ value, onChange, schools, onSelectSchool }: SearchBa
   // Filter schools based on search query
   const filteredSchools = value.trim()
     ? schools.filter((school) => {
-        const query = value.toLowerCase();
+        const query = removeAccents(value.toLowerCase());
         return (
-          school.name.toLowerCase().includes(query) ||
-          school.neighborhood.toLowerCase().includes(query) ||
-          school.address.toLowerCase().includes(query) ||
-          (school.outsourced && school.outsourced.toLowerCase().includes(query))
+          removeAccents(school.name.toLowerCase()).includes(query) ||
+          removeAccents(school.neighborhood.toLowerCase()).includes(query) ||
+          removeAccents(school.address.toLowerCase()).includes(query) ||
+          (school.outsourced && removeAccents(school.outsourced.toLowerCase()).includes(query))
         );
       }).slice(0, 8) // Limit to 8 results
     : [];
