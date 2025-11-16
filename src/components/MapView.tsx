@@ -115,17 +115,139 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     const offset = 8; // Center the circle in the larger canvas
     
     if (isFavorite) {
-      // Golden star for favorites - dynamic scale
-      const starScale = 0.8 + (currentZoom * 0.04);
-      return {
-        path: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
-        fillColor: "#fbbf24",
-        fillOpacity: 1,
-        strokeColor: "#d97706",
-        strokeWeight: 1.5,
-        scale: starScale,
-        anchor: new google.maps.Point(12, 12),
-      };
+      // Star for favorites with color coding and glow effect
+      const starSize = size * 1.3; // Slightly larger than circles
+      const starCanvasSize = starSize + 24; // Extra space for glow
+      const starOffset = 12;
+      
+      // Star path (centered at 12,12 in a 24x24 viewbox, we'll scale it)
+      const starPath = "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
+      
+      // Single category - solid fill
+      if (categories === 1) {
+        let fillColor = primaryColor;
+        if (hasCreche) fillColor = crecheColor;
+        else if (hasPre) fillColor = preColor;
+        else if (hasFundamental) fillColor = fundamentalColor;
+        
+        const svg = `
+          <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+                <feComponentTransfer>
+                  <feFuncA type="linear" slope="1.5"/>
+                </feComponentTransfer>
+                <feMerge>
+                  <feMergeNode/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <g transform="translate(${starOffset}, ${starOffset})" filter="url(#glow)">
+              <path d="${starPath}" fill="${fillColor}" stroke="#fbbf24" stroke-width="2"/>
+            </g>
+          </svg>
+        `;
+        
+        return {
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+          scaledSize: new google.maps.Size(starCanvasSize, starCanvasSize),
+          anchor: new google.maps.Point(starCanvasSize / 2, starCanvasSize / 2),
+        };
+      }
+      
+      // Two categories - split fill (left/right)
+      if (categories === 2) {
+        let leftColor = crecheColor;
+        let rightColor = fundamentalColor;
+        
+        if (hasCreche && hasPre) {
+          leftColor = crecheColor;
+          rightColor = preColor;
+        } else if (hasCreche && hasFundamental) {
+          leftColor = crecheColor;
+          rightColor = fundamentalColor;
+        } else if (hasPre && hasFundamental) {
+          leftColor = preColor;
+          rightColor = fundamentalColor;
+        }
+        
+        const svg = `
+          <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+                <feComponentTransfer>
+                  <feFuncA type="linear" slope="1.5"/>
+                </feComponentTransfer>
+                <feMerge>
+                  <feMergeNode/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <clipPath id="leftHalf">
+                <rect x="0" y="0" width="12" height="24"/>
+              </clipPath>
+              <clipPath id="rightHalf">
+                <rect x="12" y="0" width="12" height="24"/>
+              </clipPath>
+            </defs>
+            <g transform="translate(${starOffset}, ${starOffset})" filter="url(#glow)">
+              <path d="${starPath}" fill="${leftColor}" clip-path="url(#leftHalf)"/>
+              <path d="${starPath}" fill="${rightColor}" clip-path="url(#rightHalf)"/>
+              <path d="${starPath}" fill="none" stroke="#fbbf24" stroke-width="2"/>
+            </g>
+          </svg>
+        `;
+        
+        return {
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+          scaledSize: new google.maps.Size(starCanvasSize, starCanvasSize),
+          anchor: new google.maps.Point(starCanvasSize / 2, starCanvasSize / 2),
+        };
+      }
+      
+      // Three categories - tri-split fill (left/center/right)
+      if (categories === 3) {
+        const svg = `
+          <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+                <feComponentTransfer>
+                  <feFuncA type="linear" slope="1.5"/>
+                </feComponentTransfer>
+                <feMerge>
+                  <feMergeNode/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <clipPath id="leftThird">
+                <rect x="0" y="0" width="8" height="24"/>
+              </clipPath>
+              <clipPath id="centerThird">
+                <rect x="8" y="0" width="8" height="24"/>
+              </clipPath>
+              <clipPath id="rightThird">
+                <rect x="16" y="0" width="8" height="24"/>
+              </clipPath>
+            </defs>
+            <g transform="translate(${starOffset}, ${starOffset})" filter="url(#glow)">
+              <path d="${starPath}" fill="${crecheColor}" clip-path="url(#leftThird)"/>
+              <path d="${starPath}" fill="${preColor}" clip-path="url(#centerThird)"/>
+              <path d="${starPath}" fill="${fundamentalColor}" clip-path="url(#rightThird)"/>
+              <path d="${starPath}" fill="none" stroke="#fbbf24" stroke-width="2"/>
+            </g>
+          </svg>
+        `;
+        
+        return {
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+          scaledSize: new google.maps.Size(starCanvasSize, starCanvasSize),
+          anchor: new google.maps.Point(starCanvasSize / 2, starCanvasSize / 2),
+        };
+      }
     }
     
     // Single category - solid color circle
