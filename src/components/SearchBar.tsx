@@ -53,37 +53,37 @@ export function SearchBar({ value, onChange, schools, onSelectSchool }: SearchBa
   };
 
   return (
-    <div className="sticky top-[120px] z-40 px-4 py-3 bg-background/95 backdrop-blur-sm border-b border-border">
-      <div className="relative" ref={dropdownRef}>
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+    <div className="relative w-full" ref={dropdownRef}>
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
         <Input
           type="text"
           placeholder="Buscar escola por nome, endereço ou bairro..."
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="pl-10 bg-card border-border focus-visible:ring-primary"
+          className="pl-12 pr-4 h-12 bg-white border-0 rounded-full shadow-lg focus-visible:ring-2 focus-visible:ring-primary text-foreground"
         />
-        
-        {/* Dropdown */}
-        {isOpen && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg max-h-[60vh] overflow-y-auto z-50">
-            {filteredSchools.map((school) => (
-              <button
-                key={school.id}
-                onClick={() => handleSelectSchool(school)}
-                className="w-full px-4 py-3 flex items-center justify-between gap-3 hover:bg-muted transition-colors text-left border-b border-border last:border-0"
-              >
-                <span className="text-sm font-medium text-foreground truncate flex-1 min-w-0">
-                  {school.type} {school.name}
-                </span>
-                <Badge variant="outline" className="text-xs shrink-0">
-                  {school.neighborhood}
-                </Badge>
-              </button>
-            ))}
-          </div>
-        )}
       </div>
+      
+      {/* Dropdown */}
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border rounded-2xl shadow-xl max-h-[60vh] overflow-y-auto z-50">
+          {filteredSchools.map((school) => (
+            <button
+              key={school.id}
+              onClick={() => handleSelectSchool(school)}
+              className="w-full px-4 py-3 flex items-center justify-between gap-3 hover:bg-muted transition-colors text-left border-b border-border last:border-0"
+            >
+              <span className="text-sm font-medium text-foreground truncate flex-1 min-w-0">
+                {school.type} {school.name}
+              </span>
+              <Badge variant="outline" className="text-xs shrink-0">
+                {school.neighborhood}
+              </Badge>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

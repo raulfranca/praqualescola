@@ -133,3 +133,13 @@ All colors MUST be HSL.
   border-radius: 4px !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
 }
+
+/* Hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
