@@ -19,7 +19,7 @@ const Feedback = () => {
   }, []);
 
   return (
-    <div className="relative w-full h-screen bg-background">
+    <div className="relative w-full h-screen bg-background pb-16">
       {/* Close Button */}
       <Button
         onClick={() => navigate("/")}
