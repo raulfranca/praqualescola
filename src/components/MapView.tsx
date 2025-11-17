@@ -25,11 +25,13 @@ const mapContainerStyle = {
 };
 
 const mapOptions = {
-  disableDefaultUI: false,
-  zoomControl: true,
+  disableDefaultUI: true,
+  zoomControl: false,
   streetViewControl: false,
   mapTypeControl: false,
   fullscreenControl: false,
+  keyboardShortcuts: false,
+  clickableIcons: false,
   gestureHandling: 'greedy',
   styles: [
     {
