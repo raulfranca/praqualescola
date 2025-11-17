@@ -1,9 +1,6 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
 import { SearchBar } from "@/components/SearchBar";
 import { MapView } from "@/components/MapView";
-import { PrioritiesList } from "@/components/PrioritiesList";
 import { HomeLocationInput } from "@/components/HomeLocationInput";
 import { SchoolDetailModal } from "@/components/SchoolDetailModal";
 import { useSchoolsData } from "@/hooks/useSchoolsData";
@@ -14,13 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Home, X } from "lucide-react";
 
 const Index = () => {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"map" | "priorities">("map");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
   const [showHomeInput, setShowHomeInput] = useState(false);
   const { schools, loading } = useSchoolsData();
-  const { favorites, toggleFavorite, reorderFavorites } = useFavorites();
+  const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
 
   const filteredSchools = useMemo(() => {
@@ -40,8 +35,14 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background overflow-hidden">
-      <Header activeTab={activeTab} onTabChange={setActiveTab} />
+    <div className="flex flex-col h-screen bg-background overflow-hidden pb-16">
+      <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
+        <div className="px-4 py-3">
+          <h1 className="text-lg font-semibold text-center text-foreground">
+            Pra Qual Escola Eu Vou?
+          </h1>
+        </div>
+      </header>
 
       {loading && (
         <div className="flex items-center justify-center flex-1">
@@ -52,7 +53,7 @@ const Index = () => {
         </div>
       )}
 
-      {!loading && activeTab === "map" && (
+      {!loading && (
         <>
           <div className="bg-background border-b border-border">
             <div className="px-4 py-3 flex items-center gap-2">
@@ -102,17 +103,6 @@ const Index = () => {
               onSchoolViewed={() => setSelectedSchool(null)}
               homeLocation={homeLocation}
             />
-            
-            {/* Feedback Button */}
-            <div className="fixed bottom-4 left-4 right-4 z-10 flex justify-center">
-              <Button
-                onClick={() => navigate("/feedback")}
-                className="shadow-lg"
-                size="lg"
-              >
-                Sugerir uma correção ou ideia
-              </Button>
-            </div>
           </div>
         </>
       )}
@@ -124,17 +114,6 @@ const Index = () => {
             setShowHomeInput(false);
           }}
           onClose={() => setShowHomeInput(false)}
-        />
-      )}
-
-      {!loading && activeTab === "priorities" && (
-        <PrioritiesList
-          schools={schools}
-          favorites={favorites}
-          onReorder={reorderFavorites}
-          onRemoveFavorite={toggleFavorite}
-          homeLocation={homeLocation}
-          onSchoolClick={setSelectedSchool}
         />
       )}
 
