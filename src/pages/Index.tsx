@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { SearchBar } from "@/components/SearchBar";
+import { ActionChips } from "@/components/ActionChips";
 import { MapView } from "@/components/MapView";
 import { HomeLocationInput } from "@/components/HomeLocationInput";
 import { SchoolDetailModal } from "@/components/SchoolDetailModal";
@@ -7,8 +8,6 @@ import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
 import { School } from "@/types/school";
-import { Button } from "@/components/ui/button";
-import { Home, X } from "lucide-react";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -34,16 +33,12 @@ const Index = () => {
     setSelectedSchool(school);
   };
 
+  const handleFilterClick = () => {
+    console.log("Filtros clicked - functionality coming soon");
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden pb-16">
-      <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
-        <div className="px-4 py-3">
-          <h1 className="text-lg font-semibold text-center text-foreground">
-            Pra Qual Escola Eu Vou?
-          </h1>
-        </div>
-      </header>
-
       {loading && (
         <div className="flex items-center justify-center flex-1">
           <div className="text-center">
@@ -55,46 +50,24 @@ const Index = () => {
 
       {!loading && (
         <>
-          <div className="bg-background border-b border-border">
-            <div className="px-4 py-3 flex items-center gap-2">
-              {!hasHome ? (
-                <Button
-                  onClick={() => setShowHomeInput(true)}
-                  variant="default"
-                  size="sm"
-                  className="gap-2 w-full"
-                >
-                  <Home className="w-4 h-4" />
-                  Definir Minha Casa
-                </Button>
-              ) : (
-                <div className="flex items-center gap-2 w-full">
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-sm flex-1 min-w-0">
-                    <Home className="w-4 h-4 shrink-0" />
-                    <span className="truncate">
-                      {homeLocation.address.split('-')[0].trim()}
-                    </span>
-                  </div>
-                  <Button
-                    onClick={clearHome}
-                    variant="ghost"
-                    size="sm"
-                    className="shrink-0"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
+          {/* Floating Search Bar and Action Chips */}
+          <div className="absolute top-4 left-4 right-4 z-50 space-y-3">
+            <SearchBar 
+              value={searchQuery} 
+              onChange={setSearchQuery}
+              schools={schools}
+              onSelectSchool={handleSelectSchool}
+            />
+            <ActionChips
+              hasHome={hasHome}
+              homeAddress={homeLocation?.address}
+              onHomeClick={() => setShowHomeInput(true)}
+              onFilterClick={handleFilterClick}
+            />
           </div>
-          
-          <SearchBar 
-            value={searchQuery} 
-            onChange={setSearchQuery}
-            schools={schools}
-            onSelectSchool={handleSelectSchool}
-          />
-          <div className="relative flex-1">
+
+          {/* Map View - Full Screen */}
+          <div className="relative flex-1 w-full h-full">
             <MapView
               schools={filteredSchools}
               favorites={favorites}
@@ -121,7 +94,7 @@ const Index = () => {
         <SchoolDetailModal
           school={selectedSchool}
           isFavorite={favorites.includes(selectedSchool.id)}
-          onToggleFavorite={toggleFavorite}
+          onToggleFavorite={() => toggleFavorite(selectedSchool.id)}
           onClose={() => setSelectedSchool(null)}
           homeLocation={homeLocation}
         />
