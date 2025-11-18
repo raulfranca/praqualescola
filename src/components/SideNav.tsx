@@ -2,7 +2,7 @@ import { MapIcon, Star, MessageSquare } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-export function BottomNav() {
+export function SideNav() {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -28,21 +28,21 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border shadow-lg md:hidden">
-      <div className="flex justify-around items-center h-16 px-2">
+    <nav className="fixed left-0 top-0 h-screen w-20 z-50 bg-card border-r border-border shadow-lg hidden md:flex flex-col">
+      <div className="flex flex-col items-center justify-start gap-2 py-4">
         {items.map((item) => (
           <button
             key={item.path}
             onClick={() => navigate(item.path)}
             className={cn(
-              "flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-lg transition-colors min-w-[70px]",
+              "flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-lg transition-colors w-16",
               item.isActive
                 ? "text-primary"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
             <item.icon className={cn("w-6 h-6", item.isActive && "fill-primary/20")} />
-            <span className="text-[10px] font-medium">{item.label}</span>
+            <span className="text-[10px] font-medium text-center">{item.label}</span>
           </button>
         ))}
       </div>
