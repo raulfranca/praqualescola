@@ -38,7 +38,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background overflow-hidden pb-16 md:pb-0 md:ml-20">
+    <div className="flex flex-col h-screen bg-background overflow-hidden pb-16 md:pb-0 md:ml-16">
       {loading && (
         <div className="flex items-center justify-center flex-1">
           <div className="text-center">
@@ -51,7 +51,7 @@ const Index = () => {
       {!loading && (
         <>
           {/* Floating Search Bar and Action Chips */}
-          <div className="absolute top-4 left-4 right-4 z-50 flex flex-col md:flex-row gap-3 md:items-start">
+          <div className="absolute top-4 left-4 right-4 md:left-20 z-50 flex flex-col md:flex-row gap-3 md:items-start">
             <SearchBar
               value={searchQuery} 
               onChange={setSearchQuery}

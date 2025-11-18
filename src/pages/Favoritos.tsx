@@ -13,7 +13,7 @@ const Favoritos = () => {
   const { homeLocation } = useHomeLocation();
 
   return (
-    <div className="flex flex-col h-screen bg-background overflow-hidden pb-16 md:pb-0 md:ml-20">
+    <div className="flex flex-col h-screen bg-background overflow-hidden pb-16 md:pb-0 md:ml-16">
       <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
         <div className="px-4 py-3">
           <h1 className="text-lg font-semibold text-center text-foreground">
