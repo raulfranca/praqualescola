@@ -28,14 +28,14 @@ export function SideNav() {
   ];
 
   return (
-    <nav className="fixed left-0 top-0 h-screen w-20 z-50 bg-card border-r border-border shadow-lg hidden md:flex flex-col">
+    <nav className="fixed left-0 top-0 h-screen w-16 z-50 bg-card border-r border-border shadow-lg hidden md:flex flex-col">
       <div className="flex flex-col items-center justify-start gap-2 py-4">
         {items.map((item) => (
           <button
             key={item.path}
             onClick={() => navigate(item.path)}
             className={cn(
-              "flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-lg transition-colors w-16",
+              "flex flex-col items-center justify-center gap-1 px-2 py-3 rounded-lg transition-colors w-12",
               item.isActive
                 ? "text-primary"
                 : "text-muted-foreground hover:text-foreground"
