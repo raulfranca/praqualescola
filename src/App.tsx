@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { BottomNav } from "@/components/BottomNav";
+import { SideNav } from "@/components/SideNav";
 import Index from "./pages/Index";
 import Favoritos from "./pages/Favoritos";
 import Feedback from "./pages/Feedback";
@@ -20,6 +21,7 @@ const App = () => (
       <Sonner />
       <UpdatePrompt />
       <BrowserRouter>
+        <SideNav />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/favoritos" element={<Favoritos />} />
