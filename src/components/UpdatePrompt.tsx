@@ -8,7 +8,7 @@ export function UpdatePrompt() {
   if (!showUpdatePrompt) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:max-w-md">
+    <div className="fixed bottom-20 left-4 right-4 z-50 md:bottom-4 md:left-auto md:right-4 md:max-w-md">
       <div className="bg-primary text-primary-foreground rounded-lg shadow-lg p-4 flex items-center gap-3 animate-in slide-in-from-bottom-5">
         <RefreshCw className="w-5 h-5 flex-shrink-0" />
         
