@@ -16,7 +16,7 @@ export function ActionChips({
   onFilterClick 
 }: ActionChipsProps) {
   return (
-    <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar">
+    <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar py-2">
       <Button
         onClick={onHomeClick}
         size="sm"
