@@ -1,13 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { GoogleMap, Marker } from "@react-google-maps/api";
 import { School } from "@/types/school";
 import { HomeLocation } from "@/hooks/useHomeLocation";
-
-// Google Maps API Key
-const GOOGLE_MAPS_API_KEY = "AIzaSyAB6PNWQ6m8gkTSRXKfXtfvBthU50sljA8";
-
-// Libraries array outside component to prevent unnecessary reloads
-const GOOGLE_MAPS_LIBRARIES: ("places")[] = ["places"];
 
 interface MapViewProps {
   schools: School[];
@@ -55,9 +49,16 @@ const mapOptions = {
 };
 
 export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolClick, shouldCenterMap, homeLocation }: MapViewProps) {
-  const [isLoaded, setIsLoaded] = useState(false);
   const [currentZoom, setCurrentZoom] = useState(13);
   const mapRef = useRef<google.maps.Map | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Check if Google Maps is loaded
+  useEffect(() => {
+    if (window.google?.maps) {
+      setIsLoaded(true);
+    }
+  }, []);
 
   const onMarkerClick = useCallback((school: School) => {
     onSchoolClick(school);
@@ -376,29 +377,24 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
   };
 
   return (
-    <>
-      <LoadScript 
-        googleMapsApiKey={GOOGLE_MAPS_API_KEY}
-        onLoad={() => setIsLoaded(true)}
-        libraries={GOOGLE_MAPS_LIBRARIES}
-      >
-        <GoogleMap
-          mapContainerStyle={mapContainerStyle}
-          center={DEFAULT_CENTER}
-          zoom={13}
-          options={mapOptions}
-          onLoad={(map) => {
-            mapRef.current = map;
-          }}
-          onZoomChanged={() => {
-            if (mapRef.current) {
-              const zoom = mapRef.current.getZoom();
-              if (zoom !== undefined) {
-                setCurrentZoom(zoom);
-              }
-            }
-          }}
-        >
+    <GoogleMap
+      mapContainerStyle={mapContainerStyle}
+      center={DEFAULT_CENTER}
+      zoom={13}
+      options={mapOptions}
+      onLoad={(map) => {
+        mapRef.current = map;
+        setIsLoaded(true);
+      }}
+      onZoomChanged={() => {
+        if (mapRef.current) {
+          const zoom = mapRef.current.getZoom();
+          if (zoom !== undefined) {
+            setCurrentZoom(zoom);
+          }
+        }
+      }}
+    >
           {isLoaded && schools.map((school) => {
             if (!school.lat || !school.lng) return null;
 
@@ -467,10 +463,8 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
               }}
               title="🏠 Minha Casa"
               zIndex={2000}
-            />
-          )}
-        </GoogleMap>
-      </LoadScript>
-    </>
+        />
+      )}
+    </GoogleMap>
   );
 }
