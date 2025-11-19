@@ -18,7 +18,13 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Sonner position="bottom-right" />
+      <Sonner 
+        position="bottom-center" 
+        className="mb-20 md:mb-4"
+        toastOptions={{
+          className: "w-full max-w-[calc(100vw-2rem)]",
+        }}
+      />
       <UpdatePrompt />
       <BrowserRouter>
         <SideNav />
