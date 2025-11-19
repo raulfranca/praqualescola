@@ -81,7 +81,7 @@ export function HomeLocationInput({ onLocationSelected, onClose, homeLocation, o
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-card rounded-xl shadow-xl animate-in zoom-in-95 duration-300 mb-4"
+        className="w-full max-w-md h-auto min-h-[280px] bg-card rounded-xl shadow-xl animate-in zoom-in-95 duration-300 mb-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
@@ -115,22 +115,26 @@ export function HomeLocationInput({ onLocationSelected, onClose, homeLocation, o
             onChange={(e) => setInputValue(e.target.value)}
           />
 
-          {!isLoaded && (
-            <p className="text-xs text-muted-foreground">
-              Carregando busca de endereços...
-            </p>
-          )}
+          <div className="min-h-[20px]">
+            {!isLoaded && (
+              <p className="text-xs text-muted-foreground">
+                Carregando busca de endereços...
+              </p>
+            )}
+          </div>
 
-          {homeLocation && (
-            <Button
-              variant="destructive"
-              onClick={handleClearLocation}
-              className="w-full"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Remover endereço
-            </Button>
-          )}
+          <div className="min-h-[40px]">
+            {homeLocation && (
+              <Button
+                variant="destructive"
+                onClick={handleClearLocation}
+                className="w-full"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Remover endereço
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
