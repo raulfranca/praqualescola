@@ -402,6 +402,19 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             const isFavorite = favorites.includes(school.id);
             const showLabel = currentZoom >= 15;
             
+            // Calculate zIndex based on latitude (lower lat = more south = higher zIndex)
+            // This ensures markers visually "in front" (lower on screen) are clickable over ones "behind"
+            const latitudeZIndex = Math.round((90 + school.lat) * 1000);
+            const finalZIndex = isFavorite ? latitudeZIndex + 100000 : latitudeZIndex;
+            
+            // Dynamic size calculation matching createMarkerIcon logic
+            const baseSize = currentZoom < 16 ? 
+              Math.max(18, 10 + (currentZoom * 0.8)) : 
+              Math.max(24, 14 + (currentZoom * 1.5));
+            const markerSize = isFavorite ? baseSize * 1.8 : baseSize;
+            const clickRadius = (markerSize / 2) + 4; // Add small safety margin
+            const centerOffset = (markerSize + 16) / 2; // Match canvas offset from createMarkerIcon
+            
             return (
               <Marker
                 key={school.id}
@@ -409,7 +422,14 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 icon={createMarkerIcon(school, isFavorite)}
                 onClick={() => onMarkerClick(school)}
                 title={school.name}
-                zIndex={isFavorite ? 1000 : 1}
+                zIndex={finalZIndex}
+                options={{
+                  optimized: true,
+                }}
+                shape={{
+                  coords: [centerOffset, centerOffset, clickRadius],
+                  type: 'circle'
+                }}
                 label={showLabel ? {
                   text: school.name,
                   color: '#3D7C85',
