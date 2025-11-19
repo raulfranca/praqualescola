@@ -128,7 +128,7 @@ export function HomeLocationInput({ onLocationSelected, onClose, homeLocation, o
               className="w-full"
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              Apagar endereço
+              Remover endereço
             </Button>
           )}
         </div>
