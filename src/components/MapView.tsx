@@ -6,6 +6,9 @@ import { HomeLocation } from "@/hooks/useHomeLocation";
 // Google Maps API Key
 const GOOGLE_MAPS_API_KEY = "AIzaSyAB6PNWQ6m8gkTSRXKfXtfvBthU50sljA8";
 
+// Libraries array outside component to prevent unnecessary reloads
+const GOOGLE_MAPS_LIBRARIES: ("places")[] = ["places"];
+
 interface MapViewProps {
   schools: School[];
   favorites: number[];
@@ -377,7 +380,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       <LoadScript 
         googleMapsApiKey={GOOGLE_MAPS_API_KEY}
         onLoad={() => setIsLoaded(true)}
-        libraries={["places"]}
+        libraries={GOOGLE_MAPS_LIBRARIES}
       >
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
