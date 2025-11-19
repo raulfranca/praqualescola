@@ -1,18 +1,15 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { GoogleMap, Marker } from "@react-google-maps/api";
 import { School } from "@/types/school";
-import { SchoolDetailModal } from "./SchoolDetailModal";
 import { HomeLocation } from "@/hooks/useHomeLocation";
-
-// Google Maps API Key
-const GOOGLE_MAPS_API_KEY = "AIzaSyAB6PNWQ6m8gkTSRXKfXtfvBthU50sljA8";
 
 interface MapViewProps {
   schools: School[];
   favorites: number[];
   onToggleFavorite: (schoolId: number) => void;
   selectedSchool: School | null;
-  onSchoolViewed: () => void;
+  onSchoolClick: (school: School) => void;
+  shouldCenterMap: boolean;
   homeLocation: HomeLocation | null;
 }
 
@@ -25,11 +22,14 @@ const mapContainerStyle = {
 };
 
 const mapOptions = {
-  disableDefaultUI: false,
-  zoomControl: true,
+  disableDefaultUI: true,
+  zoomControl: false,
   streetViewControl: false,
   mapTypeControl: false,
   fullscreenControl: false,
+  keyboardShortcuts: false,
+  clickableIcons: false,
+  gestureHandling: 'greedy',
   styles: [
     {
       featureType: "poi",
@@ -48,36 +48,29 @@ const mapOptions = {
   ],
 };
 
-export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolViewed, homeLocation }: MapViewProps) {
-  const [clickedSchool, setClickedSchool] = useState<School | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolClick, shouldCenterMap, homeLocation }: MapViewProps) {
   const [currentZoom, setCurrentZoom] = useState(13);
   const mapRef = useRef<google.maps.Map | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const displayedSchool = selectedSchool || clickedSchool;
-
-  const onMarkerClick = useCallback((school: School) => {
-    try {
-      setClickedSchool(school);
-    } catch (error) {
-      console.error("Error setting clicked school:", error);
+  // Check if Google Maps is loaded
+  useEffect(() => {
+    if (window.google?.maps) {
+      setIsLoaded(true);
     }
   }, []);
 
-  // When a school is selected from search, center map and show details
+  const onMarkerClick = useCallback((school: School) => {
+    onSchoolClick(school);
+  }, [onSchoolClick]);
+
+  // Only center map when shouldCenterMap is true (from search bar)
   useEffect(() => {
-    if (selectedSchool && mapRef.current) {
+    if (selectedSchool && shouldCenterMap && mapRef.current) {
       mapRef.current.panTo({ lat: selectedSchool.lat, lng: selectedSchool.lng });
       mapRef.current.setZoom(16);
     }
-  }, [selectedSchool]);
-
-  const handleCloseModal = () => {
-    setClickedSchool(null);
-    if (selectedSchool) {
-      onSchoolViewed();
-    }
-  };
+  }, [selectedSchool, shouldCenterMap]);
 
   // Determine school category
   const getSchoolCategory = (school: School) => {
@@ -114,17 +107,140 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     const offset = 8; // Center the circle in the larger canvas
     
     if (isFavorite) {
-      // Golden star for favorites - dynamic scale
-      const starScale = 0.8 + (currentZoom * 0.04);
-      return {
-        path: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
-        fillColor: "#fbbf24",
-        fillOpacity: 1,
-        strokeColor: "#d97706",
-        strokeWeight: 1.5,
-        scale: starScale,
-        anchor: new google.maps.Point(12, 12),
-      };
+      // Star for favorites with color coding and glow effect
+      const starSize = size * 1.8; // Significantly larger than circles (80% bigger)
+      const starCanvasSize = starSize + 24; // Extra space for glow
+      const starOffset = 12;
+      const starScale = starSize / 24; // Scale factor to make star actually bigger
+      
+      // Star path (centered at 12,12 in a 24x24 viewbox, we'll scale it)
+      const starPath = "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
+      
+      // Single category - solid fill
+      if (categories === 1) {
+        let fillColor = primaryColor;
+        if (hasCreche) fillColor = crecheColor;
+        else if (hasPre) fillColor = preColor;
+        else if (hasFundamental) fillColor = fundamentalColor;
+        
+        const svg = `
+          <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+                <feComponentTransfer>
+                  <feFuncA type="linear" slope="1.5"/>
+                </feComponentTransfer>
+                <feMerge>
+                  <feMergeNode/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#glow)">
+              <path d="${starPath}" fill="${fillColor}" stroke="#ffffff" stroke-width="2" vector-effect="non-scaling-stroke"/>
+            </g>
+          </svg>
+        `;
+        
+        return {
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+          scaledSize: new google.maps.Size(starCanvasSize, starCanvasSize),
+          anchor: new google.maps.Point(starCanvasSize / 2, starCanvasSize / 2),
+        };
+      }
+      
+      // Two categories - split fill (left/right)
+      if (categories === 2) {
+        let leftColor = crecheColor;
+        let rightColor = fundamentalColor;
+        
+        if (hasCreche && hasPre) {
+          leftColor = crecheColor;
+          rightColor = preColor;
+        } else if (hasCreche && hasFundamental) {
+          leftColor = crecheColor;
+          rightColor = fundamentalColor;
+        } else if (hasPre && hasFundamental) {
+          leftColor = preColor;
+          rightColor = fundamentalColor;
+        }
+        
+        const svg = `
+          <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+                <feComponentTransfer>
+                  <feFuncA type="linear" slope="1.5"/>
+                </feComponentTransfer>
+                <feMerge>
+                  <feMergeNode/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <clipPath id="leftHalf">
+                <rect x="0" y="0" width="12" height="24"/>
+              </clipPath>
+              <clipPath id="rightHalf">
+                <rect x="12" y="0" width="12" height="24"/>
+              </clipPath>
+            </defs>
+            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#glow)">
+              <path d="${starPath}" fill="${leftColor}" clip-path="url(#leftHalf)"/>
+              <path d="${starPath}" fill="${rightColor}" clip-path="url(#rightHalf)"/>
+              <path d="${starPath}" fill="none" stroke="#ffffff" stroke-width="2" vector-effect="non-scaling-stroke"/>
+            </g>
+          </svg>
+        `;
+        
+        return {
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+          scaledSize: new google.maps.Size(starCanvasSize, starCanvasSize),
+          anchor: new google.maps.Point(starCanvasSize / 2, starCanvasSize / 2),
+        };
+      }
+      
+      // Three categories - tri-split fill (left/center/right)
+      if (categories === 3) {
+        const svg = `
+          <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+                <feComponentTransfer>
+                  <feFuncA type="linear" slope="1.5"/>
+                </feComponentTransfer>
+                <feMerge>
+                  <feMergeNode/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <clipPath id="leftThird">
+                <rect x="0" y="0" width="8" height="24"/>
+              </clipPath>
+              <clipPath id="centerThird">
+                <rect x="8" y="0" width="8" height="24"/>
+              </clipPath>
+              <clipPath id="rightThird">
+                <rect x="16" y="0" width="8" height="24"/>
+              </clipPath>
+            </defs>
+            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#glow)">
+              <path d="${starPath}" fill="${crecheColor}" clip-path="url(#leftThird)"/>
+              <path d="${starPath}" fill="${preColor}" clip-path="url(#centerThird)"/>
+              <path d="${starPath}" fill="${fundamentalColor}" clip-path="url(#rightThird)"/>
+              <path d="${starPath}" fill="none" stroke="#ffffff" stroke-width="2" vector-effect="non-scaling-stroke"/>
+            </g>
+          </svg>
+        `;
+        
+        return {
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+          scaledSize: new google.maps.Size(starCanvasSize, starCanvasSize),
+          anchor: new google.maps.Point(starCanvasSize / 2, starCanvasSize / 2),
+        };
+      }
     }
     
     // Single category - solid color circle
@@ -261,34 +377,42 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
   };
 
   return (
-    <>
-      <LoadScript 
-        googleMapsApiKey={GOOGLE_MAPS_API_KEY}
-        onLoad={() => setIsLoaded(true)}
-        libraries={["places"]}
-      >
-        <GoogleMap
-          mapContainerStyle={mapContainerStyle}
-          center={DEFAULT_CENTER}
-          zoom={13}
-          options={mapOptions}
-          onLoad={(map) => {
-            mapRef.current = map;
-          }}
-          onZoomChanged={() => {
-            if (mapRef.current) {
-              const zoom = mapRef.current.getZoom();
-              if (zoom !== undefined) {
-                setCurrentZoom(zoom);
-              }
-            }
-          }}
-        >
+    <GoogleMap
+      mapContainerStyle={mapContainerStyle}
+      center={DEFAULT_CENTER}
+      zoom={13}
+      options={mapOptions}
+      onLoad={(map) => {
+        mapRef.current = map;
+        setIsLoaded(true);
+      }}
+      onZoomChanged={() => {
+        if (mapRef.current) {
+          const zoom = mapRef.current.getZoom();
+          if (zoom !== undefined) {
+            setCurrentZoom(zoom);
+          }
+        }
+      }}
+    >
           {isLoaded && schools.map((school) => {
             if (!school.lat || !school.lng) return null;
 
             const isFavorite = favorites.includes(school.id);
             const showLabel = currentZoom >= 15;
+            
+            // Calculate zIndex based on latitude (lower lat = more south = higher zIndex)
+            // This ensures markers visually "in front" (lower on screen) are clickable over ones "behind"
+            const latitudeZIndex = Math.round((90 + school.lat) * 1000);
+            const finalZIndex = isFavorite ? latitudeZIndex + 100000 : latitudeZIndex;
+            
+            // Dynamic size calculation matching createMarkerIcon logic
+            const baseSize = currentZoom < 16 ? 
+              Math.max(18, 10 + (currentZoom * 0.8)) : 
+              Math.max(24, 14 + (currentZoom * 1.5));
+            const markerSize = isFavorite ? baseSize * 1.8 : baseSize;
+            const clickRadius = (markerSize / 2) + 4; // Add small safety margin
+            const centerOffset = (markerSize + 16) / 2; // Match canvas offset from createMarkerIcon
             
             return (
               <Marker
@@ -297,7 +421,14 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 icon={createMarkerIcon(school, isFavorite)}
                 onClick={() => onMarkerClick(school)}
                 title={school.name}
-                zIndex={isFavorite ? 1000 : 1}
+                zIndex={finalZIndex}
+                options={{
+                  optimized: true,
+                }}
+                shape={{
+                  coords: [centerOffset, centerOffset, clickRadius],
+                  type: 'circle'
+                }}
                 label={showLabel ? {
                   text: school.name,
                   color: '#3D7C85',
@@ -332,20 +463,8 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
               }}
               title="🏠 Minha Casa"
               zIndex={2000}
-            />
-          )}
-        </GoogleMap>
-      </LoadScript>
-
-      {displayedSchool && (
-        <SchoolDetailModal
-          school={displayedSchool}
-          isFavorite={favorites.includes(displayedSchool.id)}
-          onToggleFavorite={onToggleFavorite}
-          onClose={handleCloseModal}
-          homeLocation={homeLocation}
         />
       )}
-    </>
+    </GoogleMap>
   );
 }

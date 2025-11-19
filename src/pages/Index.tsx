@@ -1,26 +1,21 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
 import { SearchBar } from "@/components/SearchBar";
+import { ActionChips } from "@/components/ActionChips";
 import { MapView } from "@/components/MapView";
-import { PrioritiesList } from "@/components/PrioritiesList";
 import { HomeLocationInput } from "@/components/HomeLocationInput";
 import { SchoolDetailModal } from "@/components/SchoolDetailModal";
 import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
 import { School } from "@/types/school";
-import { Button } from "@/components/ui/button";
-import { Home, X } from "lucide-react";
 
 const Index = () => {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"map" | "priorities">("map");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
+  const [shouldCenterMap, setShouldCenterMap] = useState(false);
   const [showHomeInput, setShowHomeInput] = useState(false);
   const { schools, loading } = useSchoolsData();
-  const { favorites, toggleFavorite, reorderFavorites } = useFavorites();
+  const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
 
   const filteredSchools = useMemo(() => {
@@ -35,14 +30,24 @@ const Index = () => {
     );
   }, [searchQuery, schools]);
 
+  // When selecting from search bar - should center map
   const handleSelectSchool = (school: School) => {
     setSelectedSchool(school);
+    setShouldCenterMap(true);
+  };
+
+  // When clicking on map marker - should NOT center map
+  const handleSchoolClickOnMap = (school: School) => {
+    setSelectedSchool(school);
+    setShouldCenterMap(false);
+  };
+
+  const handleFilterClick = () => {
+    console.log("Filtros clicked - functionality coming soon");
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      <Header activeTab={activeTab} onTabChange={setActiveTab} />
-
+    <div className="flex flex-col h-screen bg-background overflow-hidden pb-16 md:pb-0 md:ml-16">
       {loading && (
         <div className="flex items-center justify-center flex-1">
           <div className="text-center">
@@ -52,71 +57,40 @@ const Index = () => {
         </div>
       )}
 
-      {!loading && activeTab === "map" && (
+      {!loading && (
         <>
-          <div className="bg-background border-b border-border">
-            <div className="px-4 py-3 flex items-center gap-2">
-              {!hasHome ? (
-                <Button
-                  onClick={() => setShowHomeInput(true)}
-                  variant="default"
-                  size="sm"
-                  className="gap-2 w-full"
-                >
-                  <Home className="w-4 h-4" />
-                  Definir Minha Casa
-                </Button>
-              ) : (
-                <div className="flex items-center gap-2 w-full">
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-sm flex-1 min-w-0">
-                    <Home className="w-4 h-4 shrink-0" />
-                    <span className="truncate">
-                      {homeLocation.address.split('-')[0].trim()}
-                    </span>
-                  </div>
-                  <Button
-                    onClick={clearHome}
-                    variant="ghost"
-                    size="sm"
-                    className="shrink-0"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
+          {/* Floating Search Bar and Action Chips */}
+          <div className="absolute top-4 left-4 right-4 md:left-20 z-50 flex flex-col md:flex-row gap-3 md:items-start">
+            <SearchBar
+              value={searchQuery} 
+              onChange={setSearchQuery}
+              schools={schools}
+              onSelectSchool={handleSelectSchool}
+            />
+            <ActionChips
+              hasHome={hasHome}
+              homeAddress={homeLocation?.address}
+              onHomeClick={() => setShowHomeInput(true)}
+              onFilterClick={handleFilterClick}
+            />
           </div>
-          
-          <SearchBar 
-            value={searchQuery} 
-            onChange={setSearchQuery}
-            schools={schools}
-            onSelectSchool={handleSelectSchool}
-          />
-          <div className="relative flex-1">
+
+          {/* Map View - Full Screen */}
+          <div className="relative flex-1 w-full h-full">
             <MapView
               schools={filteredSchools}
               favorites={favorites}
               onToggleFavorite={toggleFavorite}
               selectedSchool={selectedSchool}
-              onSchoolViewed={() => setSelectedSchool(null)}
+              onSchoolClick={handleSchoolClickOnMap}
+              shouldCenterMap={shouldCenterMap}
               homeLocation={homeLocation}
             />
-            
-            {/* Feedback Button */}
-            <div className="fixed bottom-4 left-4 right-4 z-10">
-              <Button
-                onClick={() => navigate("/feedback")}
-                className="w-full shadow-lg"
-                size="lg"
-              >
-                Sugerir uma correção ou ideia
-              </Button>
-            </div>
           </div>
         </>
       )}
 
+      {/* Home Location Input - Always mounted, controlled by showHomeInput state */}
       {showHomeInput && (
         <HomeLocationInput
           onLocationSelected={(location) => {
@@ -124,29 +98,22 @@ const Index = () => {
             setShowHomeInput(false);
           }}
           onClose={() => setShowHomeInput(false)}
+          homeLocation={homeLocation}
+          onClearLocation={() => {
+            clearHome();
+            setShowHomeInput(false);
+          }}
         />
       )}
 
-      {!loading && activeTab === "priorities" && (
-        <PrioritiesList
-          schools={schools}
-          favorites={favorites}
-          onReorder={reorderFavorites}
-          onRemoveFavorite={toggleFavorite}
-          homeLocation={homeLocation}
-          onSchoolClick={setSelectedSchool}
-        />
-      )}
-
-      {selectedSchool && (
-        <SchoolDetailModal
-          school={selectedSchool}
-          isFavorite={favorites.includes(selectedSchool.id)}
-          onToggleFavorite={toggleFavorite}
-          onClose={() => setSelectedSchool(null)}
-          homeLocation={homeLocation}
-        />
-      )}
+      {/* School Detail Modal - Always mounted, controlled by open prop */}
+      <SchoolDetailModal
+        school={selectedSchool}
+        isFavorite={selectedSchool ? favorites.includes(selectedSchool.id) : false}
+        onToggleFavorite={() => selectedSchool && toggleFavorite(selectedSchool.id)}
+        onClose={() => setSelectedSchool(null)}
+        homeLocation={homeLocation}
+      />
     </div>
   );
 };

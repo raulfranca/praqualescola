@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Home, X } from "lucide-react";
+import { Home, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -8,10 +8,13 @@ import { HomeLocation } from "@/hooks/useHomeLocation";
 interface HomeLocationInputProps {
   onLocationSelected: (location: HomeLocation) => void;
   onClose: () => void;
+  homeLocation: HomeLocation | null;
+  onClearLocation: () => void;
 }
 
-export function HomeLocationInput({ onLocationSelected, onClose }: HomeLocationInputProps) {
+export function HomeLocationInput({ onLocationSelected, onClose, homeLocation, onClearLocation }: HomeLocationInputProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [inputValue, setInputValue] = useState(homeLocation?.address || "");
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const { toast } = useToast();
@@ -64,13 +67,21 @@ export function HomeLocationInput({ onLocationSelected, onClose }: HomeLocationI
     });
   }, [isLoaded, onLocationSelected, toast]);
 
+  const handleClearLocation = () => {
+    onClearLocation();
+    toast({
+      title: "Endereço removido",
+      description: "Sua localização foi removida com sucesso.",
+    });
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20 overflow-y-auto bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-card rounded-xl shadow-xl animate-in zoom-in-95 duration-300 mb-4"
+        className="w-full max-w-md bg-card rounded-xl shadow-xl animate-fade-in will-change-[opacity] mb-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
@@ -89,21 +100,38 @@ export function HomeLocationInput({ onLocationSelected, onClose }: HomeLocationI
 
         <div className="p-6 space-y-4">
           <p className="text-sm text-muted-foreground">
-            Digite seu endereço para calcular a distância até as escolas:
+            {homeLocation 
+              ? "Edite seu endereço ou remova a localização atual:"
+              : "Digite seu endereço para calcular a distância até as escolas:"}
           </p>
           
-          <Input
-            ref={inputRef}
-            type="text"
-            placeholder="Digite seu endereço..."
-            className="w-full"
-            disabled={!isLoaded}
-          />
+          <div className="space-y-2">
+            <Input
+              ref={inputRef}
+              type="text"
+              placeholder="Digite seu endereço..."
+              className="w-full"
+              disabled={!isLoaded}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+            />
 
-          {!isLoaded && (
-            <p className="text-xs text-muted-foreground">
-              Carregando busca de endereços...
-            </p>
+            {!isLoaded && (
+              <p className="text-xs text-muted-foreground">
+                Carregando busca de endereços...
+              </p>
+            )}
+          </div>
+
+          {homeLocation && (
+            <Button
+              variant="destructive"
+              onClick={handleClearLocation}
+              className="w-full"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Remover endereço
+            </Button>
           )}
         </div>
       </div>
