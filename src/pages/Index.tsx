@@ -98,6 +98,11 @@ const Index = () => {
             setShowHomeInput(false);
           }}
           onClose={() => setShowHomeInput(false)}
+          homeLocation={homeLocation}
+          onClearLocation={() => {
+            clearHome();
+            setShowHomeInput(false);
+          }}
         />
       )}
 
