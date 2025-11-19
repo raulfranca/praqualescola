@@ -423,9 +423,21 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             const baseSize = currentZoom < 16 ? 
               Math.max(18, 10 + (currentZoom * 0.8)) : 
               Math.max(24, 14 + (currentZoom * 1.5));
-            const markerSize = isFavorite ? baseSize * 1.8 : baseSize;
-            const clickRadius = (markerSize / 2) + 4; // Add small safety margin
-            const centerOffset = (markerSize + 16) / 2; // Match canvas offset from createMarkerIcon
+            
+            // For favorites, calculate star canvas and click area
+            let clickRadius, centerOffset;
+            if (isFavorite) {
+              const starSize = baseSize * 1.8;
+              const starCanvasSize = starSize + 24; // Extra space for glow
+              centerOffset = starCanvasSize / 2;
+              // Click radius should be based on the actual star size, not including glow
+              clickRadius = (starSize / 2) + 2; // Small margin for easier clicking
+            } else {
+              // Regular circles
+              const canvasSize = baseSize + 16;
+              centerOffset = canvasSize / 2;
+              clickRadius = (baseSize / 2) + 4;
+            }
             
             return (
               <Marker
