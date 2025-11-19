@@ -22,7 +22,7 @@ const Feedback = () => {
       <iframe data-tally-src="https://tally.so/r/Y5DJ2z?transparentBackground=1&formEventsForwarding=1" width="100%" height="100%" frameBorder="0" marginHeight={0} marginWidth={0} title="Pra Qual Escola Eu Vou?" className="absolute inset-0" />
 
       {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent text-center z-40 py-[25px] bg-zinc-300">
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent text-center z-40 bg-zinc-300 py-[20px]">
         <p className="text-xs text-muted-foreground">
           Desenvolvido pelo professor Raul Cabral
         </p>
