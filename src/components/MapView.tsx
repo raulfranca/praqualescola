@@ -12,6 +12,7 @@ interface MapViewProps {
   onToggleFavorite: (schoolId: number) => void;
   selectedSchool: School | null;
   onSchoolClick: (school: School) => void;
+  shouldCenterMap: boolean;
   homeLocation: HomeLocation | null;
 }
 
@@ -50,7 +51,7 @@ const mapOptions = {
   ],
 };
 
-export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolClick, homeLocation }: MapViewProps) {
+export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolClick, shouldCenterMap, homeLocation }: MapViewProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentZoom, setCurrentZoom] = useState(13);
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -59,13 +60,13 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     onSchoolClick(school);
   }, [onSchoolClick]);
 
-  // When a school is selected from search, center map and show details
+  // Only center map when shouldCenterMap is true (from search bar)
   useEffect(() => {
-    if (selectedSchool && mapRef.current) {
+    if (selectedSchool && shouldCenterMap && mapRef.current) {
       mapRef.current.panTo({ lat: selectedSchool.lat, lng: selectedSchool.lng });
       mapRef.current.setZoom(16);
     }
-  }, [selectedSchool]);
+  }, [selectedSchool, shouldCenterMap]);
 
   // Determine school category
   const getSchoolCategory = (school: School) => {

@@ -12,6 +12,7 @@ import { School } from "@/types/school";
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
+  const [shouldCenterMap, setShouldCenterMap] = useState(false);
   const [showHomeInput, setShowHomeInput] = useState(false);
   const { schools, loading } = useSchoolsData();
   const { favorites, toggleFavorite } = useFavorites();
@@ -29,8 +30,16 @@ const Index = () => {
     );
   }, [searchQuery, schools]);
 
+  // When selecting from search bar - should center map
   const handleSelectSchool = (school: School) => {
     setSelectedSchool(school);
+    setShouldCenterMap(true);
+  };
+
+  // When clicking on map marker - should NOT center map
+  const handleSchoolClickOnMap = (school: School) => {
+    setSelectedSchool(school);
+    setShouldCenterMap(false);
   };
 
   const handleFilterClick = () => {
@@ -73,7 +82,8 @@ const Index = () => {
               favorites={favorites}
               onToggleFavorite={toggleFavorite}
               selectedSchool={selectedSchool}
-              onSchoolClick={handleSelectSchool}
+              onSchoolClick={handleSchoolClickOnMap}
+              shouldCenterMap={shouldCenterMap}
               homeLocation={homeLocation}
             />
           </div>
