@@ -81,10 +81,8 @@ export function SchoolDetailModal({
     return phone;
   };
 
-  if (!school) return null;
-
   // Content shared between mobile drawer and desktop dialog
-  const content = (
+  const content = school ? (
     <div className="space-y-3 sm:space-y-4">
       {/* Tags */}
       <div className="flex flex-wrap gap-2">
@@ -235,24 +233,28 @@ export function SchoolDetailModal({
         </Button>
       </div>
     </div>
-  );
+  ) : null;
 
   // Mobile: Bottom drawer
   if (isMobile) {
     return (
       <Drawer open={!!school} onOpenChange={(open) => !open && onClose()}>
         <DrawerContent className="max-h-[90vh]">
-          <DrawerHeader className="text-left border-b">
-            <DrawerTitle className="text-lg sm:text-xl leading-tight pr-8">
-              {school.name}
-            </DrawerTitle>
-            <DrawerDescription className="sr-only">
-              Detalhes da escola {school.name}
-            </DrawerDescription>
-          </DrawerHeader>
-          <div className="p-4 sm:p-6 overflow-y-auto">
-            {content}
-          </div>
+          {school && (
+            <>
+              <DrawerHeader className="text-left border-b">
+                <DrawerTitle className="text-lg sm:text-xl leading-tight pr-8">
+                  {school.name}
+                </DrawerTitle>
+                <DrawerDescription className="sr-only">
+                  Detalhes da escola {school.name}
+                </DrawerDescription>
+              </DrawerHeader>
+              <div className="p-4 sm:p-6 overflow-y-auto">
+                {content}
+              </div>
+            </>
+          )}
         </DrawerContent>
       </Drawer>
     );
@@ -262,15 +264,19 @@ export function SchoolDetailModal({
   return (
     <Dialog open={!!school} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl leading-tight pr-8">
-            {school.name}
-          </DialogTitle>
-          <DialogDescription className="sr-only">
-            Detalhes da escola {school.name}
-          </DialogDescription>
-        </DialogHeader>
-        {content}
+        {school && (
+          <>
+            <DialogHeader>
+              <DialogTitle className="text-xl leading-tight pr-8">
+                {school.name}
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                Detalhes da escola {school.name}
+              </DialogDescription>
+            </DialogHeader>
+            {content}
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

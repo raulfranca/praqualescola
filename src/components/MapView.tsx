@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { School } from "@/types/school";
-import { SchoolDetailModal } from "./SchoolDetailModal";
 import { HomeLocation } from "@/hooks/useHomeLocation";
 
 // Google Maps API Key
@@ -12,7 +11,7 @@ interface MapViewProps {
   favorites: number[];
   onToggleFavorite: (schoolId: number) => void;
   selectedSchool: School | null;
-  onSchoolViewed: () => void;
+  onSchoolClick: (school: School) => void;
   homeLocation: HomeLocation | null;
 }
 
@@ -51,21 +50,14 @@ const mapOptions = {
   ],
 };
 
-export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolViewed, homeLocation }: MapViewProps) {
-  const [clickedSchool, setClickedSchool] = useState<School | null>(null);
+export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolClick, homeLocation }: MapViewProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentZoom, setCurrentZoom] = useState(13);
   const mapRef = useRef<google.maps.Map | null>(null);
 
-  const displayedSchool = selectedSchool || clickedSchool;
-
   const onMarkerClick = useCallback((school: School) => {
-    try {
-      setClickedSchool(school);
-    } catch (error) {
-      console.error("Error setting clicked school:", error);
-    }
-  }, []);
+    onSchoolClick(school);
+  }, [onSchoolClick]);
 
   // When a school is selected from search, center map and show details
   useEffect(() => {
@@ -74,13 +66,6 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       mapRef.current.setZoom(16);
     }
   }, [selectedSchool]);
-
-  const handleCloseModal = () => {
-    setClickedSchool(null);
-    if (selectedSchool) {
-      onSchoolViewed();
-    }
-  };
 
   // Determine school category
   const getSchoolCategory = (school: School) => {
@@ -462,16 +447,6 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
           )}
         </GoogleMap>
       </LoadScript>
-
-      {displayedSchool && (
-        <SchoolDetailModal
-          school={displayedSchool}
-          isFavorite={favorites.includes(displayedSchool.id)}
-          onToggleFavorite={onToggleFavorite}
-          onClose={handleCloseModal}
-          homeLocation={homeLocation}
-        />
-      )}
     </>
   );
 }

@@ -73,13 +73,14 @@ const Index = () => {
               favorites={favorites}
               onToggleFavorite={toggleFavorite}
               selectedSchool={selectedSchool}
-              onSchoolViewed={() => setSelectedSchool(null)}
+              onSchoolClick={handleSelectSchool}
               homeLocation={homeLocation}
             />
           </div>
         </>
       )}
 
+      {/* Home Location Input - Always mounted, controlled by showHomeInput state */}
       {showHomeInput && (
         <HomeLocationInput
           onLocationSelected={(location) => {
@@ -90,15 +91,14 @@ const Index = () => {
         />
       )}
 
-      {selectedSchool && (
-        <SchoolDetailModal
-          school={selectedSchool}
-          isFavorite={favorites.includes(selectedSchool.id)}
-          onToggleFavorite={() => toggleFavorite(selectedSchool.id)}
-          onClose={() => setSelectedSchool(null)}
-          homeLocation={homeLocation}
-        />
-      )}
+      {/* School Detail Modal - Always mounted, controlled by open prop */}
+      <SchoolDetailModal
+        school={selectedSchool}
+        isFavorite={selectedSchool ? favorites.includes(selectedSchool.id) : false}
+        onToggleFavorite={() => selectedSchool && toggleFavorite(selectedSchool.id)}
+        onClose={() => setSelectedSchool(null)}
+        homeLocation={homeLocation}
+      />
     </div>
   );
 };
