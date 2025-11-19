@@ -126,17 +126,19 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
           <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
-                <feComponentTransfer>
-                  <feFuncA type="linear" slope="1.5"/>
-                </feComponentTransfer>
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+                <feColorMatrix type="matrix" values="0 0 0 0 0.831
+                                                      0 0 0 0 0.659
+                                                      0 0 0 0 0.286
+                                                      0 0 0 0.6 0"/>
                 <feMerge>
                   <feMergeNode/>
                   <feMergeNode in="SourceGraphic"/>
                 </feMerge>
               </filter>
             </defs>
-            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#glow)">
+            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})">
+              <path d="${starPath}" fill="${fillColor}" stroke="none" filter="url(#glow)" pointer-events="none" opacity="0.8"/>
               <path d="${starPath}" fill="${fillColor}" stroke="#ffffff" stroke-width="2" vector-effect="non-scaling-stroke"/>
             </g>
           </svg>
@@ -169,10 +171,11 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
           <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
-                <feComponentTransfer>
-                  <feFuncA type="linear" slope="1.5"/>
-                </feComponentTransfer>
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+                <feColorMatrix type="matrix" values="0 0 0 0 0.831
+                                                      0 0 0 0 0.659
+                                                      0 0 0 0 0.286
+                                                      0 0 0 0.6 0"/>
                 <feMerge>
                   <feMergeNode/>
                   <feMergeNode in="SourceGraphic"/>
@@ -185,7 +188,9 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 <rect x="12" y="0" width="12" height="24"/>
               </clipPath>
             </defs>
-            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#glow)">
+            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})">
+              <path d="${starPath}" fill="${leftColor}" clip-path="url(#leftHalf)" filter="url(#glow)" pointer-events="none" opacity="0.8"/>
+              <path d="${starPath}" fill="${rightColor}" clip-path="url(#rightHalf)" filter="url(#glow)" pointer-events="none" opacity="0.8"/>
               <path d="${starPath}" fill="${leftColor}" clip-path="url(#leftHalf)"/>
               <path d="${starPath}" fill="${rightColor}" clip-path="url(#rightHalf)"/>
               <path d="${starPath}" fill="none" stroke="#ffffff" stroke-width="2" vector-effect="non-scaling-stroke"/>
@@ -206,10 +211,11 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
           <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
-                <feComponentTransfer>
-                  <feFuncA type="linear" slope="1.5"/>
-                </feComponentTransfer>
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+                <feColorMatrix type="matrix" values="0 0 0 0 0.831
+                                                      0 0 0 0 0.659
+                                                      0 0 0 0 0.286
+                                                      0 0 0 0.6 0"/>
                 <feMerge>
                   <feMergeNode/>
                   <feMergeNode in="SourceGraphic"/>
@@ -225,7 +231,10 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 <rect x="16" y="0" width="8" height="24"/>
               </clipPath>
             </defs>
-            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#glow)">
+            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})">
+              <path d="${starPath}" fill="${crecheColor}" clip-path="url(#leftThird)" filter="url(#glow)" pointer-events="none" opacity="0.8"/>
+              <path d="${starPath}" fill="${preColor}" clip-path="url(#centerThird)" filter="url(#glow)" pointer-events="none" opacity="0.8"/>
+              <path d="${starPath}" fill="${fundamentalColor}" clip-path="url(#rightThird)" filter="url(#glow)" pointer-events="none" opacity="0.8"/>
               <path d="${starPath}" fill="${crecheColor}" clip-path="url(#leftThird)"/>
               <path d="${starPath}" fill="${preColor}" clip-path="url(#centerThird)"/>
               <path d="${starPath}" fill="${fundamentalColor}" clip-path="url(#rightThird)"/>
