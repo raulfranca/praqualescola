@@ -92,6 +92,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     const preColor = "#D4A849"; // Amarelo (Pré)
     const fundamentalColor = "#3D7C85"; // Azul petróleo (Fundamental)
     const primaryColor = "#1ba3c6"; // Azul principal do sistema
+    const glowColor = "#D4A849"; // Amarelo para o glow das estrelas
     
     // Dynamic size based on zoom level - smaller at city view, larger at street view
     // Streets with arrows typically appear at zoom 17+
@@ -126,19 +127,16 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
           <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
-                <feColorMatrix type="matrix" values="0 0 0 0 0.831
-                                                      0 0 0 0 0.659
-                                                      0 0 0 0 0.286
-                                                      0 0 0 0.6 0"/>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
+                <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>
+                <feComponentTransfer>
+                  <feFuncA type="discrete" tableValues="1"/>
+                </feComponentTransfer>
               </filter>
             </defs>
             <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})">
-              <path d="${starPath}" fill="${fillColor}" stroke="none" filter="url(#glow)" pointer-events="none" opacity="0.8"/>
+              <!-- Glow layer (yellow, larger, blurred) -->
+              <path d="${starPath}" fill="${glowColor}" stroke="none" filter="url(#glow)" pointer-events="none" opacity="0.6"/>
+              <!-- Main star -->
               <path d="${starPath}" fill="${fillColor}" stroke="#ffffff" stroke-width="2" vector-effect="non-scaling-stroke"/>
             </g>
           </svg>
@@ -171,15 +169,10 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
           <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
-                <feColorMatrix type="matrix" values="0 0 0 0 0.831
-                                                      0 0 0 0 0.659
-                                                      0 0 0 0 0.286
-                                                      0 0 0 0.6 0"/>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
+                <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>
+                <feComponentTransfer>
+                  <feFuncA type="discrete" tableValues="1"/>
+                </feComponentTransfer>
               </filter>
               <clipPath id="leftHalf">
                 <rect x="0" y="0" width="12" height="24"/>
@@ -189,8 +182,9 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
               </clipPath>
             </defs>
             <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})">
-              <path d="${starPath}" fill="${leftColor}" clip-path="url(#leftHalf)" filter="url(#glow)" pointer-events="none" opacity="0.8"/>
-              <path d="${starPath}" fill="${rightColor}" clip-path="url(#rightHalf)" filter="url(#glow)" pointer-events="none" opacity="0.8"/>
+              <!-- Glow layer (yellow, larger, blurred) -->
+              <path d="${starPath}" fill="${glowColor}" stroke="none" filter="url(#glow)" pointer-events="none" opacity="0.6"/>
+              <!-- Split colored star -->
               <path d="${starPath}" fill="${leftColor}" clip-path="url(#leftHalf)"/>
               <path d="${starPath}" fill="${rightColor}" clip-path="url(#rightHalf)"/>
               <path d="${starPath}" fill="none" stroke="#ffffff" stroke-width="2" vector-effect="non-scaling-stroke"/>
@@ -211,15 +205,10 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
           <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
-                <feColorMatrix type="matrix" values="0 0 0 0 0.831
-                                                      0 0 0 0 0.659
-                                                      0 0 0 0 0.286
-                                                      0 0 0 0.6 0"/>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
+                <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>
+                <feComponentTransfer>
+                  <feFuncA type="discrete" tableValues="1"/>
+                </feComponentTransfer>
               </filter>
               <clipPath id="leftThird">
                 <rect x="0" y="0" width="8" height="24"/>
@@ -232,9 +221,9 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
               </clipPath>
             </defs>
             <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})">
-              <path d="${starPath}" fill="${crecheColor}" clip-path="url(#leftThird)" filter="url(#glow)" pointer-events="none" opacity="0.8"/>
-              <path d="${starPath}" fill="${preColor}" clip-path="url(#centerThird)" filter="url(#glow)" pointer-events="none" opacity="0.8"/>
-              <path d="${starPath}" fill="${fundamentalColor}" clip-path="url(#rightThird)" filter="url(#glow)" pointer-events="none" opacity="0.8"/>
+              <!-- Glow layer (yellow, larger, blurred) -->
+              <path d="${starPath}" fill="${glowColor}" stroke="none" filter="url(#glow)" pointer-events="none" opacity="0.6"/>
+              <!-- Tri-split colored star -->
               <path d="${starPath}" fill="${crecheColor}" clip-path="url(#leftThird)"/>
               <path d="${starPath}" fill="${preColor}" clip-path="url(#centerThird)"/>
               <path d="${starPath}" fill="${fundamentalColor}" clip-path="url(#rightThird)"/>
@@ -424,19 +413,20 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
               Math.max(18, 10 + (currentZoom * 0.8)) : 
               Math.max(24, 14 + (currentZoom * 1.5));
             
-            // For favorites, calculate star canvas and click area
+            // CRITICAL: Calculate click area to ONLY include the solid icon, excluding shadow/glow
             let clickRadius, centerOffset;
             if (isFavorite) {
               const starSize = baseSize * 1.8;
-              const starCanvasSize = starSize + 24; // Extra space for glow
+              const starCanvasSize = starSize + 24; // Extra space for glow (visual only)
               centerOffset = starCanvasSize / 2;
-              // Click radius should be based on the actual star size, not including glow
-              clickRadius = (starSize / 2) + 2; // Small margin for easier clicking
+              // Click radius ONLY covers the star itself (approximately 70% of bounding box)
+              clickRadius = (starSize * 0.35); // Tight to star shape, ignoring glow completely
             } else {
               // Regular circles
-              const canvasSize = baseSize + 16;
+              const canvasSize = baseSize + 16; // Extra space for shadow (visual only)
               centerOffset = canvasSize / 2;
-              clickRadius = (baseSize / 2) + 4;
+              // Click radius ONLY covers the circle itself, ignoring shadow
+              clickRadius = baseSize / 2; // Exact circle radius, no margin for shadow
             }
             
             return (
