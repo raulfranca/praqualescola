@@ -11,12 +11,15 @@ import {
 } from "@/components/ui/drawer";
 
 export type SchoolLevel = "creche" | "pre" | "fundamental";
+export type ManagementType = "prefeitura" | "terceirizada";
 
 interface FilterDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedLevels: SchoolLevel[];
   onLevelsChange: (levels: SchoolLevel[]) => void;
+  selectedManagement: ManagementType[];
+  onManagementChange: (management: ManagementType[]) => void;
   schoolCount: number;
 }
 
@@ -25,6 +28,8 @@ export function FilterDrawer({
   onOpenChange,
   selectedLevels,
   onLevelsChange,
+  selectedManagement,
+  onManagementChange,
   schoolCount,
 }: FilterDrawerProps) {
   const toggleLevel = (level: SchoolLevel) => {
@@ -35,8 +40,17 @@ export function FilterDrawer({
     }
   };
 
+  const toggleManagement = (type: ManagementType) => {
+    if (selectedManagement.includes(type)) {
+      onManagementChange(selectedManagement.filter((t) => t !== type));
+    } else {
+      onManagementChange([...selectedManagement, type]);
+    }
+  };
+
   const clearAll = () => {
     onLevelsChange(["creche", "pre", "fundamental"]);
+    onManagementChange(["prefeitura", "terceirizada"]);
   };
 
   const applyFilters = () => {
@@ -51,33 +65,57 @@ export function FilterDrawer({
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-6 py-6">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Nível</h3>
-            
-            <div className="flex flex-row gap-4 flex-wrap">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <Checkbox
-                  checked={selectedLevels.includes("creche")}
-                  onCheckedChange={() => toggleLevel("creche")}
-                />
-                <span className="text-base">Creche</span>
-              </label>
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Nível</h3>
+              
+              <div className="flex flex-row gap-4 flex-wrap">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={selectedLevels.includes("creche")}
+                    onCheckedChange={() => toggleLevel("creche")}
+                  />
+                  <span className="text-base">Creche</span>
+                </label>
 
-              <label className="flex items-center gap-3 cursor-pointer">
-                <Checkbox
-                  checked={selectedLevels.includes("pre")}
-                  onCheckedChange={() => toggleLevel("pre")}
-                />
-                <span className="text-base">Pré</span>
-              </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={selectedLevels.includes("pre")}
+                    onCheckedChange={() => toggleLevel("pre")}
+                  />
+                  <span className="text-base">Pré</span>
+                </label>
 
-              <label className="flex items-center gap-3 cursor-pointer">
-                <Checkbox
-                  checked={selectedLevels.includes("fundamental")}
-                  onCheckedChange={() => toggleLevel("fundamental")}
-                />
-                <span className="text-base">Fundamental</span>
-              </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={selectedLevels.includes("fundamental")}
+                    onCheckedChange={() => toggleLevel("fundamental")}
+                  />
+                  <span className="text-base">Fundamental</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Gestão</h3>
+              
+              <div className="flex flex-row gap-4 flex-wrap">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={selectedManagement.includes("prefeitura")}
+                    onCheckedChange={() => toggleManagement("prefeitura")}
+                  />
+                  <span className="text-base">Prefeitura</span>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={selectedManagement.includes("terceirizada")}
+                    onCheckedChange={() => toggleManagement("terceirizada")}
+                  />
+                  <span className="text-base">Terceirizada</span>
+                </label>
+              </div>
             </div>
           </div>
         </div>

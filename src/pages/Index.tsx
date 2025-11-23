@@ -4,7 +4,7 @@ import { ActionChips } from "@/components/ActionChips";
 import { MapView } from "@/components/MapView";
 import { HomeLocationInput } from "@/components/HomeLocationInput";
 import { SchoolDetailModal } from "@/components/SchoolDetailModal";
-import { FilterDrawer, SchoolLevel } from "@/components/FilterDrawer";
+import { FilterDrawer, SchoolLevel, ManagementType } from "@/components/FilterDrawer";
 import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
@@ -17,6 +17,7 @@ const Index = () => {
   const [showHomeInput, setShowHomeInput] = useState(false);
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
   const [selectedLevels, setSelectedLevels] = useState<SchoolLevel[]>(["creche", "pre", "fundamental"]);
+  const [selectedManagement, setSelectedManagement] = useState<ManagementType[]>(["prefeitura", "terceirizada"]);
   const { schools, loading } = useSchoolsData();
   const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
@@ -34,6 +35,14 @@ const Index = () => {
     }
   };
 
+  const hasAnyLevel = (school: School): boolean => {
+    return !!(
+      school.bercario || school.infantil1 || school.infantil2 ||
+      school.pre1 || school.pre2 ||
+      school.ano1 || school.ano2 || school.ano3 || school.ano4 || school.ano5
+    );
+  };
+
   const filteredSchools = useMemo(() => {
     let filtered = schools;
 
@@ -48,15 +57,29 @@ const Index = () => {
       );
     }
 
-    // Apply level filters
-    if (selectedLevels.length > 0) {
-      filtered = filtered.filter((school) =>
-        selectedLevels.some((level) => hasLevel(school, level))
-      );
-    }
+    // Apply filters with exception rule
+    filtered = filtered.filter((school) => {
+      // Exception: Schools with NO levels are ALWAYS visible
+      if (!hasAnyLevel(school)) {
+        return true;
+      }
+
+      // For schools with levels, apply both filters
+      const matchesLevel = selectedLevels.some((level) => hasLevel(school, level));
+      
+      const matchesManagement = selectedManagement.some((type) => {
+        if (type === "prefeitura") {
+          return !school.outsourced || school.outsourced.trim() === "";
+        } else {
+          return school.outsourced && school.outsourced.trim() !== "";
+        }
+      });
+
+      return matchesLevel && matchesManagement;
+    });
 
     return filtered;
-  }, [searchQuery, schools, selectedLevels]);
+  }, [searchQuery, schools, selectedLevels, selectedManagement]);
 
   // When selecting from search bar - should center map
   const handleSelectSchool = (school: School) => {
@@ -100,7 +123,7 @@ const Index = () => {
               homeAddress={homeLocation?.address}
               onHomeClick={() => setShowHomeInput(true)}
               onFilterClick={handleFilterClick}
-              hasActiveFilters={selectedLevels.length < 3}
+              hasActiveFilters={selectedLevels.length < 3 || selectedManagement.length < 2}
             />
           </div>
 
@@ -150,6 +173,8 @@ const Index = () => {
         onOpenChange={setShowFilterDrawer}
         selectedLevels={selectedLevels}
         onLevelsChange={setSelectedLevels}
+        selectedManagement={selectedManagement}
+        onManagementChange={setSelectedManagement}
         schoolCount={filteredSchools.length}
       />
     </div>
