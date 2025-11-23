@@ -4,6 +4,7 @@ import { ActionChips } from "@/components/ActionChips";
 import { MapView } from "@/components/MapView";
 import { HomeLocationInput } from "@/components/HomeLocationInput";
 import { SchoolDetailModal } from "@/components/SchoolDetailModal";
+import { FilterDrawer, SchoolLevel } from "@/components/FilterDrawer";
 import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
@@ -14,21 +15,48 @@ const Index = () => {
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
   const [shouldCenterMap, setShouldCenterMap] = useState(false);
   const [showHomeInput, setShowHomeInput] = useState(false);
+  const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+  const [selectedLevels, setSelectedLevels] = useState<SchoolLevel[]>([]);
   const { schools, loading } = useSchoolsData();
   const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
 
-  const filteredSchools = useMemo(() => {
-    if (!searchQuery.trim()) return schools;
+  const hasLevel = (school: School, level: SchoolLevel): boolean => {
+    switch (level) {
+      case "creche":
+        return !!(school.bercario || school.infantil1 || school.infantil2);
+      case "pre":
+        return !!(school.pre1 || school.pre2);
+      case "fundamental":
+        return !!(school.ano1 || school.ano2 || school.ano3 || school.ano4 || school.ano5);
+      default:
+        return false;
+    }
+  };
 
-    const query = searchQuery.toLowerCase();
-    return schools.filter(
-      (school) =>
-        school.name.toLowerCase().includes(query) ||
-        school.address.toLowerCase().includes(query) ||
-        school.neighborhood.toLowerCase().includes(query)
-    );
-  }, [searchQuery, schools]);
+  const filteredSchools = useMemo(() => {
+    let filtered = schools;
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (school) =>
+          school.name.toLowerCase().includes(query) ||
+          school.address.toLowerCase().includes(query) ||
+          school.neighborhood.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply level filters
+    if (selectedLevels.length > 0) {
+      filtered = filtered.filter((school) =>
+        selectedLevels.some((level) => hasLevel(school, level))
+      );
+    }
+
+    return filtered;
+  }, [searchQuery, schools, selectedLevels]);
 
   // When selecting from search bar - should center map
   const handleSelectSchool = (school: School) => {
@@ -43,7 +71,7 @@ const Index = () => {
   };
 
   const handleFilterClick = () => {
-    console.log("Filtros clicked - functionality coming soon");
+    setShowFilterDrawer(true);
   };
 
   return (
@@ -113,6 +141,15 @@ const Index = () => {
         onToggleFavorite={() => selectedSchool && toggleFavorite(selectedSchool.id)}
         onClose={() => setSelectedSchool(null)}
         homeLocation={homeLocation}
+      />
+
+      {/* Filter Drawer */}
+      <FilterDrawer
+        open={showFilterDrawer}
+        onOpenChange={setShowFilterDrawer}
+        selectedLevels={selectedLevels}
+        onLevelsChange={setSelectedLevels}
+        schoolCount={filteredSchools.length}
       />
     </div>
   );
