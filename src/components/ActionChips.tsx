@@ -7,13 +7,15 @@ interface ActionChipsProps {
   homeAddress?: string;
   onHomeClick: () => void;
   onFilterClick: () => void;
+  hasActiveFilters?: boolean;
 }
 
 export function ActionChips({
   hasHome,
   homeAddress,
   onHomeClick,
-  onFilterClick
+  onFilterClick,
+  hasActiveFilters = false
 }: ActionChipsProps) {
   return (
     <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar py-2">
@@ -38,7 +40,12 @@ export function ActionChips({
       <Button 
         onClick={onFilterClick}
         size="sm"
-        className="rounded-full shadow-md h-10 px-4 gap-2 shrink-0 transition-all bg-white text-foreground hover:bg-white/90 border border-border"
+        className={cn(
+          "rounded-full shadow-md h-10 px-4 gap-2 shrink-0 transition-all",
+          hasActiveFilters
+            ? "bg-primary text-primary-foreground hover:bg-primary/90"
+            : "bg-white text-foreground hover:bg-white/90 border border-border"
+        )}
       >
         <Filter className="w-4 h-4" />
         <span className="text-sm font-medium">Filtros</span>

@@ -36,7 +36,7 @@ export function FilterDrawer({
   };
 
   const clearAll = () => {
-    onLevelsChange([]);
+    onLevelsChange(["creche", "pre", "fundamental"]);
   };
 
   const applyFilters = () => {
@@ -54,7 +54,7 @@ export function FilterDrawer({
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Nível</h3>
             
-            <div className="space-y-4">
+            <div className="flex flex-row gap-4 flex-wrap">
               <label className="flex items-center gap-3 cursor-pointer">
                 <Checkbox
                   checked={selectedLevels.includes("creche")}

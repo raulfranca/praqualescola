@@ -16,7 +16,7 @@ const Index = () => {
   const [shouldCenterMap, setShouldCenterMap] = useState(false);
   const [showHomeInput, setShowHomeInput] = useState(false);
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
-  const [selectedLevels, setSelectedLevels] = useState<SchoolLevel[]>([]);
+  const [selectedLevels, setSelectedLevels] = useState<SchoolLevel[]>(["creche", "pre", "fundamental"]);
   const { schools, loading } = useSchoolsData();
   const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
@@ -100,6 +100,7 @@ const Index = () => {
               homeAddress={homeLocation?.address}
               onHomeClick={() => setShowHomeInput(true)}
               onFilterClick={handleFilterClick}
+              hasActiveFilters={selectedLevels.length < 3}
             />
           </div>
 
