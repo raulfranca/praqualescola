@@ -22,6 +22,7 @@ export interface School {
   ano3?: number;
   ano4?: number;
   ano5?: number;
+  vacancies?: number;
 }
 
 export interface FavoriteSchool {
