@@ -102,18 +102,12 @@ export function SchoolDetailModal({
             {school.outsourced}
           </Badge>
         )}
-        {isCampaignActive && (
+        {isCampaignActive && school.vacancies && school.vacancies > 0 && (
           <Badge 
             variant="outline" 
-            className={`text-sm font-semibold ${
-              school.vacancies && school.vacancies > 0
-                ? "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-900 dark:text-green-100"
-                : "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-900 dark:text-red-100"
-            }`}
+            className="text-sm bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800 text-purple-900 dark:text-purple-100 font-semibold"
           >
-            {school.vacancies && school.vacancies > 0
-              ? school.vacancies === 1 ? "1 vaga" : `${school.vacancies} vagas`
-              : "sem vagas"}
+            {school.vacancies === 1 ? "1 vaga" : `${school.vacancies} vagas`}
           </Badge>
         )}
       </div>
