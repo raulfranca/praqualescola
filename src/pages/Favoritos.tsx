@@ -25,11 +25,13 @@ const Favoritos = () => {
     config: campaign
   } = useCampaign();
   return <div className="flex flex-col h-screen bg-background overflow-hidden pb-16 md:pb-0 md:ml-16">
-      {isCampaignActive && <div className="sticky top-0 z-50 bg-blue-50 dark:bg-blue-950/30 border-b border-blue-100 dark:border-blue-900 px-4 py-3">
-          <p className="text-sm text-blue-900 dark:text-blue-100 text-center truncate whitespace-nowrap overflow-hidden font-bold">
+      {isCampaignActive && (
+        <div className="sticky top-0 z-50 bg-blue-50 dark:bg-blue-950/30 border-b border-blue-100 dark:border-blue-900 px-4 py-3">
+          <p className="text-sm text-blue-900 dark:text-blue-100 text-center truncate whitespace-nowrap overflow-hidden">
             {campaign.bannerMessage}
           </p>
-        </div>}
+        </div>
+      )}
 
       {loading && <div className="flex items-center justify-center flex-1">
           <div className="text-center">
