@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { ActionChips } from "@/components/ActionChips";
 import { MapView } from "@/components/MapView";
@@ -76,14 +76,14 @@ const Index = () => {
     };
   }, [schoolsWithDistances, hasDistances]);
 
-  // Initialize distance filter to max when home location changes
-  useMemo(() => {
-    if (hasDistances && maxDistanceFilter === null) {
+  // Reset distance filter to max whenever home location changes
+  useEffect(() => {
+    if (hasDistances) {
       setMaxDistanceFilter(distanceRange.max);
-    } else if (!hasDistances) {
+    } else {
       setMaxDistanceFilter(null);
     }
-  }, [hasDistances, distanceRange.max, maxDistanceFilter]);
+  }, [homeLocation, hasDistances, distanceRange.max]);
 
   const filteredSchools = useMemo(() => {
     let filtered = schoolsWithDistances;
