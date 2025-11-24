@@ -19,6 +19,7 @@ const Index = () => {
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
   const [selectedLevels, setSelectedLevels] = useState<SchoolLevel[]>(["creche", "pre", "fundamental"]);
   const [selectedManagement, setSelectedManagement] = useState<ManagementType[]>(["prefeitura", "terceirizada"]);
+  const [maxDistanceFilter, setMaxDistanceFilter] = useState<number | null>(null);
   const { schools, loading } = useSchoolsData();
   const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
@@ -50,8 +51,40 @@ const Index = () => {
     );
   };
 
+  // Calculate distance range for slider
+  const distanceRange = useMemo(() => {
+    if (!hasDistances || schoolsWithDistances.length === 0) {
+      return { min: 0, max: 10 };
+    }
+    
+    const distances = schoolsWithDistances
+      .map(s => s.distanceInKm)
+      .filter((d): d is number => d !== undefined);
+    
+    if (distances.length === 0) {
+      return { min: 0, max: 10 };
+    }
+    
+    const min = Math.min(...distances);
+    const max = Math.max(...distances);
+    
+    return { 
+      min: Math.floor(min * 10) / 10, // Round down to 1 decimal
+      max: Math.ceil(max * 10) / 10   // Round up to 1 decimal
+    };
+  }, [schoolsWithDistances, hasDistances]);
+
+  // Initialize distance filter to max when home location changes
+  useMemo(() => {
+    if (hasDistances && maxDistanceFilter === null) {
+      setMaxDistanceFilter(distanceRange.max);
+    } else if (!hasDistances) {
+      setMaxDistanceFilter(null);
+    }
+  }, [hasDistances, distanceRange.max, maxDistanceFilter]);
+
   const filteredSchools = useMemo(() => {
-    let filtered = schools;
+    let filtered = schoolsWithDistances;
 
     // Apply search filter
     if (searchQuery.trim()) {
@@ -85,8 +118,17 @@ const Index = () => {
       return matchesLevel && matchesManagement;
     });
 
+    // Apply distance filter (only when home location is set)
+    if (hasDistances && maxDistanceFilter !== null) {
+      filtered = filtered.filter((school) => {
+        // Schools without distance data are excluded when filter is active
+        if (school.distanceInKm === undefined) return false;
+        return school.distanceInKm <= maxDistanceFilter;
+      });
+    }
+
     return filtered;
-  }, [searchQuery, schools, selectedLevels, selectedManagement]);
+  }, [searchQuery, schoolsWithDistances, selectedLevels, selectedManagement, hasDistances, maxDistanceFilter]);
 
   // When selecting from search bar - should center map
   const handleSelectSchool = (school: School) => {
@@ -183,6 +225,11 @@ const Index = () => {
         selectedManagement={selectedManagement}
         onManagementChange={setSelectedManagement}
         schoolCount={filteredSchools.length}
+        hasHomeLocation={hasHome}
+        minDistance={distanceRange.min}
+        maxDistance={distanceRange.max}
+        selectedDistance={maxDistanceFilter ?? distanceRange.max}
+        onDistanceChange={setMaxDistanceFilter}
       />
     </div>
   );

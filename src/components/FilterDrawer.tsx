@@ -1,6 +1,7 @@
 import { Filter } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import {
   Drawer,
   DrawerClose,
@@ -21,6 +22,12 @@ interface FilterDrawerProps {
   selectedManagement: ManagementType[];
   onManagementChange: (management: ManagementType[]) => void;
   schoolCount: number;
+  // Distance filter props (only when home location is set)
+  hasHomeLocation?: boolean;
+  minDistance?: number;
+  maxDistance?: number;
+  selectedDistance?: number;
+  onDistanceChange?: (distance: number) => void;
 }
 
 export function FilterDrawer({
@@ -31,6 +38,11 @@ export function FilterDrawer({
   selectedManagement,
   onManagementChange,
   schoolCount,
+  hasHomeLocation = false,
+  minDistance = 0,
+  maxDistance = 10,
+  selectedDistance = 10,
+  onDistanceChange,
 }: FilterDrawerProps) {
   const toggleLevel = (level: SchoolLevel) => {
     if (selectedLevels.includes(level)) {
@@ -51,6 +63,10 @@ export function FilterDrawer({
   const clearAll = () => {
     onLevelsChange(["creche", "pre", "fundamental"]);
     onManagementChange(["prefeitura", "terceirizada"]);
+    // Reset distance to max (show all)
+    if (onDistanceChange && hasHomeLocation) {
+      onDistanceChange(maxDistance);
+    }
   };
 
   const applyFilters = () => {
@@ -117,6 +133,32 @@ export function FilterDrawer({
                 </label>
               </div>
             </div>
+
+            {hasHomeLocation && onDistanceChange && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Distância</h3>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Até {selectedDistance.toFixed(1)} km
+                  </span>
+                </div>
+                
+                <div className="px-2">
+                  <Slider
+                    value={[selectedDistance]}
+                    onValueChange={(value) => onDistanceChange(value[0])}
+                    min={minDistance}
+                    max={maxDistance}
+                    step={0.1}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                    <span>{minDistance.toFixed(1)} km</span>
+                    <span>{maxDistance.toFixed(1)} km</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
