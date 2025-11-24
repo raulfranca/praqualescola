@@ -1,7 +1,6 @@
 import { School } from "@/types/school";
-import { CAMPAIGN_CONFIG } from "@/config/campaign_config";
 
-export function parseCSV(csv: string): School[] {
+export function parseCSV(csv: string, vacancyColumnHeader: string): School[] {
   const lines = csv.split('\n');
   const schools: School[] = [];
   
@@ -27,11 +26,11 @@ export function parseCSV(csv: string): School[] {
   
   // Find the vacancy column index
   const vacancyColumnIndex = headerValues.findIndex(
-    header => header === CAMPAIGN_CONFIG.vacancyColumnHeader
+    header => header === vacancyColumnHeader
   );
   
   console.log('📊 CSV Headers:', headerValues);
-  console.log(`🎯 Looking for vacancy column: "${CAMPAIGN_CONFIG.vacancyColumnHeader}"`);
+  console.log(`🎯 Looking for vacancy column: "${vacancyColumnHeader}"`);
   console.log(`📍 Vacancy column found at index: ${vacancyColumnIndex}`);
   
   // Skip header line, start from data rows
