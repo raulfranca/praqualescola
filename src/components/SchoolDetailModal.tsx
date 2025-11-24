@@ -42,7 +42,7 @@ export function SchoolDetailModal({
   const [distanceInfo, setDistanceInfo] = useState<DistanceMatrixResult | null>(null);
   const [loadingDistance, setLoadingDistance] = useState(false);
   const isMobile = useIsMobile();
-  const { isActive: isCampaignActive } = useCampaign();
+  const { isActive: isCampaignActive, config: campaign } = useCampaign();
 
   useEffect(() => {
     if (!homeLocation || !school?.lat || !school?.lng) {
@@ -111,6 +111,31 @@ export function SchoolDetailModal({
           </Badge>
         )}
       </div>
+
+      {/* Campaign Section */}
+      {isCampaignActive && (
+        <div className="flex items-start gap-2">
+          <School2 className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-muted-foreground">{campaign.title}</p>
+            <div className="mt-1">
+              {school.vacancies && school.vacancies > 0 ? (
+                <Badge 
+                  className="bg-green-600 text-white hover:bg-green-700"
+                >
+                  {school.vacancies === 1 ? "1 vaga" : `${school.vacancies} vagas`}
+                </Badge>
+              ) : (
+                <Badge 
+                  className="bg-red-500 text-white hover:bg-red-600"
+                >
+                  Sem vagas
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Salas */}
       {(() => {
