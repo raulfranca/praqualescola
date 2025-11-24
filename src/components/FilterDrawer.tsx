@@ -3,7 +3,9 @@ import { Filter } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { DistanceHistogram } from "@/components/DistanceHistogram";
+import { useCampaign } from "@/hooks/useCampaign";
 import {
   Drawer,
   DrawerClose,
@@ -31,6 +33,9 @@ interface FilterDrawerProps {
   selectedDistance?: number;
   onDistanceChange?: (distance: number) => void;
   schoolDistances?: number[];
+  // Campaign filter props
+  showOnlyVacancies?: boolean;
+  onVacanciesChange?: (showOnly: boolean) => void;
 }
 
 export function FilterDrawer({
@@ -47,7 +52,10 @@ export function FilterDrawer({
   selectedDistance = 10,
   onDistanceChange,
   schoolDistances = [],
+  showOnlyVacancies = false,
+  onVacanciesChange,
 }: FilterDrawerProps) {
+  const { isActive, config } = useCampaign();
   // Local state for smooth slider dragging (visual only)
   const [localDistance, setLocalDistance] = useState(selectedDistance);
   const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -114,6 +122,10 @@ export function FilterDrawer({
     if (onDistanceChange && hasHomeLocation) {
       onDistanceChange(maxDistance);
     }
+    // Reset campaign filter
+    if (onVacanciesChange) {
+      onVacanciesChange(false);
+    }
   };
 
   const applyFilters = () => {
@@ -129,6 +141,24 @@ export function FilterDrawer({
 
         <div className="flex-1 overflow-y-auto px-6 py-6">
           <div className="space-y-6">
+            {/* Campaign Filter Toggle (only visible when campaign is active) */}
+            {isActive && onVacanciesChange && (
+              <div className="space-y-4 pb-6 border-b">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-semibold">{config.title}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Mostrar apenas escolas com vagas disponíveis
+                    </p>
+                  </div>
+                  <Switch
+                    checked={showOnlyVacancies}
+                    onCheckedChange={onVacanciesChange}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Nível</h3>
               
