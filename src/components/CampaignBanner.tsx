@@ -24,6 +24,11 @@ export function CampaignBanner({ onShowVacancies }: CampaignBannerProps) {
     setIsDismissed(true);
   };
 
+  const handleShowVacancies = () => {
+    handleDismiss(); // Dismiss banner permanently
+    onShowVacancies(); // Execute the filter action
+  };
+
   if (!isActive || isDismissed) return null;
 
   return (
@@ -47,7 +52,7 @@ export function CampaignBanner({ onShowVacancies }: CampaignBannerProps) {
             </p>
           </div>
           <Button
-            onClick={onShowVacancies}
+            onClick={handleShowVacancies}
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
             size="default"
           >
