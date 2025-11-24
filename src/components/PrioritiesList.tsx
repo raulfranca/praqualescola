@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
 import { Badge } from "@/components/ui/badge";
 import { getSchoolLevelTags } from "@/lib/schoolTags";
+import { useCampaign } from "@/hooks/useCampaign";
 import {
   DndContext,
   closestCenter,
@@ -38,12 +39,14 @@ function SortableSchoolItem({
   onRemove,
   homeLocation,
   onSchoolClick,
+  isCampaignActive,
 }: {
   school: School;
   order: number;
   onRemove: (id: number) => void;
   homeLocation: HomeLocation | null;
   onSchoolClick: (school: School) => void;
+  isCampaignActive: boolean;
 }) {
   const [distanceInfo, setDistanceInfo] = useState<DistanceMatrixResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -134,26 +137,33 @@ function SortableSchoolItem({
               </div>
             );
           })()}
-          {homeLocation && (
-            <div className="flex flex-wrap gap-1.5">
-              {isCalculating ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-muted text-muted-foreground whitespace-nowrap">
-                  Calculando...
-                </span>
-              ) : distanceInfo ? (
-                <>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-orange/10 text-orange font-medium whitespace-nowrap">
-                    <MapPin className="w-3 h-3" />
-                    {distanceInfo.distance}
+          <div className="flex flex-wrap gap-1.5">
+            {homeLocation && (
+              <>
+                {isCalculating ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-muted text-muted-foreground whitespace-nowrap">
+                    Calculando...
                   </span>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-orange/10 text-orange font-medium whitespace-nowrap">
-                    <Clock className="w-3 h-3" />
-                    {distanceInfo.duration}
-                  </span>
-                </>
-              ) : null}
-            </div>
-          )}
+                ) : distanceInfo ? (
+                  <>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-orange/10 text-orange font-medium whitespace-nowrap">
+                      <MapPin className="w-3 h-3" />
+                      {distanceInfo.distance}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-orange/10 text-orange font-medium whitespace-nowrap">
+                      <Clock className="w-3 h-3" />
+                      {distanceInfo.duration}
+                    </span>
+                  </>
+                ) : null}
+              </>
+            )}
+            {isCampaignActive && school.vacancies && school.vacancies > 0 && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 text-purple-900 dark:text-purple-100 font-semibold whitespace-nowrap">
+                {school.vacancies === 1 ? "1 vaga" : `${school.vacancies} vagas`}
+              </span>
+            )}
+          </div>
         </div>
 
         <button
@@ -176,6 +186,7 @@ export function PrioritiesList({
   homeLocation,
   onSchoolClick,
 }: PrioritiesListProps) {
+  const { isActive: isCampaignActive } = useCampaign();
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -243,6 +254,7 @@ export function PrioritiesList({
                 onRemove={onRemoveFavorite}
                 homeLocation={homeLocation}
                 onSchoolClick={onSchoolClick}
+                isCampaignActive={isCampaignActive}
               />
               ))}
             </div>

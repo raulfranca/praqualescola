@@ -5,6 +5,7 @@ import { HomeLocation } from "@/hooks/useHomeLocation";
 import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
 import { useState, useEffect } from "react";
 import { getSchoolLevelTags } from "@/lib/schoolTags";
+import { useCampaign } from "@/hooks/useCampaign";
 import {
   Drawer,
   DrawerClose,
@@ -41,6 +42,7 @@ export function SchoolDetailModal({
   const [distanceInfo, setDistanceInfo] = useState<DistanceMatrixResult | null>(null);
   const [loadingDistance, setLoadingDistance] = useState(false);
   const isMobile = useIsMobile();
+  const { isActive: isCampaignActive } = useCampaign();
 
   useEffect(() => {
     if (!homeLocation || !school?.lat || !school?.lng) {
@@ -98,6 +100,14 @@ export function SchoolDetailModal({
             className="text-sm bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-100"
           >
             {school.outsourced}
+          </Badge>
+        )}
+        {isCampaignActive && school.vacancies && school.vacancies > 0 && (
+          <Badge 
+            variant="outline" 
+            className="text-sm bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800 text-purple-900 dark:text-purple-100 font-semibold"
+          >
+            {school.vacancies === 1 ? "1 vaga" : `${school.vacancies} vagas`}
           </Badge>
         )}
       </div>
