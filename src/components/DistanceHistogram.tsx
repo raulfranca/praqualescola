@@ -32,14 +32,16 @@ export function DistanceHistogram({
   const maxCount = Math.max(...buckets, 1);
 
   return (
-    <div className="w-full h-12 flex items-end gap-[1px] px-2">
+    <div className="w-full h-16 flex items-end gap-[1px] px-2 mb-2">
       {buckets.map((count, index) => {
         const heightPercent = (count / maxCount) * 100;
+        // Ensure minimum visibility for non-zero buckets
+        const minHeight = count > 0 ? Math.max(heightPercent, 8) : 0;
         return (
           <div
             key={index}
-            className="flex-1 bg-muted/40 rounded-t-sm transition-all"
-            style={{ height: `${heightPercent}%` }}
+            className="flex-1 bg-primary/20 rounded-t-sm transition-all"
+            style={{ height: `${minHeight}%` }}
           />
         );
       })}
