@@ -1,5 +1,5 @@
 import { School } from "@/types/school";
-import { Star, MapPin, Phone, Building2, Car, Clock, School2, X } from "lucide-react";
+import { Star, MapPin, Phone, Building2, Car, Clock, School2, X, LogIn } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { HomeLocation } from "@/hooks/useHomeLocation";
 import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
@@ -72,7 +72,7 @@ export function SchoolDetailModal({
 
       {/* Campaign Section */}
       {isCampaignActive && <div className="flex items-start gap-2">
-          <School2 className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+          <LogIn className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
           <div className="flex-1">
             <p className="text-sm font-medium text-muted-foreground">{campaign.title}</p>
             <div className="mt-1">
