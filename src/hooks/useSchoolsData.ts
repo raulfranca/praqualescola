@@ -33,7 +33,7 @@ export function useSchoolsData() {
         }
         
         const csvText = await response.text();
-        const parsedSchools = parseCSV(csvText);
+        const parsedSchools = parseCSV(csvText, config.vacancyColumnHeader);
         
         setSchools(parsedSchools);
         
