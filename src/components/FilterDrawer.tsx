@@ -2,6 +2,7 @@ import { Filter } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { DistanceHistogram } from "@/components/DistanceHistogram";
 import {
   Drawer,
   DrawerClose,
@@ -28,6 +29,7 @@ interface FilterDrawerProps {
   maxDistance?: number;
   selectedDistance?: number;
   onDistanceChange?: (distance: number) => void;
+  schoolDistances?: number[];
 }
 
 export function FilterDrawer({
@@ -43,6 +45,7 @@ export function FilterDrawer({
   maxDistance = 10,
   selectedDistance = 10,
   onDistanceChange,
+  schoolDistances = [],
 }: FilterDrawerProps) {
   const toggleLevel = (level: SchoolLevel) => {
     if (selectedLevels.includes(level)) {
@@ -113,7 +116,7 @@ export function FilterDrawer({
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Gestão</h3>
+              <h3 className="text-lg font-semibold">Administração</h3>
               
               <div className="flex flex-row gap-4 flex-wrap">
                 <label className="flex items-center gap-3 cursor-pointer">
@@ -144,6 +147,13 @@ export function FilterDrawer({
                 </div>
                 
                 <div className="px-2">
+                  {schoolDistances.length > 0 && (
+                    <DistanceHistogram
+                      distances={schoolDistances}
+                      minDistance={minDistance}
+                      maxDistance={maxDistance}
+                    />
+                  )}
                   <Slider
                     value={[selectedDistance]}
                     onValueChange={(value) => onDistanceChange(value[0])}
