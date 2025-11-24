@@ -4,6 +4,7 @@ import { ActionChips } from "@/components/ActionChips";
 import { MapView } from "@/components/MapView";
 import { HomeLocationInput } from "@/components/HomeLocationInput";
 import { SchoolDetailModal } from "@/components/SchoolDetailModal";
+import { CampaignBanner } from "@/components/CampaignBanner";
 import { FilterDrawer, SchoolLevel, ManagementType } from "@/components/FilterDrawer";
 import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -20,6 +21,7 @@ const Index = () => {
   const [selectedLevels, setSelectedLevels] = useState<SchoolLevel[]>(["creche", "pre", "fundamental"]);
   const [selectedManagement, setSelectedManagement] = useState<ManagementType[]>(["prefeitura", "terceirizada"]);
   const [maxDistanceFilter, setMaxDistanceFilter] = useState<number | null>(null);
+  const [showOnlyVacancies, setShowOnlyVacancies] = useState(false);
   const { schools, loading } = useSchoolsData();
   const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
@@ -127,8 +129,15 @@ const Index = () => {
       });
     }
 
+    // Apply campaign vacancy filter
+    if (showOnlyVacancies) {
+      filtered = filtered.filter((school) => {
+        return school.vacancies && school.vacancies > 0;
+      });
+    }
+
     return filtered;
-  }, [searchQuery, schoolsWithDistances, selectedLevels, selectedManagement, hasDistances, maxDistanceFilter]);
+  }, [searchQuery, schoolsWithDistances, selectedLevels, selectedManagement, hasDistances, maxDistanceFilter, showOnlyVacancies]);
 
   // When selecting from search bar - should center map
   const handleSelectSchool = (school: School) => {
@@ -146,6 +155,11 @@ const Index = () => {
     setShowFilterDrawer(true);
   };
 
+  const handleShowVacanciesFromBanner = () => {
+    setShowOnlyVacancies(true);
+    setShowFilterDrawer(true);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden pb-16 md:pb-0 md:ml-16">
       {loading && (
@@ -159,6 +173,9 @@ const Index = () => {
 
       {!loading && (
         <>
+          {/* Campaign Banner */}
+          <CampaignBanner onShowVacancies={handleShowVacanciesFromBanner} />
+
           {/* Floating Search Bar and Action Chips */}
           <div className="absolute top-4 left-4 right-4 md:left-20 z-50 flex flex-col md:flex-row gap-3 md:items-start">
             <SearchBar
@@ -175,7 +192,8 @@ const Index = () => {
               hasActiveFilters={
                 selectedLevels.length < 3 || 
                 selectedManagement.length < 2 ||
-                (hasDistances && maxDistanceFilter !== null && maxDistanceFilter < distanceRange.max)
+                (hasDistances && maxDistanceFilter !== null && maxDistanceFilter < distanceRange.max) ||
+                showOnlyVacancies
               }
             />
           </div>
@@ -237,6 +255,8 @@ const Index = () => {
         schoolDistances={schoolsWithDistances
           .map(s => s.distanceInKm)
           .filter((d): d is number => d !== undefined)}
+        showOnlyVacancies={showOnlyVacancies}
+        onVacanciesChange={setShowOnlyVacancies}
       />
     </div>
   );
