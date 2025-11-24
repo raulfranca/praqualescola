@@ -12,20 +12,19 @@ export function CampaignBanner({ onShowVacancies }: CampaignBannerProps) {
   if (!isActive) return null;
 
   return (
-    <div className="absolute top-32 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-md md:max-w-lg">
-      <div className="bg-primary text-primary-foreground rounded-xl shadow-lg px-4 py-3 md:px-5 md:py-4">
-        <div className="flex items-center justify-between gap-3 flex-wrap md:flex-nowrap">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
+    <div className="absolute top-44 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-md">
+      <div className="bg-amber-50 dark:bg-amber-950 rounded-xl shadow-lg p-5">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="flex items-center gap-2 text-amber-900 dark:text-amber-100">
             <Info className="h-5 w-5 flex-shrink-0" />
-            <p className="text-sm font-medium">
+            <p className="text-sm font-semibold">
               {config.bannerMessage}
             </p>
           </div>
           <Button
             onClick={onShowVacancies}
-            variant="secondary"
-            size="sm"
-            className="flex-shrink-0 font-semibold whitespace-nowrap"
+            className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold"
+            size="default"
           >
             Ver apenas escolas com vagas
           </Button>
