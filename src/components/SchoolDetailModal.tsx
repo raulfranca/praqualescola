@@ -76,7 +76,7 @@ export function SchoolDetailModal({
           <div className="flex-1">
             <p className="text-sm font-medium text-muted-foreground">{campaign.title}</p>
             <div className="mt-1">
-              {school.vacancies && school.vacancies > 0 ? <Badge className="text-white bg-lime-500 hover:bg-lime-600">
+              {school.vacancies && school.vacancies > 0 ? <Badge className="text-white bg-lime-500 ">
                   {school.vacancies === 1 ? "1 vaga" : `${school.vacancies} vagas`}
                 </Badge> : <Badge className="bg-red-500 text-white hover:bg-red-600">
                   Sem vagas
