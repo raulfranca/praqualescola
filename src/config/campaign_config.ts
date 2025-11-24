@@ -10,8 +10,8 @@ export interface CampaignConfig {
 export const CAMPAIGNS: CampaignConfig[] = [
   {
     campaignId: "remocao-2-2025",
-    title: "2a Fase da Remoção 2025",
-    bannerMessage: "2a Fase da Remoção aberta! Confira as vagas.",
+    title: "Remoção 2025 - 2ª Fase",
+    bannerMessage: "2ª Fase da Remoção aberta!",
     startsAt: "2025-11-24T00:00:00Z",
     endsAt: "2025-11-25T07:00:00Z",
     vacancyColumnHeader: "VAGAS_REMO"
