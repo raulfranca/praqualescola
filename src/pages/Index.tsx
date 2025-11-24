@@ -172,7 +172,11 @@ const Index = () => {
               homeAddress={homeLocation?.address}
               onHomeClick={() => setShowHomeInput(true)}
               onFilterClick={handleFilterClick}
-              hasActiveFilters={selectedLevels.length < 3 || selectedManagement.length < 2}
+              hasActiveFilters={
+                selectedLevels.length < 3 || 
+                selectedManagement.length < 2 ||
+                (hasDistances && maxDistanceFilter !== null && maxDistanceFilter < distanceRange.max)
+              }
             />
           </div>
 
@@ -230,6 +234,9 @@ const Index = () => {
         maxDistance={distanceRange.max}
         selectedDistance={maxDistanceFilter ?? distanceRange.max}
         onDistanceChange={setMaxDistanceFilter}
+        schoolDistances={schoolsWithDistances
+          .map(s => s.distanceInKm)
+          .filter((d): d is number => d !== undefined)}
       />
     </div>
   );
