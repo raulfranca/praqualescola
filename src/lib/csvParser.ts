@@ -1,10 +1,39 @@
 import { School } from "@/types/school";
 
-export function parseCSV(csv: string): School[] {
+export function parseCSV(csv: string, vacancyColumnHeader: string): School[] {
   const lines = csv.split('\n');
   const schools: School[] = [];
   
-  // Skip header line
+  // Parse header to find vacancy column index
+  const headerLine = lines[0];
+  const headerValues: string[] = [];
+  let currentValue = '';
+  let insideQuotes = false;
+  
+  for (let j = 0; j < headerLine.length; j++) {
+    const char = headerLine[j];
+    
+    if (char === '"') {
+      insideQuotes = !insideQuotes;
+    } else if (char === ',' && !insideQuotes) {
+      headerValues.push(currentValue.trim());
+      currentValue = '';
+    } else {
+      currentValue += char;
+    }
+  }
+  headerValues.push(currentValue.trim());
+  
+  // Find the vacancy column index
+  const vacancyColumnIndex = headerValues.findIndex(
+    header => header === vacancyColumnHeader
+  );
+  
+  console.log('📊 CSV Headers:', headerValues);
+  console.log(`🎯 Looking for vacancy column: "${vacancyColumnHeader}"`);
+  console.log(`📍 Vacancy column found at index: ${vacancyColumnIndex}`);
+  
+  // Skip header line, start from data rows
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
@@ -36,6 +65,17 @@ export function parseCSV(csv: string): School[] {
     
     if (values.length < 14) continue; // Skip invalid rows
     
+    // Parse vacancy data if column exists
+    let vacancyValue = 0;
+    if (vacancyColumnIndex >= 0 && vacancyColumnIndex < values.length) {
+      const rawVacancy = values[vacancyColumnIndex];
+      const parsedVacancy = parseInt(rawVacancy);
+      // Validation: only accept positive numbers
+      if (!isNaN(parsedVacancy) && parsedVacancy > 0) {
+        vacancyValue = parsedVacancy;
+      }
+    }
+
     const school: School = {
       id: parseInt(values[0]) || 0,
       type: values[1] || '',
@@ -61,10 +101,20 @@ export function parseCSV(csv: string): School[] {
       ano3: parseInt(values[21]) || 0,
       ano4: parseInt(values[22]) || 0,
       ano5: parseInt(values[23]) || 0,
+      vacancies: vacancyValue
     };
     
     schools.push(school);
   }
+  
+  // Log sample schools with vacancy data for verification
+  const schoolsWithVacancies = schools.filter(s => s.vacancies && s.vacancies > 0);
+  console.log(`✅ Parsed ${schools.length} schools total`);
+  console.log(`🎓 ${schoolsWithVacancies.length} schools have vacancies`);
+  console.log('📝 Sample schools with vacancies:', schoolsWithVacancies.slice(0, 3).map(s => ({
+    name: s.name,
+    vacancies: s.vacancies
+  })));
   
   return schools;
 }
