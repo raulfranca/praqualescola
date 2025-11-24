@@ -119,9 +119,17 @@ function SortableSchoolItem({
                     </span>
                   </> : null}
               </>}
-            {isCampaignActive && school.vacancies && school.vacancies > 0 && <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded border border-purple-200 dark:border-purple-800 font-semibold whitespace-nowrap bg-lime-500 text-lime-50">
-                {school.vacancies === 1 ? "1 vaga" : `${school.vacancies} vagas`}
-              </span>}
+            {isCampaignActive && (
+              school.vacancies && school.vacancies > 0 ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded font-semibold whitespace-nowrap bg-lime-500 text-white">
+                  {school.vacancies === 1 ? "1 vaga" : `${school.vacancies} vagas`}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded font-semibold whitespace-nowrap bg-red-500 text-white">
+                  Sem vagas
+                </span>
+              )
+            )}
           </div>
         </div>
 

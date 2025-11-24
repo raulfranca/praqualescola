@@ -4,6 +4,7 @@ import { SchoolDetailModal } from "@/components/SchoolDetailModal";
 import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
+import { useCampaign } from "@/hooks/useCampaign";
 import { School } from "@/types/school";
 const Favoritos = () => {
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
@@ -19,10 +20,18 @@ const Favoritos = () => {
   const {
     homeLocation
   } = useHomeLocation();
+  const {
+    isActive: isCampaignActive,
+    config: campaign
+  } = useCampaign();
   return <div className="flex flex-col h-screen bg-background overflow-hidden pb-16 md:pb-0 md:ml-16">
-      <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
-        
-      </header>
+      {isCampaignActive && (
+        <div className="sticky top-0 z-50 bg-blue-50 dark:bg-blue-950/30 border-b border-blue-100 dark:border-blue-900 px-4 py-3">
+          <p className="text-sm text-blue-900 dark:text-blue-100 text-center truncate whitespace-nowrap overflow-hidden">
+            {campaign.bannerMessage}
+          </p>
+        </div>
+      )}
 
       {loading && <div className="flex items-center justify-center flex-1">
           <div className="text-center">
