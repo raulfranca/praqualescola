@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Filter } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,14 @@ export function FilterDrawer({
   onDistanceChange,
   schoolDistances = [],
 }: FilterDrawerProps) {
+  // Local state for smooth slider dragging (visual only)
+  const [localDistance, setLocalDistance] = useState(selectedDistance);
+
+  // Sync local state when prop changes (e.g., "Limpar tudo")
+  useEffect(() => {
+    setLocalDistance(selectedDistance);
+  }, [selectedDistance]);
+
   const toggleLevel = (level: SchoolLevel) => {
     if (selectedLevels.includes(level)) {
       onLevelsChange(selectedLevels.filter((l) => l !== level));
@@ -142,7 +151,7 @@ export function FilterDrawer({
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Distância</h3>
                   <span className="text-sm font-medium text-muted-foreground">
-                    Até {selectedDistance.toFixed(1)} km
+                    Até {localDistance.toFixed(1)} km
                   </span>
                 </div>
                 
@@ -155,8 +164,9 @@ export function FilterDrawer({
                     />
                   )}
                   <Slider
-                    value={[selectedDistance]}
-                    onValueChange={(value) => onDistanceChange(value[0])}
+                    value={[localDistance]}
+                    onValueChange={(value) => setLocalDistance(value[0])}
+                    onValueCommit={(value) => onDistanceChange?.(value[0])}
                     min={minDistance}
                     max={maxDistance}
                     step={0.1}
