@@ -15,7 +15,7 @@ export function getSchoolLevelTags(school: School): SchoolTag[] {
   if (school.bercario && school.bercario > 0) {
     tags.push({
       label: "Berçário",
-      className: "bg-infantil text-infantil-foreground hover:bg-infantil/90"
+      className: "bg-teal-500/15 text-teal-800 dark:text-teal-300"
     });
   }
 
@@ -26,17 +26,17 @@ export function getSchoolLevelTags(school: School): SchoolTag[] {
   if (hasInfantil1 && hasInfantil2) {
     tags.push({
       label: "Inf. 1 e 2",
-      className: "bg-infantil text-infantil-foreground hover:bg-infantil/90"
+      className: "bg-teal-500/15 text-teal-800 dark:text-teal-300"
     });
   } else if (hasInfantil1) {
     tags.push({
       label: "Inf. 1",
-      className: "bg-infantil text-infantil-foreground hover:bg-infantil/90"
+      className: "bg-teal-500/15 text-teal-800 dark:text-teal-300"
     });
   } else if (hasInfantil2) {
     tags.push({
       label: "Inf. 2",
-      className: "bg-infantil text-infantil-foreground hover:bg-infantil/90"
+      className: "bg-teal-500/15 text-teal-800 dark:text-teal-300"
     });
   }
 
@@ -47,17 +47,17 @@ export function getSchoolLevelTags(school: School): SchoolTag[] {
   if (hasPre1 && hasPre2) {
     tags.push({
       label: "Pré 1 e 2",
-      className: "bg-pre text-pre-foreground hover:bg-pre/90"
+      className: "bg-amber-500/15 text-amber-800 dark:text-amber-300"
     });
   } else if (hasPre1) {
     tags.push({
       label: "Pré 1",
-      className: "bg-pre text-pre-foreground hover:bg-pre/90"
+      className: "bg-amber-500/15 text-amber-800 dark:text-amber-300"
     });
   } else if (hasPre2) {
     tags.push({
       label: "Pré 2",
-      className: "bg-pre text-pre-foreground hover:bg-pre/90"
+      className: "bg-amber-500/15 text-amber-800 dark:text-amber-300"
     });
   }
 
@@ -81,7 +81,7 @@ export function getSchoolLevelTags(school: School): SchoolTag[] {
  */
 function getFundamentalTags(anos: { num: number; has: boolean }[]): SchoolTag[] {
   const tags: SchoolTag[] = [];
-  const className = "bg-fundamental text-fundamental-foreground hover:bg-fundamental/90";
+  const className = "bg-cyan-600/15 text-cyan-800 dark:text-cyan-300";
 
   // Encontrar blocos contínuos
   let i = 0;

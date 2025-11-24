@@ -76,11 +76,15 @@ export function SchoolDetailModal({
           <div className="flex-1">
             <p className="text-sm font-medium text-muted-foreground">{campaign.title}</p>
             <div className="mt-1">
-              {school.vacancies && school.vacancies > 0 ? <Badge className="text-white bg-lime-500 hover:bg-lime-500">
+              {school.vacancies && school.vacancies > 0 ? (
+                <Badge className="bg-green-500/15 text-green-800 dark:text-green-300 border-0 px-2.5 py-0.5 font-semibold">
                   {school.vacancies === 1 ? "1 vaga" : `${school.vacancies} vagas`}
-                </Badge> : <Badge className="bg-red-500 text-white hover:bg-red-600">
+                </Badge>
+              ) : (
+                <Badge className="bg-red-500/15 text-red-800 dark:text-red-300 border-0 px-2.5 py-0.5 font-semibold">
                   Sem vagas
-                </Badge>}
+                </Badge>
+              )}
             </div>
           </div>
         </div>}
@@ -93,7 +97,7 @@ export function SchoolDetailModal({
             <div className="flex-1">
               <p className="text-sm font-medium text-muted-foreground">Salas</p>
               <div className="flex flex-wrap gap-2 mt-1">
-                {levelTags.map((tag, index) => <Badge key={index} variant="outline" className={`text-sm ${tag.className}`}>
+                {levelTags.map((tag, index) => <Badge key={index} className={`${tag.className} border-0 px-2.5 py-0.5 font-medium`}>
                     {tag.label}
                   </Badge>)}
               </div>
