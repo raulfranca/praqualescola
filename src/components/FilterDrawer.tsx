@@ -51,25 +51,35 @@ export function FilterDrawer({
   // Local state for smooth slider dragging (visual only)
   const [localDistance, setLocalDistance] = useState(selectedDistance);
   const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingValueRef = useRef<number | null>(null);
 
   // Sync local state when prop changes (e.g., "Limpar tudo")
   useEffect(() => {
     setLocalDistance(selectedDistance);
   }, [selectedDistance]);
 
-  // Throttled distance change handler (250ms throttle)
+  // True throttling: updates happen continuously at intervals during drag (100ms = ~10 updates/sec)
   const handleDistanceChange = useCallback((value: number) => {
     // Update local state immediately for smooth visual feedback
     setLocalDistance(value);
 
-    // Throttle the heavy filtering logic
-    if (throttleTimerRef.current) {
-      clearTimeout(throttleTimerRef.current);
-    }
+    // Store the latest value for next throttle cycle
+    pendingValueRef.current = value;
 
-    throttleTimerRef.current = setTimeout(() => {
+    // If no throttle timer is active, apply immediately and start throttle period
+    if (!throttleTimerRef.current) {
       onDistanceChange?.(value);
-    }, 250);
+      pendingValueRef.current = null;
+      
+      throttleTimerRef.current = setTimeout(() => {
+        // Apply pending value if one exists
+        if (pendingValueRef.current !== null) {
+          onDistanceChange?.(pendingValueRef.current);
+          pendingValueRef.current = null;
+        }
+        throttleTimerRef.current = null;
+      }, 100);
+    }
   }, [onDistanceChange]);
 
   // Cleanup throttle timer on unmount
