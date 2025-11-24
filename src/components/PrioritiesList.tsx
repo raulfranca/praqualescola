@@ -16,6 +16,8 @@ interface PrioritiesListProps {
   onRemoveFavorite: (schoolId: number) => void;
   homeLocation: HomeLocation | null;
   onSchoolClick: (school: School) => void;
+  tipDismissed: boolean;
+  onDismissTip: () => void;
 }
 function SortableSchoolItem({
   school,
@@ -77,60 +79,65 @@ function SortableSchoolItem({
       <div className="flex items-center gap-3">
         <div {...attributes} {...listeners} className="flex items-center gap-2 cursor-grab active:cursor-grabbing touch-none shrink-0">
           <GripVertical className="w-5 h-5 text-muted-foreground" />
-          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
+          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/15 text-primary font-bold text-sm">
             {order}
           </span>
         </div>
 
         <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onSchoolClick(school)}>
           <h3 className="font-semibold text-foreground truncate mb-1">
-            {school.name}
+            {school.type} {school.name}
           </h3>
-          <div className="flex items-center gap-2 mb-2">
-            <p className="text-sm text-muted-foreground">
-              {school.neighborhood}
-            </p>
-            <span className="inline-block px-2 py-0.5 text-xs rounded bg-primary/10 text-primary whitespace-nowrap">
-              {school.type}
-            </span>
-          </div>
+          <p className="text-sm text-muted-foreground mb-2">
+            {school.neighborhood}
+          </p>
+
+          {/* Vacancy Badge - On its own line */}
+          {isCampaignActive && (
+            <div className="mb-2">
+              {school.vacancies && school.vacancies > 0 ? (
+                <Badge className="bg-green-500/15 text-green-800 dark:text-green-300 border-0 px-2.5 py-0.5 text-xs font-semibold">
+                  {school.vacancies === 1 ? "1 vaga" : `${school.vacancies} vagas`}
+                </Badge>
+              ) : (
+                <Badge className="bg-red-500/15 text-red-800 dark:text-red-300 border-0 px-2.5 py-0.5 text-xs font-semibold">
+                  Sem vagas
+                </Badge>
+              )}
+            </div>
+          )}
 
           {/* Tags de Níveis */}
           {(() => {
           const levelTags = getSchoolLevelTags(school);
           return levelTags.length > 0 && <div className="flex flex-wrap gap-1.5 mb-2">
-                {levelTags.map((tag, index) => <Badge key={index} className={`${tag.className} text-xs`}>
+                {levelTags.map((tag, index) => <Badge key={index} className={`${tag.className} border-0 px-2.5 py-0.5 text-xs font-medium`}>
                     {tag.label}
                   </Badge>)}
               </div>;
         })()}
-          <div className="flex flex-wrap gap-1.5">
-            {homeLocation && <>
-                {isCalculating ? <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-muted text-muted-foreground whitespace-nowrap">
-                    Calculando...
-                  </span> : distanceInfo ? <>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-orange/10 text-orange font-medium whitespace-nowrap">
-                      <MapPin className="w-3 h-3" />
-                      {distanceInfo.distance}
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-orange/10 text-orange font-medium whitespace-nowrap">
-                      <Clock className="w-3 h-3" />
-                      {distanceInfo.duration}
-                    </span>
-                  </> : null}
-              </>}
-            {isCampaignActive && (
-              school.vacancies && school.vacancies > 0 ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded font-semibold whitespace-nowrap bg-lime-500 text-white">
-                  {school.vacancies === 1 ? "1 vaga" : `${school.vacancies} vagas`}
+          
+          {/* Distance/Duration Badges */}
+          {homeLocation && (
+            <div className="flex flex-wrap gap-1.5">
+              {isCalculating ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs rounded-full bg-muted text-muted-foreground whitespace-nowrap">
+                  Calculando...
                 </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded font-semibold whitespace-nowrap bg-red-500 text-white">
-                  Sem vagas
-                </span>
-              )
-            )}
-          </div>
+              ) : distanceInfo ? (
+                <>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs rounded-full bg-orange-500/15 text-orange-800 dark:text-orange-300 font-medium whitespace-nowrap">
+                    <MapPin className="w-3 h-3" />
+                    {distanceInfo.distance}
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs rounded-full bg-orange-500/15 text-orange-800 dark:text-orange-300 font-medium whitespace-nowrap">
+                    <Clock className="w-3 h-3" />
+                    {distanceInfo.duration}
+                  </span>
+                </>
+              ) : null}
+            </div>
+          )}
         </div>
 
         <button onClick={() => onRemove(school.id)} className="p-2 rounded-full hover:bg-destructive/10 transition-colors group shrink-0" title="Remover dos favoritos">
@@ -145,7 +152,9 @@ export function PrioritiesList({
   onReorder,
   onRemoveFavorite,
   homeLocation,
-  onSchoolClick
+  onSchoolClick,
+  tipDismissed,
+  onDismissTip
 }: PrioritiesListProps) {
   const {
     isActive: isCampaignActive
@@ -183,12 +192,21 @@ export function PrioritiesList({
   }
   return <div className="flex-1 overflow-y-auto p-4">
       <div className="max-w-2xl mx-auto">
-        <div className="mb-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
-          <p className="text-sm text-muted-foreground">
-            <strong className="text-foreground">Dica:</strong> Arraste as escolas para organizá-las em ordem de prioridade. 
-            Suas preferências são salvas automaticamente neste dispositivo.
-          </p>
-        </div>
+        {!tipDismissed && (
+          <div className="mb-4 p-4 bg-primary/5 rounded-lg border border-primary/20 relative">
+            <button
+              onClick={onDismissTip}
+              className="absolute top-3 right-3 p-1 hover:bg-primary/10 rounded-full transition-colors"
+              aria-label="Fechar dica"
+            >
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <p className="text-sm text-muted-foreground pr-6">
+              <strong className="text-foreground">Dica:</strong> Arraste as escolas para organizá-las em ordem de prioridade. 
+              Suas preferências são salvas automaticamente neste dispositivo.
+            </p>
+          </div>
+        )}
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={favorites} strategy={verticalListSortingStrategy}>
