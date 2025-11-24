@@ -8,6 +8,7 @@ import { FilterDrawer, SchoolLevel, ManagementType } from "@/components/FilterDr
 import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
+import { useSchoolDistances } from "@/hooks/useSchoolDistances";
 import { School } from "@/types/school";
 
 const Index = () => {
@@ -21,6 +22,12 @@ const Index = () => {
   const { schools, loading } = useSchoolsData();
   const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
+  
+  // Calculate distances from home location to all schools
+  const { schoolsWithDistances, sortedSchools, hasDistances } = useSchoolDistances(
+    schools,
+    homeLocation
+  );
 
   const hasLevel = (school: School, level: SchoolLevel): boolean => {
     switch (level) {
