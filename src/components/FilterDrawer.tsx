@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Filter } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -50,11 +50,36 @@ export function FilterDrawer({
 }: FilterDrawerProps) {
   // Local state for smooth slider dragging (visual only)
   const [localDistance, setLocalDistance] = useState(selectedDistance);
+  const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sync local state when prop changes (e.g., "Limpar tudo")
   useEffect(() => {
     setLocalDistance(selectedDistance);
   }, [selectedDistance]);
+
+  // Throttled distance change handler (250ms throttle)
+  const handleDistanceChange = useCallback((value: number) => {
+    // Update local state immediately for smooth visual feedback
+    setLocalDistance(value);
+
+    // Throttle the heavy filtering logic
+    if (throttleTimerRef.current) {
+      clearTimeout(throttleTimerRef.current);
+    }
+
+    throttleTimerRef.current = setTimeout(() => {
+      onDistanceChange?.(value);
+    }, 250);
+  }, [onDistanceChange]);
+
+  // Cleanup throttle timer on unmount
+  useEffect(() => {
+    return () => {
+      if (throttleTimerRef.current) {
+        clearTimeout(throttleTimerRef.current);
+      }
+    };
+  }, []);
 
   const toggleLevel = (level: SchoolLevel) => {
     if (selectedLevels.includes(level)) {
@@ -165,8 +190,7 @@ export function FilterDrawer({
                   )}
                   <Slider
                     value={[localDistance]}
-                    onValueChange={(value) => setLocalDistance(value[0])}
-                    onValueCommit={(value) => onDistanceChange?.(value[0])}
+                    onValueChange={(value) => handleDistanceChange(value[0])}
                     min={minDistance}
                     max={maxDistance}
                     step={0.1}
