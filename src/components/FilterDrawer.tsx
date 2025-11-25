@@ -273,17 +273,17 @@ export function FilterDrawer({
                     onValueChange={(value) => {
                       if (value) onMetricChange?.(value as FilterMetric);
                     }}
-                    className="inline-flex bg-secondary p-1 rounded-full gap-1"
+                    className="inline-flex bg-muted/30 p-0.5 rounded-lg gap-0.5"
                   >
                     <ToggleGroupItem
                       value="distance"
-                      className="rounded-full px-4 py-1.5 text-sm font-medium transition-all data-[state=on]:bg-white data-[state=on]:text-primary data-[state=on]:shadow-sm data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
+                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-primary data-[state=on]:shadow-sm data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
                     >
                       Distância
                     </ToggleGroupItem>
                     <ToggleGroupItem
                       value="time"
-                      className="rounded-full px-4 py-1.5 text-sm font-medium transition-all data-[state=on]:bg-white data-[state=on]:text-purple data-[state=on]:shadow-sm data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
+                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-purple data-[state=on]:shadow-sm data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
                     >
                       Tempo
                     </ToggleGroupItem>
