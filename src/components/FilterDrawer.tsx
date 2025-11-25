@@ -266,24 +266,24 @@ export function FilterDrawer({
 
             {hasHomeLocation && (onDistanceChange || onDurationChange) && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between -ml-0.5">
                   <ToggleGroup
                     type="single"
                     value={filterMetric}
                     onValueChange={(value) => {
                       if (value) onMetricChange?.(value as FilterMetric);
                     }}
-                    className="inline-flex bg-muted/30 p-0.5 rounded-lg gap-0.5"
+                    className="inline-flex bg-muted border border-border p-0.5 rounded-lg gap-0.5"
                   >
                     <ToggleGroupItem
                       value="distance"
-                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-primary data-[state=on]:shadow-sm data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
+                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-primary data-[state=on]:shadow-md data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
                     >
                       Distância
                     </ToggleGroupItem>
                     <ToggleGroupItem
                       value="time"
-                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-purple data-[state=on]:shadow-sm data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
+                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-purple data-[state=on]:shadow-md data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
                     >
                       Tempo
                     </ToggleGroupItem>
