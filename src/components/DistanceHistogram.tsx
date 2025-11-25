@@ -4,12 +4,14 @@ interface DistanceHistogramProps {
   distances: number[];
   minDistance: number;
   maxDistance: number;
+  globalMax: number;
 }
 
 export function DistanceHistogram({
   distances,
   minDistance,
   maxDistance,
+  globalMax,
 }: DistanceHistogramProps) {
   const buckets = useMemo(() => {
     const bucketCount = 25;
@@ -29,12 +31,11 @@ export function DistanceHistogram({
     return bucketArray;
   }, [distances, minDistance, maxDistance]);
 
-  const maxCount = Math.max(...buckets, 1);
-
   return (
     <div className="w-full h-16 flex items-end gap-[1px] px-2 mb-2">
       {buckets.map((count, index) => {
-        const heightPercent = (count / maxCount) * 100;
+        // Use globalMax for absolute scaling instead of local max
+        const heightPercent = (count / globalMax) * 100;
         // Ensure minimum visibility for non-zero buckets
         const minHeight = count > 0 ? Math.max(heightPercent, 8) : 0;
         return (

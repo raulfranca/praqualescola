@@ -76,6 +76,31 @@ const Index = () => {
     };
   }, [schoolsWithDistances, hasDistances]);
 
+  // Calculate global histogram max for absolute scaling (using ALL schools, not filtered)
+  const globalHistogramMax = useMemo(() => {
+    if (!hasDistances || schoolsWithDistances.length === 0) {
+      return 1;
+    }
+
+    const bucketCount = 25;
+    const bucketSize = (distanceRange.max - distanceRange.min) / bucketCount;
+    const bucketArray = new Array(bucketCount).fill(0);
+
+    schoolsWithDistances.forEach((school) => {
+      if (school.distanceInKm !== undefined) {
+        const bucketIndex = Math.min(
+          Math.floor((school.distanceInKm - distanceRange.min) / bucketSize),
+          bucketCount - 1
+        );
+        if (bucketIndex >= 0) {
+          bucketArray[bucketIndex]++;
+        }
+      }
+    });
+
+    return Math.max(...bucketArray, 1);
+  }, [schoolsWithDistances, distanceRange.min, distanceRange.max, hasDistances]);
+
   // Reset distance filter to max whenever home location changes
   useEffect(() => {
     if (hasDistances) {
@@ -263,6 +288,7 @@ const Index = () => {
         schoolDistances={schoolsMatchingCriteria
           .map(s => s.distanceInKm)
           .filter((d): d is number => d !== undefined)}
+        globalHistogramMax={globalHistogramMax}
         showOnlyVacancies={showOnlyVacancies}
         onVacanciesChange={setShowOnlyVacancies}
       />
