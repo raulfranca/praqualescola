@@ -19,23 +19,6 @@ export interface SchoolWithDistance extends School {
 }
 
 /**
- * Parse Google Maps duration string to minutes
- * Examples: "15 mins" -> 15, "1 hour 5 mins" -> 65
- */
-function parseDurationToMinutes(durationString?: string): number | undefined {
-  if (!durationString) return undefined;
-  
-  let totalMinutes = 0;
-  const hourMatch = durationString.match(/(\d+)\s*hour/i);
-  const minMatch = durationString.match(/(\d+)\s*min/i);
-  
-  if (hourMatch) totalMinutes += parseInt(hourMatch[1]) * 60;
-  if (minMatch) totalMinutes += parseInt(minMatch[1]);
-  
-  return totalMinutes > 0 ? totalMinutes : undefined;
-}
-
-/**
  * Hook to manage distance calculations between home location and schools
  * Automatically calculates distances when home location changes
  * Persists distances in localStorage
@@ -74,7 +57,7 @@ export function useSchoolDistances(
         results.forEach((result) => {
           newDistances[result.schoolId] = {
             distanceInKm: result.distanceInKm,
-            durationInMinutes: parseDurationToMinutes(result.duration),
+            durationInMinutes: result.durationInMinutes,
           };
         });
 

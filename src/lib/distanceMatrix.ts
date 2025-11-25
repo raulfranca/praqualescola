@@ -8,7 +8,7 @@ export interface DistanceMatrixResult {
 export interface SchoolDistanceResult {
   schoolId: number;
   distanceInKm: number;
-  duration?: string;
+  durationInMinutes?: number;
   usedFallback: boolean;
 }
 
@@ -115,11 +115,11 @@ async function calculateBatch(
           const element = response.rows[0]?.elements[index];
 
           if (element && element.status === 'OK') {
-            // API success - use real driving distance
+            // API success - use real driving distance and duration
             return {
               schoolId: school.id,
               distanceInKm: Number((element.distance.value / 1000).toFixed(2)),
-              duration: element.duration.text,
+              durationInMinutes: Math.ceil(element.duration.value / 60),
               usedFallback: false,
             };
           } else {
