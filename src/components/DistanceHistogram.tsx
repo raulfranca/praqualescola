@@ -5,6 +5,7 @@ interface DistanceHistogramProps {
   minDistance: number;
   maxDistance: number;
   globalMax: number;
+  metric?: "distance" | "time";
 }
 
 export function DistanceHistogram({
@@ -12,6 +13,7 @@ export function DistanceHistogram({
   minDistance,
   maxDistance,
   globalMax,
+  metric = "distance",
 }: DistanceHistogramProps) {
   const buckets = useMemo(() => {
     const bucketCount = 25;
@@ -31,6 +33,10 @@ export function DistanceHistogram({
     return bucketArray;
   }, [distances, minDistance, maxDistance]);
 
+  const barColor = metric === "time" 
+    ? "bg-purple/20 dark:bg-purple/20" 
+    : "bg-primary/20";
+
   return (
     <div className="w-full h-16 flex items-end gap-[1px] px-2 mb-2">
       {buckets.map((count, index) => {
@@ -41,7 +47,7 @@ export function DistanceHistogram({
         return (
           <div
             key={index}
-            className="flex-1 bg-primary/20 rounded-t-sm transition-all"
+            className={`flex-1 ${barColor} rounded-t-sm transition-all`}
             style={{ height: `${minHeight}%` }}
           />
         );

@@ -7,11 +7,32 @@ import { calculateDistancesForSchools } from "@/lib/distanceMatrix";
 const DISTANCES_STORAGE_KEY = "school-distances";
 
 interface SchoolDistances {
-  [schoolId: number]: number; // schoolId -> distanceInKm
+  [schoolId: number]: {
+    distanceInKm: number;
+    durationInMinutes?: number;
+  };
 }
 
 export interface SchoolWithDistance extends School {
   distanceInKm?: number;
+  durationInMinutes?: number;
+}
+
+/**
+ * Parse Google Maps duration string to minutes
+ * Examples: "15 mins" -> 15, "1 hour 5 mins" -> 65
+ */
+function parseDurationToMinutes(durationString?: string): number | undefined {
+  if (!durationString) return undefined;
+  
+  let totalMinutes = 0;
+  const hourMatch = durationString.match(/(\d+)\s*hour/i);
+  const minMatch = durationString.match(/(\d+)\s*min/i);
+  
+  if (hourMatch) totalMinutes += parseInt(hourMatch[1]) * 60;
+  if (minMatch) totalMinutes += parseInt(minMatch[1]);
+  
+  return totalMinutes > 0 ? totalMinutes : undefined;
 }
 
 /**
@@ -51,7 +72,10 @@ export function useSchoolDistances(
 
         const newDistances: SchoolDistances = {};
         results.forEach((result) => {
-          newDistances[result.schoolId] = result.distanceInKm;
+          newDistances[result.schoolId] = {
+            distanceInKm: result.distanceInKm,
+            durationInMinutes: parseDurationToMinutes(result.duration),
+          };
         });
 
         // Log first 5 schools for verification
@@ -74,11 +98,12 @@ export function useSchoolDistances(
     calculateDrivingDistances();
   }, [homeLocation, schools]);
 
-  // Enrich schools with distance data
+  // Enrich schools with distance and duration data
   const schoolsWithDistances: SchoolWithDistance[] = useMemo(() => {
     return schools.map((school) => ({
       ...school,
-      distanceInKm: distances[school.id],
+      distanceInKm: distances[school.id]?.distanceInKm,
+      durationInMinutes: distances[school.id]?.durationInMinutes,
     }));
   }, [schools, distances]);
 
