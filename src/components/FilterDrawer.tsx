@@ -19,6 +19,22 @@ export type SchoolLevel = "creche" | "pre" | "fundamental";
 export type ManagementType = "prefeitura" | "terceirizada";
 export type FilterMetric = "distance" | "time";
 
+/**
+ * Format duration in minutes to "Xh Ymin" or "X min"
+ * Examples: 55 -> "55 min", 66 -> "1h 06min", 125 -> "2h 05min"
+ */
+function formatDuration(totalMinutes: number): string {
+  if (totalMinutes < 60) {
+    return `${Math.round(totalMinutes)} min`;
+  }
+  
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = Math.round(totalMinutes % 60);
+  const paddedMinutes = minutes.toString().padStart(2, '0');
+  
+  return `${hours}h ${paddedMinutes}min`;
+}
+
 interface FilterDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -272,7 +288,7 @@ export function FilterDrawer({
                   <span className="text-sm font-medium text-muted-foreground">
                     {filterMetric === "distance" 
                       ? `Até ${localDistance.toFixed(1)} km`
-                      : `Até ${Math.round(localDuration)} min`
+                      : `Até ${formatDuration(localDuration)}`
                     }
                   </span>
                 </div>
@@ -326,8 +342,8 @@ export function FilterDrawer({
                       </>
                     ) : (
                       <>
-                        <span>{Math.round(minDuration)} min</span>
-                        <span>{Math.round(maxDuration)} min</span>
+                        <span>{formatDuration(minDuration)}</span>
+                        <span>{formatDuration(maxDuration)}</span>
                       </>
                     )}
                   </div>
