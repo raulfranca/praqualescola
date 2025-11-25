@@ -85,19 +85,10 @@ const Index = () => {
     }
   }, [homeLocation, hasDistances, distanceRange.max]);
 
-  const filteredSchools = useMemo(() => {
+  // Master filtered list: applies Level, Management, and Campaign filters (NOT distance)
+  // This represents "all eligible schools regardless of distance" for histogram and future UI counters
+  const schoolsMatchingCriteria = useMemo(() => {
     let filtered = schoolsWithDistances;
-
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (school) =>
-          school.name.toLowerCase().includes(query) ||
-          school.address.toLowerCase().includes(query) ||
-          school.neighborhood.toLowerCase().includes(query)
-      );
-    }
 
     // Apply filters with exception rule
     filtered = filtered.filter((school) => {
@@ -120,6 +111,30 @@ const Index = () => {
       return matchesLevel && matchesManagement;
     });
 
+    // Apply campaign vacancy filter
+    if (showOnlyVacancies) {
+      filtered = filtered.filter((school) => {
+        return school.vacancies && school.vacancies > 0;
+      });
+    }
+
+    return filtered;
+  }, [schoolsWithDistances, selectedLevels, selectedManagement, showOnlyVacancies]);
+
+  const filteredSchools = useMemo(() => {
+    let filtered = schoolsMatchingCriteria;
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (school) =>
+          school.name.toLowerCase().includes(query) ||
+          school.address.toLowerCase().includes(query) ||
+          school.neighborhood.toLowerCase().includes(query)
+      );
+    }
+
     // Apply distance filter (only when home location is set)
     if (hasDistances && maxDistanceFilter !== null) {
       filtered = filtered.filter((school) => {
@@ -129,15 +144,8 @@ const Index = () => {
       });
     }
 
-    // Apply campaign vacancy filter
-    if (showOnlyVacancies) {
-      filtered = filtered.filter((school) => {
-        return school.vacancies && school.vacancies > 0;
-      });
-    }
-
     return filtered;
-  }, [searchQuery, schoolsWithDistances, selectedLevels, selectedManagement, hasDistances, maxDistanceFilter, showOnlyVacancies]);
+  }, [searchQuery, schoolsMatchingCriteria, hasDistances, maxDistanceFilter]);
 
   // When selecting from search bar - should center map
   const handleSelectSchool = (school: School) => {
@@ -252,7 +260,7 @@ const Index = () => {
         maxDistance={distanceRange.max}
         selectedDistance={maxDistanceFilter ?? distanceRange.max}
         onDistanceChange={setMaxDistanceFilter}
-        schoolDistances={schoolsWithDistances
+        schoolDistances={schoolsMatchingCriteria
           .map(s => s.distanceInKm)
           .filter((d): d is number => d !== undefined)}
         showOnlyVacancies={showOnlyVacancies}
