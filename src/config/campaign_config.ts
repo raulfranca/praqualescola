@@ -17,12 +17,4 @@ export const CAMPAIGNS: CampaignConfig[] = [
     vacancyColumnHeader: "VAGAS_REMO"
   },
   // Add future campaigns here - first active campaign in the array takes priority
-  {
-    campaignId: "blank",
-    title: "Remoção 2025",
-    bannerMessage: "Vagas para Remoção 2025 disponíveis",
-    startsAt: "2025-01-01T00:00:00Z",
-    endsAt: "2025-12-31T23:59:59Z",
-    vacancyColumnHeader: "VAGAS_REMO"
-  },
 ];
