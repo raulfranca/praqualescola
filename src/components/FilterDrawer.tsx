@@ -4,6 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { DistanceHistogram } from "@/components/DistanceHistogram";
 import { useCampaign } from "@/hooks/useCampaign";
 import {
@@ -17,6 +18,23 @@ import {
 
 export type SchoolLevel = "creche" | "pre" | "fundamental";
 export type ManagementType = "prefeitura" | "terceirizada";
+export type FilterMetric = "distance" | "time";
+
+/**
+ * Format duration in minutes to "Xh Ymin" or "X min"
+ * Examples: 55 -> "55 min", 66 -> "1h 06min", 125 -> "2h 05min"
+ */
+function formatDuration(totalMinutes: number): string {
+  if (totalMinutes < 60) {
+    return `${Math.round(totalMinutes)} min`;
+  }
+  
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = Math.round(totalMinutes % 60);
+  const paddedMinutes = minutes.toString().padStart(2, '0');
+  
+  return `${hours}h ${paddedMinutes}min`;
+}
 
 interface FilterDrawerProps {
   open: boolean;
@@ -26,13 +44,21 @@ interface FilterDrawerProps {
   selectedManagement: ManagementType[];
   onManagementChange: (management: ManagementType[]) => void;
   schoolCount: number;
-  // Distance filter props (only when home location is set)
+  // Distance/Time filter props (only when home location is set)
   hasHomeLocation?: boolean;
   minDistance?: number;
   maxDistance?: number;
   selectedDistance?: number;
   onDistanceChange?: (distance: number) => void;
   schoolDistances?: number[];
+  minDuration?: number;
+  maxDuration?: number;
+  selectedDuration?: number;
+  onDurationChange?: (duration: number) => void;
+  schoolDurations?: number[];
+  globalHistogramMax?: number;
+  filterMetric?: FilterMetric;
+  onMetricChange?: (metric: FilterMetric) => void;
   // Campaign filter props
   showOnlyVacancies?: boolean;
   onVacanciesChange?: (showOnly: boolean) => void;
@@ -52,12 +78,21 @@ export function FilterDrawer({
   selectedDistance = 10,
   onDistanceChange,
   schoolDistances = [],
+  minDuration = 0,
+  maxDuration = 30,
+  selectedDuration = 30,
+  onDurationChange,
+  schoolDurations = [],
+  globalHistogramMax = 1,
+  filterMetric = "distance",
+  onMetricChange,
   showOnlyVacancies = false,
   onVacanciesChange,
 }: FilterDrawerProps) {
   const { isActive, config } = useCampaign();
   // Local state for smooth slider dragging (visual only)
   const [localDistance, setLocalDistance] = useState(selectedDistance);
+  const [localDuration, setLocalDuration] = useState(selectedDuration);
   const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pendingValueRef = useRef<number | null>(null);
 
@@ -66,21 +101,20 @@ export function FilterDrawer({
     setLocalDistance(selectedDistance);
   }, [selectedDistance]);
 
+  useEffect(() => {
+    setLocalDuration(selectedDuration);
+  }, [selectedDuration]);
+
   // True throttling: updates happen continuously at intervals during drag (100ms = ~10 updates/sec)
   const handleDistanceChange = useCallback((value: number) => {
-    // Update local state immediately for smooth visual feedback
     setLocalDistance(value);
-
-    // Store the latest value for next throttle cycle
     pendingValueRef.current = value;
 
-    // If no throttle timer is active, apply immediately and start throttle period
     if (!throttleTimerRef.current) {
       onDistanceChange?.(value);
       pendingValueRef.current = null;
       
       throttleTimerRef.current = setTimeout(() => {
-        // Apply pending value if one exists
         if (pendingValueRef.current !== null) {
           onDistanceChange?.(pendingValueRef.current);
           pendingValueRef.current = null;
@@ -89,6 +123,24 @@ export function FilterDrawer({
       }, 100);
     }
   }, [onDistanceChange]);
+
+  const handleDurationChange = useCallback((value: number) => {
+    setLocalDuration(value);
+    pendingValueRef.current = value;
+
+    if (!throttleTimerRef.current) {
+      onDurationChange?.(value);
+      pendingValueRef.current = null;
+      
+      throttleTimerRef.current = setTimeout(() => {
+        if (pendingValueRef.current !== null) {
+          onDurationChange?.(pendingValueRef.current);
+          pendingValueRef.current = null;
+        }
+        throttleTimerRef.current = null;
+      }, 100);
+    }
+  }, [onDurationChange]);
 
   // Cleanup throttle timer on unmount
   useEffect(() => {
@@ -118,9 +170,10 @@ export function FilterDrawer({
   const clearAll = () => {
     onLevelsChange(["creche", "pre", "fundamental"]);
     onManagementChange(["prefeitura", "terceirizada"]);
-    // Reset distance to max (show all)
-    if (onDistanceChange && hasHomeLocation) {
-      onDistanceChange(maxDistance);
+    // Reset distance/duration to max (show all)
+    if (hasHomeLocation) {
+      if (onDistanceChange) onDistanceChange(maxDistance);
+      if (onDurationChange) onDurationChange(maxDuration);
     }
     // Reset campaign filter
     if (onVacanciesChange) {
@@ -211,34 +264,92 @@ export function FilterDrawer({
               </div>
             </div>
 
-            {hasHomeLocation && onDistanceChange && (
+            {hasHomeLocation && (onDistanceChange || onDurationChange) && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Distância</h3>
+                <div className="flex items-center justify-between -ml-0.5">
+                  <ToggleGroup
+                    type="single"
+                    value={filterMetric}
+                    onValueChange={(value) => {
+                      if (value) onMetricChange?.(value as FilterMetric);
+                    }}
+                    className="inline-flex bg-muted border border-border p-0.5 rounded-lg gap-0.5"
+                  >
+                    <ToggleGroupItem
+                      value="distance"
+                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-primary data-[state=on]:shadow-md data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
+                    >
+                      Distância
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                      value="time"
+                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-purple data-[state=on]:shadow-md data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
+                    >
+                      Tempo
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                  
                   <span className="text-sm font-medium text-muted-foreground">
-                    Até {localDistance.toFixed(1)} km
+                    {filterMetric === "distance" 
+                      ? `Até ${localDistance.toFixed(1)} km`
+                      : `Até ${formatDuration(localDuration)}`
+                    }
                   </span>
                 </div>
                 
                 <div className="px-2">
-                  {schoolDistances.length > 0 && (
+                  {filterMetric === "distance" && schoolDistances.length > 0 && (
                     <DistanceHistogram
                       distances={schoolDistances}
                       minDistance={minDistance}
                       maxDistance={maxDistance}
+                      globalMax={globalHistogramMax}
+                      metric="distance"
                     />
                   )}
-                  <Slider
-                    value={[localDistance]}
-                    onValueChange={(value) => handleDistanceChange(value[0])}
-                    min={minDistance}
-                    max={maxDistance}
-                    step={0.1}
-                    className="w-full"
-                  />
+                  {filterMetric === "time" && schoolDurations.length > 0 && (
+                    <DistanceHistogram
+                      distances={schoolDurations}
+                      minDistance={minDuration}
+                      maxDistance={maxDuration}
+                      globalMax={globalHistogramMax}
+                      metric="time"
+                    />
+                  )}
+                  
+                  {filterMetric === "distance" && onDistanceChange && (
+                    <Slider
+                      value={[localDistance]}
+                      onValueChange={(value) => handleDistanceChange(value[0])}
+                      min={minDistance}
+                      max={maxDistance}
+                      step={0.1}
+                      className="w-full"
+                    />
+                  )}
+                  {filterMetric === "time" && onDurationChange && (
+                    <Slider
+                      value={[localDuration]}
+                      onValueChange={(value) => handleDurationChange(value[0])}
+                      min={minDuration}
+                      max={maxDuration}
+                      step={1}
+                      className="w-full [&_[role=slider]]:border-purple [&_.bg-primary]:bg-purple"
+                    />
+                  )}
+                  
                   <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                    <span>{minDistance.toFixed(1)} km</span>
-                    <span>{maxDistance.toFixed(1)} km</span>
+                    {filterMetric === "distance" ? (
+                      <>
+                        <span>{minDistance.toFixed(1)} km</span>
+                        <span>{maxDistance.toFixed(1)} km</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>{formatDuration(minDuration)}</span>
+                        <span>{formatDuration(maxDuration)}</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

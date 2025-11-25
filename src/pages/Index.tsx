@@ -5,7 +5,7 @@ import { MapView } from "@/components/MapView";
 import { HomeLocationInput } from "@/components/HomeLocationInput";
 import { SchoolDetailModal } from "@/components/SchoolDetailModal";
 import { CampaignBanner } from "@/components/CampaignBanner";
-import { FilterDrawer, SchoolLevel, ManagementType } from "@/components/FilterDrawer";
+import { FilterDrawer, SchoolLevel, ManagementType, FilterMetric } from "@/components/FilterDrawer";
 import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
@@ -21,6 +21,8 @@ const Index = () => {
   const [selectedLevels, setSelectedLevels] = useState<SchoolLevel[]>(["creche", "pre", "fundamental"]);
   const [selectedManagement, setSelectedManagement] = useState<ManagementType[]>(["prefeitura", "terceirizada"]);
   const [maxDistanceFilter, setMaxDistanceFilter] = useState<number | null>(null);
+  const [maxDurationFilter, setMaxDurationFilter] = useState<number | null>(null);
+  const [filterMetric, setFilterMetric] = useState<FilterMetric>("distance");
   const [showOnlyVacancies, setShowOnlyVacancies] = useState(false);
   const { schools, loading } = useSchoolsData();
   const { favorites, toggleFavorite } = useFavorites();
@@ -76,28 +78,71 @@ const Index = () => {
     };
   }, [schoolsWithDistances, hasDistances]);
 
-  // Reset distance filter to max whenever home location changes
+  // Calculate duration range for slider
+  const durationRange = useMemo(() => {
+    if (!hasDistances || schoolsWithDistances.length === 0) {
+      return { min: 0, max: 30 };
+    }
+    
+    const durations = schoolsWithDistances
+      .map(s => s.durationInMinutes)
+      .filter((d): d is number => d !== undefined);
+    
+    if (durations.length === 0) {
+      return { min: 0, max: 30 };
+    }
+    
+    const min = Math.min(...durations);
+    const max = Math.max(...durations);
+    
+    return { 
+      min: Math.floor(min),
+      max: Math.ceil(max)
+    };
+  }, [schoolsWithDistances, hasDistances]);
+
+  // Calculate global histogram max for absolute scaling (using ALL schools, not filtered)
+  const globalHistogramMax = useMemo(() => {
+    if (!hasDistances || schoolsWithDistances.length === 0) {
+      return 1;
+    }
+
+    const bucketCount = 25;
+    const range = filterMetric === "distance" ? distanceRange : durationRange;
+    const bucketSize = (range.max - range.min) / bucketCount;
+    const bucketArray = new Array(bucketCount).fill(0);
+
+    schoolsWithDistances.forEach((school) => {
+      const value = filterMetric === "distance" ? school.distanceInKm : school.durationInMinutes;
+      if (value !== undefined) {
+        const bucketIndex = Math.min(
+          Math.floor((value - range.min) / bucketSize),
+          bucketCount - 1
+        );
+        if (bucketIndex >= 0) {
+          bucketArray[bucketIndex]++;
+        }
+      }
+    });
+
+    return Math.max(...bucketArray, 1);
+  }, [schoolsWithDistances, distanceRange, durationRange, filterMetric, hasDistances]);
+
+  // Reset distance/duration filter to max whenever home location or metric changes
   useEffect(() => {
     if (hasDistances) {
       setMaxDistanceFilter(distanceRange.max);
+      setMaxDurationFilter(durationRange.max);
     } else {
       setMaxDistanceFilter(null);
+      setMaxDurationFilter(null);
     }
-  }, [homeLocation, hasDistances, distanceRange.max]);
+  }, [homeLocation, hasDistances, distanceRange.max, durationRange.max]);
 
-  const filteredSchools = useMemo(() => {
+  // Master filtered list: applies Level, Management, and Campaign filters (NOT distance)
+  // This represents "all eligible schools regardless of distance" for histogram and future UI counters
+  const schoolsMatchingCriteria = useMemo(() => {
     let filtered = schoolsWithDistances;
-
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (school) =>
-          school.name.toLowerCase().includes(query) ||
-          school.address.toLowerCase().includes(query) ||
-          school.neighborhood.toLowerCase().includes(query)
-      );
-    }
 
     // Apply filters with exception rule
     filtered = filtered.filter((school) => {
@@ -120,15 +165,6 @@ const Index = () => {
       return matchesLevel && matchesManagement;
     });
 
-    // Apply distance filter (only when home location is set)
-    if (hasDistances && maxDistanceFilter !== null) {
-      filtered = filtered.filter((school) => {
-        // Schools without distance data are excluded when filter is active
-        if (school.distanceInKm === undefined) return false;
-        return school.distanceInKm <= maxDistanceFilter;
-      });
-    }
-
     // Apply campaign vacancy filter
     if (showOnlyVacancies) {
       filtered = filtered.filter((school) => {
@@ -137,7 +173,39 @@ const Index = () => {
     }
 
     return filtered;
-  }, [searchQuery, schoolsWithDistances, selectedLevels, selectedManagement, hasDistances, maxDistanceFilter, showOnlyVacancies]);
+  }, [schoolsWithDistances, selectedLevels, selectedManagement, showOnlyVacancies]);
+
+  const filteredSchools = useMemo(() => {
+    let filtered = schoolsMatchingCriteria;
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (school) =>
+          school.name.toLowerCase().includes(query) ||
+          school.address.toLowerCase().includes(query) ||
+          school.neighborhood.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply distance/duration filter (only when home location is set)
+    if (hasDistances) {
+      if (filterMetric === "distance" && maxDistanceFilter !== null) {
+        filtered = filtered.filter((school) => {
+          if (school.distanceInKm === undefined) return false;
+          return school.distanceInKm <= maxDistanceFilter;
+        });
+      } else if (filterMetric === "time" && maxDurationFilter !== null) {
+        filtered = filtered.filter((school) => {
+          if (school.durationInMinutes === undefined) return false;
+          return school.durationInMinutes <= maxDurationFilter;
+        });
+      }
+    }
+
+    return filtered;
+  }, [searchQuery, schoolsMatchingCriteria, hasDistances, maxDistanceFilter, maxDurationFilter, filterMetric]);
 
   // When selecting from search bar - should center map
   const handleSelectSchool = (school: School) => {
@@ -192,7 +260,8 @@ const Index = () => {
               hasActiveFilters={
                 selectedLevels.length < 3 || 
                 selectedManagement.length < 2 ||
-                (hasDistances && maxDistanceFilter !== null && maxDistanceFilter < distanceRange.max) ||
+                (hasDistances && filterMetric === "distance" && maxDistanceFilter !== null && maxDistanceFilter < distanceRange.max) ||
+                (hasDistances && filterMetric === "time" && maxDurationFilter !== null && maxDurationFilter < durationRange.max) ||
                 showOnlyVacancies
               }
             />
@@ -252,9 +321,19 @@ const Index = () => {
         maxDistance={distanceRange.max}
         selectedDistance={maxDistanceFilter ?? distanceRange.max}
         onDistanceChange={setMaxDistanceFilter}
-        schoolDistances={schoolsWithDistances
+        schoolDistances={schoolsMatchingCriteria
           .map(s => s.distanceInKm)
           .filter((d): d is number => d !== undefined)}
+        minDuration={durationRange.min}
+        maxDuration={durationRange.max}
+        selectedDuration={maxDurationFilter ?? durationRange.max}
+        onDurationChange={setMaxDurationFilter}
+        schoolDurations={schoolsMatchingCriteria
+          .map(s => s.durationInMinutes)
+          .filter((d): d is number => d !== undefined)}
+        globalHistogramMax={globalHistogramMax}
+        filterMetric={filterMetric}
+        onMetricChange={setFilterMetric}
         showOnlyVacancies={showOnlyVacancies}
         onVacanciesChange={setShowOnlyVacancies}
       />

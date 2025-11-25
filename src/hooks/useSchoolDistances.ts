@@ -1,16 +1,21 @@
 import { useState, useEffect, useMemo } from "react";
 import { School } from "@/types/school";
 import { HomeLocation } from "@/hooks/useHomeLocation";
-import { calculateHaversineDistance, sortSchoolsByDistance } from "@/lib/distanceCalculator";
+import { sortSchoolsByDistance } from "@/lib/distanceCalculator";
+import { calculateDistancesForSchools } from "@/lib/distanceMatrix";
 
 const DISTANCES_STORAGE_KEY = "school-distances";
 
 interface SchoolDistances {
-  [schoolId: number]: number; // schoolId -> distanceInKm
+  [schoolId: number]: {
+    distanceInKm: number;
+    durationInMinutes?: number;
+  };
 }
 
 export interface SchoolWithDistance extends School {
   distanceInKm?: number;
+  durationInMinutes?: number;
 }
 
 /**
@@ -39,37 +44,49 @@ export function useSchoolDistances(
     }
 
     console.log("🏠 Home location set:", homeLocation.address);
-    console.log("📍 Calculating distances for", schools.length, "schools...");
+    console.log("📍 Starting driving distance calculation for", schools.length, "schools...");
 
-    const newDistances: SchoolDistances = {};
-    
-    schools.forEach((school) => {
-      const distance = calculateHaversineDistance(
-        homeLocation.lat,
-        homeLocation.lng,
-        school.lat,
-        school.lng
-      );
-      newDistances[school.id] = distance;
-      
-      // Log first 5 schools for verification
-      if (Object.keys(newDistances).length <= 5) {
-        console.log(`📏 ${school.name}: ${distance} km`);
+    const calculateDrivingDistances = async () => {
+      try {
+        const results = await calculateDistancesForSchools(
+          { lat: homeLocation.lat, lng: homeLocation.lng },
+          schools.map(s => ({ id: s.id, lat: s.lat, lng: s.lng, name: s.name }))
+        );
+
+        const newDistances: SchoolDistances = {};
+        results.forEach((result) => {
+          newDistances[result.schoolId] = {
+            distanceInKm: result.distanceInKm,
+            durationInMinutes: result.durationInMinutes,
+          };
+        });
+
+        // Log first 5 schools for verification
+        const firstFive = results.slice(0, 5);
+        firstFive.forEach((result) => {
+          const method = result.usedFallback ? "(fallback)" : "(API)";
+          console.log(`📏 School ${result.schoolId}: ${result.distanceInKm} km ${method}`);
+        });
+
+        console.log("✅ Driving distance calculation complete!");
+        console.log("💾 Saving to localStorage...");
+        
+        setDistances(newDistances);
+        localStorage.setItem(DISTANCES_STORAGE_KEY, JSON.stringify(newDistances));
+      } catch (error) {
+        console.error("❌ Failed to calculate distances:", error);
       }
-    });
+    };
 
-    console.log("✅ Distance calculation complete!");
-    console.log("💾 Saving to localStorage...");
-    
-    setDistances(newDistances);
-    localStorage.setItem(DISTANCES_STORAGE_KEY, JSON.stringify(newDistances));
+    calculateDrivingDistances();
   }, [homeLocation, schools]);
 
-  // Enrich schools with distance data
+  // Enrich schools with distance and duration data
   const schoolsWithDistances: SchoolWithDistance[] = useMemo(() => {
     return schools.map((school) => ({
       ...school,
-      distanceInKm: distances[school.id],
+      distanceInKm: distances[school.id]?.distanceInKm,
+      durationInMinutes: distances[school.id]?.durationInMinutes,
     }));
   }, [schools, distances]);
 
