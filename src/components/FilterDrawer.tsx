@@ -4,6 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { DistanceHistogram } from "@/components/DistanceHistogram";
 import { useCampaign } from "@/hooks/useCampaign";
 import {
@@ -266,25 +267,28 @@ export function FilterDrawer({
             {hasHomeLocation && (onDistanceChange || onDurationChange) && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => onMetricChange?.("distance")}
-                      className={`text-lg font-semibold transition-colors ${
-                        filterMetric === "distance" ? "text-foreground" : "text-muted-foreground"
-                      }`}
+                  <ToggleGroup
+                    type="single"
+                    value={filterMetric}
+                    onValueChange={(value) => {
+                      if (value) onMetricChange?.(value as FilterMetric);
+                    }}
+                    className="inline-flex bg-secondary p-1 rounded-full gap-1"
+                  >
+                    <ToggleGroupItem
+                      value="distance"
+                      className="rounded-full px-4 py-1.5 text-sm font-medium transition-all data-[state=on]:bg-white data-[state=on]:text-primary data-[state=on]:shadow-sm data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
                     >
                       Distância
-                    </button>
-                    <span className="text-muted-foreground">/</span>
-                    <button
-                      onClick={() => onMetricChange?.("time")}
-                      className={`text-lg font-semibold transition-colors ${
-                        filterMetric === "time" ? "text-foreground" : "text-muted-foreground"
-                      }`}
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                      value="time"
+                      className="rounded-full px-4 py-1.5 text-sm font-medium transition-all data-[state=on]:bg-white data-[state=on]:text-purple data-[state=on]:shadow-sm data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
                     >
                       Tempo
-                    </button>
-                  </div>
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                  
                   <span className="text-sm font-medium text-muted-foreground">
                     {filterMetric === "distance" 
                       ? `Até ${localDistance.toFixed(1)} km`
