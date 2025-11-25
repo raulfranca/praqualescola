@@ -23,6 +23,7 @@ export interface School {
   ano4?: number;
   ano5?: number;
   vacancies?: number;
+  durationInMinutes?: number;
 }
 
 export interface FavoriteSchool {

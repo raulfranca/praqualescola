@@ -53,6 +53,9 @@ All colors MUST be HSL.
     --fundamental: 180 51% 36%;
     --fundamental-foreground: 0 0% 100%;
     
+    --purple: 270 60% 60%;
+    --purple-foreground: 0 0% 100%;
+    
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
