@@ -33,6 +33,7 @@ interface FilterDrawerProps {
   selectedDistance?: number;
   onDistanceChange?: (distance: number) => void;
   schoolDistances?: number[];
+  globalHistogramMax?: number;
   // Campaign filter props
   showOnlyVacancies?: boolean;
   onVacanciesChange?: (showOnly: boolean) => void;
@@ -52,6 +53,7 @@ export function FilterDrawer({
   selectedDistance = 10,
   onDistanceChange,
   schoolDistances = [],
+  globalHistogramMax = 1,
   showOnlyVacancies = false,
   onVacanciesChange,
 }: FilterDrawerProps) {
@@ -226,6 +228,7 @@ export function FilterDrawer({
                       distances={schoolDistances}
                       minDistance={minDistance}
                       maxDistance={maxDistance}
+                      globalMax={globalHistogramMax}
                     />
                   )}
                   <Slider
