@@ -187,90 +187,85 @@ export function FilterDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[85vh] md:fixed md:right-6 md:top-24 md:w-[600px] md:h-auto md:rounded-xl md:shadow-2xl md:border md:max-h-[calc(100vh-8rem)]">
+      <DrawerContent className="max-h-[85vh]">
         <DrawerHeader className="border-b">
           <DrawerTitle className="text-2xl font-semibold">Filtros</DrawerTitle>
         </DrawerHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6 md:px-0 md:py-0">
-          {/* Campaign Filter Toggle (only visible when campaign is active) - Full width on all screens */}
-          {isActive && onVacanciesChange && (
-            <div className="space-y-4 pb-6 border-b md:px-6 md:pt-6 md:pb-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h3 className="text-lg font-semibold">{config.title}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Mostrar apenas escolas com vagas disponíveis
-                  </p>
-                </div>
-                <Switch
-                  checked={showOnlyVacancies}
-                  onCheckedChange={onVacanciesChange}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Two-column grid layout on desktop */}
-          <div className="space-y-6 md:grid md:grid-cols-2 md:divide-x md:space-y-0">
-            {/* LEFT COLUMN: Nível + Administração */}
-            <div className="space-y-6 md:p-5">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Nível</h3>
-                
-                <div className="flex flex-row gap-4 flex-wrap">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <Checkbox
-                      checked={selectedLevels.includes("creche")}
-                      onCheckedChange={() => toggleLevel("creche")}
-                    />
-                    <span className="text-base">Creche</span>
-                  </label>
-
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <Checkbox
-                      checked={selectedLevels.includes("pre")}
-                      onCheckedChange={() => toggleLevel("pre")}
-                    />
-                    <span className="text-base">Pré</span>
-                  </label>
-
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <Checkbox
-                      checked={selectedLevels.includes("fundamental")}
-                      onCheckedChange={() => toggleLevel("fundamental")}
-                    />
-                    <span className="text-base">Fundamental</span>
-                  </label>
+        <div className="flex-1 overflow-y-auto px-6 py-6">
+          <div className="space-y-6">
+            {/* Campaign Filter Toggle (only visible when campaign is active) */}
+            {isActive && onVacanciesChange && (
+              <div className="space-y-4 pb-6 border-b">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-semibold">{config.title}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Mostrar apenas escolas com vagas disponíveis
+                    </p>
+                  </div>
+                  <Switch
+                    checked={showOnlyVacancies}
+                    onCheckedChange={onVacanciesChange}
+                  />
                 </div>
               </div>
+            )}
 
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Administração</h3>
-                
-                <div className="flex flex-row gap-4 flex-wrap">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <Checkbox
-                      checked={selectedManagement.includes("prefeitura")}
-                      onCheckedChange={() => toggleManagement("prefeitura")}
-                    />
-                    <span className="text-base">Prefeitura</span>
-                  </label>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Nível</h3>
+              
+              <div className="flex flex-row gap-4 flex-wrap">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={selectedLevels.includes("creche")}
+                    onCheckedChange={() => toggleLevel("creche")}
+                  />
+                  <span className="text-base">Creche</span>
+                </label>
 
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <Checkbox
-                      checked={selectedManagement.includes("terceirizada")}
-                      onCheckedChange={() => toggleManagement("terceirizada")}
-                    />
-                    <span className="text-base">Terceirizada</span>
-                  </label>
-                </div>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={selectedLevels.includes("pre")}
+                    onCheckedChange={() => toggleLevel("pre")}
+                  />
+                  <span className="text-base">Pré</span>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={selectedLevels.includes("fundamental")}
+                    onCheckedChange={() => toggleLevel("fundamental")}
+                  />
+                  <span className="text-base">Fundamental</span>
+                </label>
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Distance/Time Toggle + Histogram + Slider */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Administração</h3>
+              
+              <div className="flex flex-row gap-4 flex-wrap">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={selectedManagement.includes("prefeitura")}
+                    onCheckedChange={() => toggleManagement("prefeitura")}
+                  />
+                  <span className="text-base">Prefeitura</span>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={selectedManagement.includes("terceirizada")}
+                    onCheckedChange={() => toggleManagement("terceirizada")}
+                  />
+                  <span className="text-base">Terceirizada</span>
+                </label>
+              </div>
+            </div>
+
             {hasHomeLocation && (onDistanceChange || onDurationChange) && (
-              <div className="space-y-4 md:p-5">
+              <div className="space-y-4">
                 <div className="flex items-center justify-between -ml-0.5">
                   <ToggleGroup
                     type="single"
@@ -362,7 +357,7 @@ export function FilterDrawer({
           </div>
         </div>
 
-        <DrawerFooter className="border-t bg-background px-6 py-4 md:px-6">
+        <DrawerFooter className="border-t bg-background px-6 py-4">
           <div className="flex items-center justify-between gap-4">
             <Button
               variant="ghost"
