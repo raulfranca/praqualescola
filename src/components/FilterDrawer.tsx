@@ -192,14 +192,14 @@ export function FilterDrawer({
           <DrawerTitle className="text-2xl font-semibold">Filtros</DrawerTitle>
         </DrawerHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6">
-          <div className="space-y-6">
+        <div className="flex-1 overflow-y-auto px-6 py-6 md:px-4 md:py-4">
+          <div className="space-y-6 md:space-y-3">
             {/* Campaign Filter Toggle (only visible when campaign is active) */}
             {isActive && onVacanciesChange && (
-              <div className="space-y-4 pb-6 border-b">
+              <div className="space-y-4 pb-6 border-b md:pb-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <h3 className="text-lg font-semibold">{config.title}</h3>
+                    <h3 className="text-lg font-semibold md:text-base">{config.title}</h3>
                     <p className="text-sm text-muted-foreground">
                       Mostrar apenas escolas com vagas disponíveis
                     </p>
@@ -212,60 +212,62 @@ export function FilterDrawer({
               </div>
             )}
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Nível</h3>
-              
-              <div className="flex flex-row gap-4 flex-wrap">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={selectedLevels.includes("creche")}
-                    onCheckedChange={() => toggleLevel("creche")}
-                  />
-                  <span className="text-base">Creche</span>
-                </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-4">
+              <div className="space-y-4 md:space-y-3">
+                <h3 className="text-lg font-semibold md:text-base">Nível</h3>
+                
+                <div className="flex flex-col gap-3 md:gap-2">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <Checkbox
+                      checked={selectedLevels.includes("creche")}
+                      onCheckedChange={() => toggleLevel("creche")}
+                    />
+                    <span className="text-base md:text-sm">Creche</span>
+                  </label>
 
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={selectedLevels.includes("pre")}
-                    onCheckedChange={() => toggleLevel("pre")}
-                  />
-                  <span className="text-base">Pré</span>
-                </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <Checkbox
+                      checked={selectedLevels.includes("pre")}
+                      onCheckedChange={() => toggleLevel("pre")}
+                    />
+                    <span className="text-base md:text-sm">Pré</span>
+                  </label>
 
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={selectedLevels.includes("fundamental")}
-                    onCheckedChange={() => toggleLevel("fundamental")}
-                  />
-                  <span className="text-base">Fundamental</span>
-                </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <Checkbox
+                      checked={selectedLevels.includes("fundamental")}
+                      onCheckedChange={() => toggleLevel("fundamental")}
+                    />
+                    <span className="text-base md:text-sm">Fundamental</span>
+                  </label>
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Administração</h3>
-              
-              <div className="flex flex-row gap-4 flex-wrap">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={selectedManagement.includes("prefeitura")}
-                    onCheckedChange={() => toggleManagement("prefeitura")}
-                  />
-                  <span className="text-base">Prefeitura</span>
-                </label>
+              <div className="space-y-4 md:space-y-3">
+                <h3 className="text-lg font-semibold md:text-base">Administração</h3>
+                
+                <div className="flex flex-col gap-3 md:gap-2">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <Checkbox
+                      checked={selectedManagement.includes("prefeitura")}
+                      onCheckedChange={() => toggleManagement("prefeitura")}
+                    />
+                    <span className="text-base md:text-sm">Prefeitura</span>
+                  </label>
 
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={selectedManagement.includes("terceirizada")}
-                    onCheckedChange={() => toggleManagement("terceirizada")}
-                  />
-                  <span className="text-base">Terceirizada</span>
-                </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <Checkbox
+                      checked={selectedManagement.includes("terceirizada")}
+                      onCheckedChange={() => toggleManagement("terceirizada")}
+                    />
+                    <span className="text-base md:text-sm">Terceirizada</span>
+                  </label>
+                </div>
               </div>
             </div>
 
             {hasHomeLocation && (onDistanceChange || onDurationChange) && (
-              <div className="space-y-4">
+              <div className="space-y-4 md:space-y-3">
                 <div className="flex items-center justify-between -ml-0.5">
                   <ToggleGroup
                     type="single"
@@ -299,22 +301,26 @@ export function FilterDrawer({
                 
                 <div className="px-2">
                   {filterMetric === "distance" && schoolDistances.length > 0 && (
-                    <DistanceHistogram
-                      distances={schoolDistances}
-                      minDistance={minDistance}
-                      maxDistance={maxDistance}
-                      globalMax={globalHistogramMax}
-                      metric="distance"
-                    />
+                    <div className="h-16 md:h-12">
+                      <DistanceHistogram
+                        distances={schoolDistances}
+                        minDistance={minDistance}
+                        maxDistance={maxDistance}
+                        globalMax={globalHistogramMax}
+                        metric="distance"
+                      />
+                    </div>
                   )}
                   {filterMetric === "time" && schoolDurations.length > 0 && (
-                    <DistanceHistogram
-                      distances={schoolDurations}
-                      minDistance={minDuration}
-                      maxDistance={maxDuration}
-                      globalMax={globalHistogramMax}
-                      metric="time"
-                    />
+                    <div className="h-16 md:h-12">
+                      <DistanceHistogram
+                        distances={schoolDurations}
+                        minDistance={minDuration}
+                        maxDistance={maxDuration}
+                        globalMax={globalHistogramMax}
+                        metric="time"
+                      />
+                    </div>
                   )}
                   
                   {filterMetric === "distance" && onDistanceChange && (
@@ -369,7 +375,7 @@ export function FilterDrawer({
             
             <Button
               onClick={applyFilters}
-              className="flex-1 bg-foreground text-background hover:bg-foreground/90 h-12 rounded-lg text-base font-semibold"
+              className="flex-1 bg-foreground text-background hover:bg-foreground/90 h-12 md:h-10 rounded-lg text-base md:text-sm font-semibold"
             >
               Mostrar {schoolCount} {schoolCount === 1 ? "escola" : "escolas"}
             </Button>
