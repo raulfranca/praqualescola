@@ -187,20 +187,20 @@ export function FilterDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[85vh]">
-        <DrawerHeader className="border-b">
-          <DrawerTitle className="text-2xl font-semibold">Filtros</DrawerTitle>
+      <DrawerContent className="max-h-[85vh] md:max-w-md lg:max-w-lg md:mx-auto">
+        <DrawerHeader className="border-b px-6 py-4 lg:px-4 lg:py-3">
+          <DrawerTitle className="text-2xl font-semibold lg:text-xl">Filtros</DrawerTitle>
         </DrawerHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6">
-          <div className="space-y-6">
+        <div className="flex-1 overflow-y-auto px-6 py-6 lg:px-4 lg:py-4">
+          <div className="space-y-6 lg:space-y-4">
             {/* Campaign Filter Toggle (only visible when campaign is active) */}
             {isActive && onVacanciesChange && (
-              <div className="space-y-4 pb-6 border-b">
+              <div className="space-y-4 pb-6 border-b lg:space-y-3 lg:pb-4">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-semibold">{config.title}</h3>
-                    <p className="text-sm text-muted-foreground">
+                  <div className="space-y-1 lg:space-y-0.5">
+                    <h3 className="text-lg font-semibold lg:text-base">{config.title}</h3>
+                    <p className="text-sm text-muted-foreground lg:text-xs">
                       Mostrar apenas escolas com vagas disponíveis
                     </p>
                   </div>
@@ -212,16 +212,16 @@ export function FilterDrawer({
               </div>
             )}
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Nível</h3>
+            <div className="space-y-4 lg:space-y-3">
+              <h3 className="text-lg font-semibold lg:text-base">Nível</h3>
               
-              <div className="flex flex-row gap-4 flex-wrap">
+              <div className="flex flex-row gap-4 flex-wrap lg:gap-3">
                 <label className="flex items-center gap-3 cursor-pointer">
                   <Checkbox
                     checked={selectedLevels.includes("creche")}
                     onCheckedChange={() => toggleLevel("creche")}
                   />
-                  <span className="text-base">Creche</span>
+                  <span className="text-base lg:text-sm">Creche</span>
                 </label>
 
                 <label className="flex items-center gap-3 cursor-pointer">
@@ -229,7 +229,7 @@ export function FilterDrawer({
                     checked={selectedLevels.includes("pre")}
                     onCheckedChange={() => toggleLevel("pre")}
                   />
-                  <span className="text-base">Pré</span>
+                  <span className="text-base lg:text-sm">Pré</span>
                 </label>
 
                 <label className="flex items-center gap-3 cursor-pointer">
@@ -237,21 +237,21 @@ export function FilterDrawer({
                     checked={selectedLevels.includes("fundamental")}
                     onCheckedChange={() => toggleLevel("fundamental")}
                   />
-                  <span className="text-base">Fundamental</span>
+                  <span className="text-base lg:text-sm">Fundamental</span>
                 </label>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Administração</h3>
+            <div className="space-y-4 lg:space-y-3">
+              <h3 className="text-lg font-semibold lg:text-base">Administração</h3>
               
-              <div className="flex flex-row gap-4 flex-wrap">
+              <div className="flex flex-row gap-4 flex-wrap lg:gap-3">
                 <label className="flex items-center gap-3 cursor-pointer">
                   <Checkbox
                     checked={selectedManagement.includes("prefeitura")}
                     onCheckedChange={() => toggleManagement("prefeitura")}
                   />
-                  <span className="text-base">Prefeitura</span>
+                  <span className="text-base lg:text-sm">Prefeitura</span>
                 </label>
 
                 <label className="flex items-center gap-3 cursor-pointer">
@@ -259,13 +259,13 @@ export function FilterDrawer({
                     checked={selectedManagement.includes("terceirizada")}
                     onCheckedChange={() => toggleManagement("terceirizada")}
                   />
-                  <span className="text-base">Terceirizada</span>
+                  <span className="text-base lg:text-sm">Terceirizada</span>
                 </label>
               </div>
             </div>
 
             {hasHomeLocation && (onDistanceChange || onDurationChange) && (
-              <div className="space-y-4">
+              <div className="space-y-4 lg:space-y-3">
                 <div className="flex items-center justify-between -ml-0.5">
                   <ToggleGroup
                     type="single"
@@ -273,23 +273,23 @@ export function FilterDrawer({
                     onValueChange={(value) => {
                       if (value) onMetricChange?.(value as FilterMetric);
                     }}
-                    className="inline-flex bg-muted border border-border p-0.5 rounded-lg gap-0.5"
+                    className="inline-flex bg-muted border border-border p-0.5 rounded-lg gap-0.5 lg:p-0.5"
                   >
                     <ToggleGroupItem
                       value="distance"
-                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-primary data-[state=on]:shadow-md data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
+                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-primary data-[state=on]:shadow-md data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent lg:px-4 lg:py-1.5 lg:text-base"
                     >
                       Distância
                     </ToggleGroupItem>
                     <ToggleGroupItem
                       value="time"
-                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-purple data-[state=on]:shadow-md data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
+                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-purple data-[state=on]:shadow-md data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent lg:px-4 lg:py-1.5 lg:text-base"
                     >
                       Tempo
                     </ToggleGroupItem>
                   </ToggleGroup>
                   
-                  <span className="text-sm font-medium text-muted-foreground">
+                  <span className="text-sm font-medium text-muted-foreground lg:text-xs">
                     {filterMetric === "distance" 
                       ? `Até ${localDistance.toFixed(1)} km`
                       : `Até ${formatDuration(localDuration)}`
@@ -357,19 +357,19 @@ export function FilterDrawer({
           </div>
         </div>
 
-        <DrawerFooter className="border-t bg-background px-6 py-4">
-          <div className="flex items-center justify-between gap-4">
+        <DrawerFooter className="border-t bg-background px-6 py-4 lg:px-4 lg:py-3">
+          <div className="flex items-center justify-between gap-4 lg:gap-3">
             <Button
               variant="ghost"
               onClick={clearAll}
-              className="text-base underline"
+              className="text-base underline lg:text-sm"
             >
               Limpar tudo
             </Button>
             
             <Button
               onClick={applyFilters}
-              className="flex-1 bg-foreground text-background hover:bg-foreground/90 h-12 rounded-lg text-base font-semibold"
+              className="flex-1 bg-foreground text-background hover:bg-foreground/90 h-12 rounded-lg text-base font-semibold lg:h-10 lg:text-sm"
             >
               Mostrar {schoolCount} {schoolCount === 1 ? "escola" : "escolas"}
             </Button>
