@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { GoogleMap, Marker } from "@react-google-maps/api";
 import { School } from "@/types/school";
 import { HomeLocation } from "@/hooks/useHomeLocation";
+import { trackEvent } from "@/lib/analytics";
 
 interface MapViewProps {
   schools: School[];
@@ -61,6 +62,14 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
   }, []);
 
   const onMarkerClick = useCallback((school: School) => {
+    // Track school view from map pin
+    trackEvent('view_item', {
+      item_id: school.id,
+      item_name: school.name,
+      item_category: school.type,
+      source: 'map_pin'
+    });
+    
     onSchoolClick(school);
   }, [onSchoolClick]);
 

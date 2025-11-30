@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { School } from "@/types/school";
 import { useState, useRef, useEffect } from "react";
 import { removeAccents } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 interface SearchBarProps {
   value: string;
@@ -47,6 +48,20 @@ export function SearchBar({ value, onChange, schools, onSelectSchool }: SearchBa
   }, []);
 
   const handleSelectSchool = (school: School) => {
+    // Track school view from search bar
+    trackEvent('view_item', {
+      item_id: school.id,
+      item_name: school.name,
+      item_category: school.type,
+      source: 'search_bar'
+    });
+    
+    // Track the search term that led to this selection
+    trackEvent('search', {
+      search_term: value,
+      item_selected: school.name
+    });
+    
     onSelectSchool(school);
     onChange("");
     setIsOpen(false);

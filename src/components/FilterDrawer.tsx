@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { DistanceHistogram } from "@/components/DistanceHistogram";
 import { useCampaign } from "@/hooks/useCampaign";
+import { trackEvent } from "@/lib/analytics";
 import {
   Drawer,
   DrawerClose,
@@ -182,6 +183,17 @@ export function FilterDrawer({
   };
 
   const applyFilters = () => {
+    // Track filter application
+    trackEvent('apply_filters', {
+      levels: selectedLevels.join(','),
+      management: selectedManagement.join(','),
+      metric: filterMetric,
+      has_distance_filter: hasHomeLocation && (
+        filterMetric === 'distance' ? selectedDistance < maxDistance : selectedDuration < maxDuration
+      ),
+      campaign_filter_active: showOnlyVacancies
+    });
+    
     onOpenChange(false);
   };
 
