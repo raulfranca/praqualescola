@@ -7,6 +7,7 @@ import { useHomeLocation } from "@/hooks/useHomeLocation";
 import { useCampaign } from "@/hooks/useCampaign";
 import { School } from "@/types/school";
 import { Megaphone, X } from "lucide-react";
+import { trackPageView } from "@/lib/analytics";
 const Favoritos = () => {
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
   const [tipDismissed, setTipDismissed] = useState(false);
@@ -32,6 +33,11 @@ const Favoritos = () => {
   useEffect(() => {
     const dismissed = localStorage.getItem("favoritosTipDismissed");
     setTipDismissed(dismissed === "true");
+  }, []);
+
+  // Track page view
+  useEffect(() => {
+    trackPageView('/favoritos', 'Favoritos - Lista de Prioridades');
   }, []);
 
   const handleDismissTip = () => {
