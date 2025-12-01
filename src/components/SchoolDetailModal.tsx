@@ -10,6 +10,7 @@ import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, Dr
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { trackEvent } from "@/lib/analytics";
 interface SchoolDetailModalProps {
   school: School | null;
   isFavorite: boolean;
@@ -54,6 +55,13 @@ export function SchoolDetailModal({
   }, [homeLocation, school?.lat, school?.lng]);
   const handleOpenInMaps = () => {
     if (!school?.address) return;
+    
+    // Track directions view
+    trackEvent('view_directions', {
+      school_id: school.id,
+      school_name: school.name
+    });
+    
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(school.address)}`;
     window.open(mapsUrl, "_blank");
   };
@@ -180,7 +188,21 @@ export function SchoolDetailModal({
 
       {/* Botões */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4 pb-4">
-        <Button onClick={() => onToggleFavorite(school.id)} variant={isFavorite ? "default" : "outline"} className={`flex items-center justify-center gap-2 ${isFavorite ? "bg-amber-500 text-white hover:bg-amber-600" : ""}`}>
+        <Button 
+          onClick={() => {
+            // Track adding to favorites (not removal)
+            if (!isFavorite) {
+              trackEvent('add_to_wishlist', {
+                school_id: school.id,
+                school_name: school.name,
+                school_type: school.type
+              });
+            }
+            onToggleFavorite(school.id);
+          }} 
+          variant={isFavorite ? "default" : "outline"} 
+          className={`flex items-center justify-center gap-2 ${isFavorite ? "bg-amber-500 text-white hover:bg-amber-600" : ""}`}
+        >
           <Star className={`w-4 h-4 sm:w-5 sm:h-5 ${isFavorite ? "fill-white" : ""}`} />
           <span className="whitespace-nowrap">{isFavorite ? "Remover dos Favoritos" : "Adicionar aos Favoritos"}</span>
         </Button>

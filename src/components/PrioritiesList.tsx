@@ -9,6 +9,7 @@ import { useCampaign } from "@/hooks/useCampaign";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { trackEvent } from "@/lib/analytics";
 interface PrioritiesListProps {
   schools: School[];
   favorites: number[];
@@ -173,6 +174,14 @@ export function PrioritiesList({
     if (over && active.id !== over.id) {
       const oldIndex = favorites.indexOf(active.id as number);
       const newIndex = favorites.indexOf(over.id as number);
+      
+      // Track reordering
+      trackEvent('reorder_favorites', {
+        school_id: active.id,
+        old_position: oldIndex + 1,
+        new_position: newIndex + 1
+      });
+      
       onReorder(arrayMove(favorites, oldIndex, newIndex));
     }
   };
