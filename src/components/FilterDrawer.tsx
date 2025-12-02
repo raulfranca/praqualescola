@@ -309,7 +309,7 @@ export function FilterDrawer({
                   </span>
                 </div>
                 
-                <div className="px-2">
+                <div className="px-6 md:px-2">
                   {filterMetric === "distance" && schoolDistances.length > 0 && (
                     <DistanceHistogram
                       distances={schoolDistances}
