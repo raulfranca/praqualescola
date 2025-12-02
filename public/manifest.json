@@ -1,6 +1,6 @@
 {
-  "name": "Pra Que Escola Eu Vou?",
-  "short_name": "Escolas",
+  "name": "Pra Qual Escola",
+  "short_name": "Pra Qual Escola",
   "description": "Organize suas prioridades de escolas para atribuição de aulas",
   "start_url": "/",
   "display": "standalone",

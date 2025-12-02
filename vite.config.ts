@@ -43,8 +43,8 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       manifest: {
-        name: "PraQualEscola",
-        short_name: "PraQualEscola",
+        name: "Pra Qual Escola",
+        short_name: "Pra Qual Escola",
         description: "Encontre e compare escolas públicas de Pindamonhangaba",
         theme_color: "#1ba3c6",
         background_color: "#ffffff",
