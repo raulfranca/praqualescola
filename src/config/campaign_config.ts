@@ -25,8 +25,8 @@ export const CAMPAIGNS: CampaignConfig[] = [
     vacancyColumnHeader: "VAGAS_REMO",
   },
   {
-    campaignId: "vagas-sede-2025",
-    title: "Vagas para Sede 2025",
+    campaignId: "vagas-sede-2026",
+    title: "Vagas para Sede 2026",
     bannerMessage: "Vagas para sede disponíveis!",
     startsAt: "2025-12-01T00:00:00Z",
     endsAt: "2025-12-22T17:00:00Z",
