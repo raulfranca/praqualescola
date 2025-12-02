@@ -24,5 +24,13 @@ export const CAMPAIGNS: CampaignConfig[] = [
     endsAt: "2025-11-28T07:00:00Z",
     vacancyColumnHeader: "VAGAS_REMO",
   },
+  {
+    campaignId: "vagas-sede-2025",
+    title: "Vagas para Sede 2025",
+    bannerMessage: "Vagas para sede disponíveis!",
+    startsAt: "2025-12-01T00:00:00Z",
+    endsAt: "2025-12-22T17:00:00Z",
+    vacancyColumnHeader: "VAGAS_SEDE",
+  },
   // Add future campaigns here - first active campaign in the array takes priority
 ];
