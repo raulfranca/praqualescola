@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { SchoolListCard } from "@/components/SchoolListCard";
 import { SchoolDetailModal } from "@/components/SchoolDetailModal";
 import { SearchBar } from "@/components/SearchBar";
-import { ActionChips } from "@/components/ActionChips";
+import { ActionChips, SortOption } from "@/components/ActionChips";
 import { HomeLocationInput } from "@/components/HomeLocationInput";
 import { CampaignBanner } from "@/components/CampaignBanner";
 import { FilterDrawer, SchoolLevel, ManagementType, FilterMetric } from "@/components/FilterDrawer";
@@ -10,6 +10,7 @@ import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
 import { useSchoolDistances } from "@/hooks/useSchoolDistances";
+import { useCampaign } from "@/hooks/useCampaign";
 import { School } from "@/types/school";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -24,9 +25,11 @@ const Lista = () => {
   const [maxDurationFilter, setMaxDurationFilter] = useState<number | null>(null);
   const [filterMetric, setFilterMetric] = useState<FilterMetric>("distance");
   const [showOnlyVacancies, setShowOnlyVacancies] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("default");
   const { schools, loading } = useSchoolsData();
   const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
+  const { isActive: hasCampaign } = useCampaign();
 
   const { schoolsWithDistances, hasDistances } = useSchoolDistances(schools, homeLocation);
 
@@ -152,15 +155,33 @@ const Lista = () => {
     return filtered;
   }, [searchQuery, schoolsMatchingCriteria, hasDistances, maxDistanceFilter, maxDurationFilter, filterMetric]);
 
-  // Sort by distance when home location is set
+  // Sort schools based on sortBy selection
   const sortedSchools = useMemo(() => {
-    if (!hasDistances) return filteredSchools;
-    return [...filteredSchools].sort((a, b) => {
-      const distA = a.distanceInKm ?? Infinity;
-      const distB = b.distanceInKm ?? Infinity;
-      return distA - distB;
-    });
-  }, [filteredSchools, hasDistances]);
+    const schoolsToSort = [...filteredSchools];
+    
+    switch (sortBy) {
+      case "alphabetical":
+        return schoolsToSort.sort((a, b) => 
+          `${a.type} ${a.name}`.localeCompare(`${b.type} ${b.name}`, 'pt-BR')
+        );
+      case "vacancies":
+        return schoolsToSort.sort((a, b) => 
+          (b.vacancies ?? 0) - (a.vacancies ?? 0)
+        );
+      case "distance":
+        if (!hasDistances) return schoolsToSort;
+        return schoolsToSort.sort((a, b) => 
+          (a.distanceInKm ?? Infinity) - (b.distanceInKm ?? Infinity)
+        );
+      case "time":
+        if (!hasDistances) return schoolsToSort;
+        return schoolsToSort.sort((a, b) => 
+          (a.durationInMinutes ?? Infinity) - (b.durationInMinutes ?? Infinity)
+        );
+      default:
+        return schoolsToSort;
+    }
+  }, [filteredSchools, sortBy, hasDistances]);
 
   const handleShowVacanciesFromBanner = () => {
     setShowOnlyVacancies(true);
@@ -202,6 +223,10 @@ const Lista = () => {
                 (hasDistances && filterMetric === "time" && maxDurationFilter !== null && maxDurationFilter < durationRange.max) ||
                 showOnlyVacancies
               }
+              showSortChip={true}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              hasCampaign={hasCampaign}
             />
           </div>
 
