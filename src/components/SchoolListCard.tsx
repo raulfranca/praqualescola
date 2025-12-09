@@ -46,9 +46,8 @@ export function SchoolListCard({
       className="px-4 py-3 border-b border-border hover:bg-muted/50 cursor-pointer transition-colors"
       style={{
         position: 'relative',
-        width: '100vw',
-        maxWidth: '100vw',
-        minWidth: '320px',
+        width: '100%',
+        maxWidth: '100%',
         boxSizing: 'border-box',
         overflow: 'hidden'
       }}

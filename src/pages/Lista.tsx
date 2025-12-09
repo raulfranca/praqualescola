@@ -241,7 +241,7 @@ const Lista = () => {
                 className="divide-y divide-border"
                 style={{ 
                   width: '100%',
-                  maxWidth: '100vw',
+                  maxWidth: '100%',
                   overflowX: 'hidden',
                   boxSizing: 'border-box'
                 }}
