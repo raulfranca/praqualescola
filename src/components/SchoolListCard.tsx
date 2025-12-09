@@ -43,12 +43,12 @@ export function SchoolListCard({
   return (
     <div
       onClick={onClick}
-      className="flex items-start gap-2 px-4 py-3 border-b border-border hover:bg-muted/50 cursor-pointer transition-colors"
+      className="flex items-start gap-2 px-4 py-3 border-b border-border hover:bg-muted/50 cursor-pointer transition-colors w-full max-w-full"
     >
       {/* Left side - Main content (flexible, truncates) */}
-      <div className="flex-1 min-w-0 overflow-hidden">
+      <div className="flex-1 min-w-0 w-full overflow-hidden">
         {/* Line 1: School name - truncates */}
-        <h3 className="font-semibold text-sm text-foreground truncate">
+        <h3 className="font-semibold text-sm text-foreground overflow-hidden text-ellipsis whitespace-nowrap">
           {school.type} {school.name}
         </h3>
 
@@ -72,7 +72,7 @@ export function SchoolListCard({
         )}
 
         {/* Line 3: Level badges + distance/time */}
-        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+        <div className="flex flex-wrap items-center gap-1.5 mt-1.5 w-full">
           {levelTags.map((tag, idx) => (
             <span
               key={idx}
