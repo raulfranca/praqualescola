@@ -43,18 +43,30 @@ export function SchoolListCard({
   return (
     <div
       onClick={onClick}
-      className="flex items-start gap-2 px-4 py-3 border-b border-border hover:bg-muted/50 cursor-pointer transition-colors w-full max-w-full"
+      className="flex items-start gap-2 px-4 py-3 border-b border-border hover:bg-muted/50 cursor-pointer transition-colors"
+      style={{ minWidth: 0 }}
     >
       {/* Left side - Main content (flexible, truncates) */}
-      <div className="flex-1 min-w-0 w-full overflow-hidden">
+      <div 
+        className="flex-1 flex flex-col"
+        style={{ minWidth: 0 }}
+      >
         {/* Line 1: School name - truncates */}
-        <h3 className="font-semibold text-sm text-foreground overflow-hidden text-ellipsis whitespace-nowrap">
+        <h3 
+          className="font-semibold text-sm text-foreground"
+          style={{
+            minWidth: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}
+        >
           {school.type} {school.name}
         </h3>
 
         {/* Line 2: Campaign info (only during active campaign) */}
         {isActive && (
-          <div className="flex items-center gap-2 mt-0.5">
+          <div className="flex items-center gap-2 mt-0.5" style={{ minWidth: 0 }}>
             <span className="text-xs text-muted-foreground truncate">{config.title}</span>
             <span
               className={cn(
@@ -72,7 +84,10 @@ export function SchoolListCard({
         )}
 
         {/* Line 3: Level badges + distance/time */}
-        <div className="flex flex-wrap items-center gap-1.5 mt-1.5 w-full">
+        <div 
+          className="flex flex-wrap items-center gap-1.5 mt-1.5"
+          style={{ minWidth: 0 }}
+        >
           {levelTags.map((tag, idx) => (
             <span
               key={idx}

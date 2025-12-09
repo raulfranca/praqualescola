@@ -8,7 +8,8 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ### Adicionado
 
-* Nova identidade visual: ícone da coruja no mapa
+* Aba "Lista", com visualização em lista de todas as escolas e funções de filtro e ordenamento.
+* Nova identidade visual: ícone da coruja no mapa.
 * Mensagens personalizadas para nova versão (editar arquivo version.json)
 
 ### Modificado
