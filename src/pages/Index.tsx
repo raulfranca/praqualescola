@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { ActionChips } from "@/components/ActionChips";
 import { MapView } from "@/components/MapView";
@@ -140,21 +140,18 @@ const Index = () => {
     return Math.max(...bucketArray, 1);
   }, [schoolsWithDistances, distanceRange, durationRange, filterMetric, hasDistances]);
 
-  // Reset distance/duration filter to max whenever home location or metric changes
+  // Initialize distance/duration filters only once when home location is first set
+  const initializedRef = useRef(false);
   useEffect(() => {
-    if (hasDistances) {
-      // Only initialize filters if they're not already set (null means first time)
-      if (maxDistanceFilter === null) {
-        setMaxDistanceFilter(distanceRange.max);
-      }
-      if (maxDurationFilter === null) {
-        setMaxDurationFilter(durationRange.max);
-      }
-    } else {
-      setMaxDistanceFilter(null);
-      setMaxDurationFilter(null);
+    if (hasDistances && !initializedRef.current) {
+      setMaxDistanceFilter(distanceRange.max);
+      setMaxDurationFilter(durationRange.max);
+      initializedRef.current = true;
     }
-  }, [homeLocation, hasDistances, maxDistanceFilter, maxDurationFilter]);
+    if (!hasDistances) {
+      initializedRef.current = false;
+    }
+  }, [hasDistances]);
 
   // Master filtered list: applies Level, Management, and Campaign filters (NOT distance)
   // This represents "all eligible schools regardless of distance" for histogram and future UI counters
