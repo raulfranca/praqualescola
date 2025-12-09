@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode } from "react";
+import React, { createContext, useState, useContext, ReactNode, useCallback } from "react";
 import { SchoolLevel, ManagementType, FilterMetric } from "@/components/FilterDrawer";
 
 interface FilterContextType {
@@ -14,6 +14,7 @@ interface FilterContextType {
   setFilterMetric: (metric: FilterMetric) => void;
   showOnlyVacancies: boolean;
   setShowOnlyVacancies: (show: boolean) => void;
+  initializeDistanceFilters: (hasDistances: boolean, distanceMax: number, durationMax: number) => void;
 }
 
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
@@ -25,10 +26,20 @@ interface FilterProviderProps {
 export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
   const [selectedLevels, setSelectedLevels] = useState<SchoolLevel[]>(["creche", "pre", "fundamental"]);
   const [selectedManagement, setSelectedManagement] = useState<ManagementType[]>(["prefeitura", "terceirizada"]);
-  const [maxDistanceFilter, setMaxDistanceFilter] = useState<number | null>(null);
-  const [maxDurationFilter, setMaxDurationFilter] = useState<number | null>(null);
+  const [maxDistanceFilter, setMaxDistanceFilterInternal] = useState<number | null>(null);
+  const [maxDurationFilter, setMaxDurationFilterInternal] = useState<number | null>(null);
   const [filterMetric, setFilterMetric] = useState<FilterMetric>("distance");
   const [showOnlyVacancies, setShowOnlyVacancies] = useState(false);
+
+  const initializeDistanceFilters = useCallback((hasDistances: boolean, distanceMax: number, durationMax: number) => {
+    if (hasDistances) {
+      setMaxDistanceFilterInternal(prev => prev ?? distanceMax);
+      setMaxDurationFilterInternal(prev => prev ?? durationMax);
+    } else {
+      setMaxDistanceFilterInternal(null);
+      setMaxDurationFilterInternal(null);
+    }
+  }, []);
 
   return (
     <FilterContext.Provider
@@ -38,9 +49,10 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
         selectedManagement,
         setSelectedManagement,
         maxDistanceFilter,
-        setMaxDistanceFilter,
+        setMaxDistanceFilter: setMaxDistanceFilterInternal,
         maxDurationFilter,
-        setMaxDurationFilter,
+        setMaxDurationFilter: setMaxDurationFilterInternal,
+        initializeDistanceFilters,
         filterMetric,
         setFilterMetric,
         showOnlyVacancies,

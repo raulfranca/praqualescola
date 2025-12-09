@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { SchoolListCard } from "@/components/SchoolListCard";
 import { SchoolDetailModal } from "@/components/SchoolDetailModal";
 import { SearchBar } from "@/components/SearchBar";
@@ -110,18 +110,11 @@ const Lista = () => {
     return Math.max(...bucketArray, 1);
   }, [schoolsWithDistances, distanceRange, durationRange, filterMetric, hasDistances]);
 
-  // Initialize distance/duration filters only once when home location is first set
-  const initializedRef = useRef(false);
+  const { initializeDistanceFilters } = useFilters();
+
   useEffect(() => {
-    if (hasDistances && !initializedRef.current) {
-      setMaxDistanceFilter(distanceRange.max);
-      setMaxDurationFilter(durationRange.max);
-      initializedRef.current = true;
-    }
-    if (!hasDistances) {
-      initializedRef.current = false;
-    }
-  }, [hasDistances]);
+    initializeDistanceFilters(hasDistances, distanceRange.max, durationRange.max);
+  }, [hasDistances, distanceRange.max, durationRange.max, initializeDistanceFilters]);
 
   const schoolsMatchingCriteria = useMemo(() => {
     let filtered = schoolsWithDistances;
