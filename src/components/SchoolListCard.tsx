@@ -43,11 +43,11 @@ export function SchoolListCard({
   return (
     <div
       onClick={onClick}
-      className="flex items-start gap-3 px-4 py-3 border-b border-border hover:bg-muted/50 cursor-pointer transition-colors"
+      className="flex items-start gap-2 px-4 py-3 border-b border-border hover:bg-muted/50 cursor-pointer transition-colors"
     >
-      {/* Left side - Main content */}
-      <div className="flex-1 min-w-0">
-        {/* Line 1: School name */}
+      {/* Left side - Main content (flexible, truncates) */}
+      <div className="flex-1 min-w-0 overflow-hidden">
+        {/* Line 1: School name - truncates */}
         <h3 className="font-semibold text-sm text-foreground truncate">
           {school.type} {school.name}
         </h3>
@@ -55,10 +55,10 @@ export function SchoolListCard({
         {/* Line 2: Campaign info (only during active campaign) */}
         {isActive && (
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-xs text-muted-foreground">{config.title}</span>
+            <span className="text-xs text-muted-foreground truncate">{config.title}</span>
             <span
               className={cn(
-                "text-xs font-medium px-1.5 py-0.5 rounded",
+                "text-xs font-medium px-1.5 py-0.5 rounded shrink-0",
                 school.vacancies && school.vacancies > 0
                   ? "bg-green-500/15 text-green-700"
                   : "bg-red-500/15 text-red-700"
@@ -76,7 +76,7 @@ export function SchoolListCard({
           {levelTags.map((tag, idx) => (
             <span
               key={idx}
-              className={cn("text-xs px-1.5 py-0.5 rounded font-medium", tag.className)}
+              className={cn("text-xs px-1.5 py-0.5 rounded font-medium shrink-0", tag.className)}
             >
               {tag.label}
             </span>
@@ -87,7 +87,7 @@ export function SchoolListCard({
               {levelTags.length > 0 && (
                 <span className="text-muted-foreground text-xs">•</span>
               )}
-              <span className="flex items-center gap-0.5 text-xs text-orange-600 font-medium">
+              <span className="flex items-center gap-0.5 text-xs text-orange-600 font-medium shrink-0">
                 <MapPin className="w-3 h-3" />
                 {formatDistance(school.distanceInKm)}
               </span>
@@ -95,7 +95,7 @@ export function SchoolListCard({
           )}
           
           {hasHomeLocation && school.durationInMinutes !== undefined && (
-            <span className="flex items-center gap-0.5 text-xs text-orange-600 font-medium">
+            <span className="flex items-center gap-0.5 text-xs text-orange-600 font-medium shrink-0">
               <Clock className="w-3 h-3" />
               {formatDuration(school.durationInMinutes)}
             </span>
@@ -103,9 +103,9 @@ export function SchoolListCard({
         </div>
       </div>
 
-      {/* Right side - Neighborhood + Star */}
-      <div className="flex flex-col items-end gap-1 shrink-0">
-        <span className="text-xs text-muted-foreground max-w-[100px] truncate">
+      {/* Right side - Neighborhood + Star (fixed width) */}
+      <div className="flex flex-col items-end gap-1 shrink-0 w-[110px]">
+        <span className="text-xs text-muted-foreground w-full text-right truncate">
           {school.neighborhood}
         </span>
         <button
