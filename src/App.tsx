@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { LoadScript } from "@react-google-maps/api";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
+import { Maintenance } from "./pages/Maintenance";
 import { BottomNav } from "@/components/BottomNav";
 import { SideNav } from "@/components/SideNav";
 import Index from "./pages/Index";
@@ -19,8 +20,20 @@ const GOOGLE_MAPS_LIBRARIES: ("places")[] = ["places"];
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+// To enable maintenance mode (production/Vercel):
+// 1. In Vercel dashboard: Add environment variable VITE_MAINTENANCE_MODE=true
+// 2. Redeploy the app
+// To disable maintenance mode: set VITE_MAINTENANCE_MODE=false or remove variable and redeploy.
+// For local testing: create a `.env.local` with `VITE_MAINTENANCE_MODE=true` and run `npm run dev`.
+const App = () => {
+  // Check maintenance mode first. This early return prevents any other app code from running.
+  const isMaintenanceMode = import.meta.env.VITE_MAINTENANCE_MODE === 'true';
+  if (isMaintenanceMode) {
+    return <Maintenance />;
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
     <LoadScript
       googleMapsApiKey={GOOGLE_MAPS_API_KEY}
       libraries={GOOGLE_MAPS_LIBRARIES}
@@ -50,7 +63,8 @@ const App = () => (
       </TooltipProvider>
       <Analytics />
     </LoadScript>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+};
 
 export default App;
