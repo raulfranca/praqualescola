@@ -231,7 +231,7 @@ const Lista = () => {
           </div>
 
           {/* School List */}
-          <ScrollArea className="flex-1" style={{ overflowX: 'hidden' }}>
+          <ScrollArea className="flex-1" style={{ overflowX: 'hidden', width: '100%' }}>
             {sortedSchools.length === 0 ? (
               <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
                 Nenhuma escola encontrada com esses filtros
@@ -240,9 +240,10 @@ const Lista = () => {
               <div 
                 className="divide-y divide-border"
                 style={{ 
-                  width: '100%', 
+                  width: '100%',
                   maxWidth: '100vw',
-                  overflowX: 'hidden'
+                  overflowX: 'hidden',
+                  boxSizing: 'border-box'
                 }}
               >
                 {sortedSchools.map((school) => (
