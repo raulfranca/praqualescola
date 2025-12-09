@@ -19,6 +19,18 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg}"],
         runtimeCaching: [
           {
+            urlPattern: /^\/version\.json$/,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "version-info-cache",
+              networkTimeoutSeconds: 3,
+              expiration: {
+                maxEntries: 1,
+                maxAgeSeconds: 60, // 1 minute - very short to ensure fresh version info
+              },
+            },
+          },
+          {
             urlPattern: /^https:\/\/maps\.googleapis\.com\/.*/i,
             handler: "CacheFirst",
             options: {
