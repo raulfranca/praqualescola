@@ -15,6 +15,7 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 ### Modificado
 
 * Diminui a largura do slider do filtro de distância para não acionar acidentalmente o gesto de voltar
+* Filtros persistentes entre a aba Mapa e Lista
 
 ### Removido
 

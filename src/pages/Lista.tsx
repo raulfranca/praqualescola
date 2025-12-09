@@ -112,13 +112,18 @@ const Lista = () => {
 
   useEffect(() => {
     if (hasDistances) {
-      setMaxDistanceFilter(distanceRange.max);
-      setMaxDurationFilter(durationRange.max);
+      // Only initialize filters if they're not already set (null means first time)
+      if (maxDistanceFilter === null) {
+        setMaxDistanceFilter(distanceRange.max);
+      }
+      if (maxDurationFilter === null) {
+        setMaxDurationFilter(durationRange.max);
+      }
     } else {
       setMaxDistanceFilter(null);
       setMaxDurationFilter(null);
     }
-  }, [homeLocation, hasDistances, distanceRange.max, durationRange.max]);
+  }, [homeLocation, hasDistances]);
 
   const schoolsMatchingCriteria = useMemo(() => {
     let filtered = schoolsWithDistances;
