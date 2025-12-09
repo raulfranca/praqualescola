@@ -43,30 +43,18 @@ export function SchoolListCard({
   return (
     <div
       onClick={onClick}
-      className="flex items-start gap-2 px-4 py-3 border-b border-border hover:bg-muted/50 cursor-pointer transition-colors"
-      style={{ minWidth: 0 }}
+      className="flex items-start gap-2 px-4 py-3 border-b border-border hover:bg-muted/50 cursor-pointer transition-colors w-full overflow-hidden"
     >
       {/* Left side - Main content (flexible, truncates) */}
-      <div 
-        className="flex-1 flex flex-col"
-        style={{ minWidth: 0 }}
-      >
+      <div className="flex-1 min-w-0 overflow-hidden">
         {/* Line 1: School name - truncates */}
-        <h3 
-          className="font-semibold text-sm text-foreground"
-          style={{
-            minWidth: 0,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
-          }}
-        >
+        <h3 className="font-semibold text-sm text-foreground truncate">
           {school.type} {school.name}
         </h3>
 
         {/* Line 2: Campaign info (only during active campaign) */}
         {isActive && (
-          <div className="flex items-center gap-2 mt-0.5" style={{ minWidth: 0 }}>
+          <div className="flex items-center gap-2 mt-0.5 min-w-0">
             <span className="text-xs text-muted-foreground truncate">{config.title}</span>
             <span
               className={cn(
@@ -84,10 +72,7 @@ export function SchoolListCard({
         )}
 
         {/* Line 3: Level badges + distance/time */}
-        <div 
-          className="flex flex-wrap items-center gap-1.5 mt-1.5"
-          style={{ minWidth: 0 }}
-        >
+        <div className="flex flex-wrap items-center gap-1.5 mt-1.5 min-w-0">
           {levelTags.map((tag, idx) => (
             <span
               key={idx}
@@ -119,7 +104,7 @@ export function SchoolListCard({
       </div>
 
       {/* Right side - Neighborhood + Star (fixed width) */}
-      <div className="flex flex-col items-end gap-1 shrink-0 w-[110px]">
+      <div className="flex flex-col items-end gap-1 shrink-0 w-28">
         <span className="text-xs text-muted-foreground w-full text-right truncate">
           {school.neighborhood}
         </span>
