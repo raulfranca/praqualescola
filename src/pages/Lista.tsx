@@ -231,13 +231,20 @@ const Lista = () => {
           </div>
 
           {/* School List */}
-          <ScrollArea className="flex-1 w-full">
+          <ScrollArea className="flex-1" style={{ overflowX: 'hidden' }}>
             {sortedSchools.length === 0 ? (
               <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
                 Nenhuma escola encontrada com esses filtros
               </div>
             ) : (
-              <div className="divide-y divide-border">
+              <div 
+                className="divide-y divide-border"
+                style={{ 
+                  width: '100%', 
+                  maxWidth: '100vw',
+                  overflowX: 'hidden'
+                }}
+              >
                 {sortedSchools.map((school) => (
                   <SchoolListCard
                     key={school.id}

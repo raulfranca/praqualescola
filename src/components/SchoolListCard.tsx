@@ -43,14 +43,26 @@ export function SchoolListCard({
   return (
     <div
       onClick={onClick}
-      className="grid px-4 py-3 border-b border-border hover:bg-muted/50 cursor-pointer transition-colors w-full"
-      style={{ gridTemplateColumns: "minmax(0, 1fr) 110px", gap: 8 }}
+      className="px-4 py-3 border-b border-border hover:bg-muted/50 cursor-pointer transition-colors"
+      style={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: '100vw',
+        overflowX: 'hidden',
+        display: 'grid',
+        gridTemplateColumns: 'minmax(0, calc(100% - 118px)) 110px',
+        gap: '8px'
+      }}
     >
       {/* Left column: School info */}
-      <div className="overflow-hidden">
+      <div style={{ overflow: 'hidden', minWidth: 0 }}>
         <h3
           className="font-semibold text-sm text-foreground"
-          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+          style={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}
         >
           {school.type} {school.name}
         </h3>
@@ -59,7 +71,11 @@ export function SchoolListCard({
           <div className="flex items-center gap-2 mt-0.5">
             <span
               className="text-xs text-muted-foreground"
-              style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
             >
               {config.title}
             </span>
@@ -108,10 +124,15 @@ export function SchoolListCard({
       </div>
 
       {/* Right column: Neighborhood + Favorite */}
-      <div className="flex flex-col items-end gap-1">
+      <div className="flex flex-col items-end gap-1" style={{ flexShrink: 0, minWidth: 110 }}>
         <span
           className="text-xs text-muted-foreground text-right"
-          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}
+          style={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            maxWidth: '100%'
+          }}
         >
           {school.neighborhood}
         </span>
