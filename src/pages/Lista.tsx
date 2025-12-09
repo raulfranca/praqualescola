@@ -25,7 +25,7 @@ const Lista = () => {
   const [maxDurationFilter, setMaxDurationFilter] = useState<number | null>(null);
   const [filterMetric, setFilterMetric] = useState<FilterMetric>("distance");
   const [showOnlyVacancies, setShowOnlyVacancies] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>("default");
+  const [sortBy, setSortBy] = useState<SortOption>("alphabetical");
   const { schools, loading } = useSchoolsData();
   const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
@@ -162,7 +162,7 @@ const Lista = () => {
     switch (sortBy) {
       case "alphabetical":
         return schoolsToSort.sort((a, b) => 
-          `${a.type} ${a.name}`.localeCompare(`${b.type} ${b.name}`, 'pt-BR')
+          a.name.toLowerCase().localeCompare(b.name.toLowerCase(), 'pt-BR')
         );
       case "vacancies":
         return schoolsToSort.sort((a, b) => 

@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export type SortOption = "default" | "alphabetical" | "vacancies" | "distance" | "time";
+export type SortOption = "alphabetical" | "vacancies" | "distance" | "time";
 
 interface ActionChipsProps {
   hasHome: boolean;
@@ -29,14 +29,14 @@ export function ActionChips({
   onFilterClick,
   hasActiveFilters = false,
   showSortChip = false,
-  sortBy = "default",
+  sortBy = "alphabetical",
   onSortChange,
   hasCampaign = false,
 }: ActionChipsProps) {
-  const getSortLabel = (sort: SortOption): string => {
+  const getSortLabel = (sort: SortOption | undefined): string => {
     switch (sort) {
-      case "alphabetical": return "A-Z";
-      case "vacancies": return "Vagas";
+      case "alphabetical": return "Ordem alfabética";
+      case "vacancies": return "Número de vagas";
       case "distance": return "Distância";
       case "time": return "Tempo";
       default: return "Ordem";
@@ -70,7 +70,7 @@ export function ActionChips({
               size="sm"
               className={cn(
                 "rounded-full shadow-md h-8 px-3 gap-1.5 shrink-0 transition-all",
-                sortBy !== "default"
+                !!sortBy
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
                   : "bg-white text-foreground hover:bg-white/90 border border-border"
               )}
@@ -80,13 +80,6 @@ export function ActionChips({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-48 bg-popover">
-            <DropdownMenuItem 
-              onClick={() => onSortChange?.("default")}
-              className="flex items-center justify-between"
-            >
-              <span>Ordem original</span>
-              {sortBy === "default" && <Check className="w-4 h-4" />}
-            </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => onSortChange?.("alphabetical")}
               className="flex items-center justify-between"
