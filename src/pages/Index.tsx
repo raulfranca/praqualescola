@@ -10,6 +10,7 @@ import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
 import { useSchoolDistances } from "@/hooks/useSchoolDistances";
+import { useFilters } from "@/contexts/FilterContext";
 import { School } from "@/types/school";
 
 const Index = () => {
@@ -18,12 +19,23 @@ const Index = () => {
   const [shouldCenterMap, setShouldCenterMap] = useState(false);
   const [showHomeInput, setShowHomeInput] = useState(false);
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
-  const [selectedLevels, setSelectedLevels] = useState<SchoolLevel[]>(["creche", "pre", "fundamental"]);
-  const [selectedManagement, setSelectedManagement] = useState<ManagementType[]>(["prefeitura", "terceirizada"]);
-  const [maxDistanceFilter, setMaxDistanceFilter] = useState<number | null>(null);
-  const [maxDurationFilter, setMaxDurationFilter] = useState<number | null>(null);
-  const [filterMetric, setFilterMetric] = useState<FilterMetric>("distance");
-  const [showOnlyVacancies, setShowOnlyVacancies] = useState(false);
+  
+  // Use shared filter context
+  const {
+    selectedLevels,
+    setSelectedLevels,
+    selectedManagement,
+    setSelectedManagement,
+    maxDistanceFilter,
+    setMaxDistanceFilter,
+    maxDurationFilter,
+    setMaxDurationFilter,
+    filterMetric,
+    setFilterMetric,
+    showOnlyVacancies,
+    setShowOnlyVacancies,
+  } = useFilters();
+  
   const { schools, loading } = useSchoolsData();
   const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
