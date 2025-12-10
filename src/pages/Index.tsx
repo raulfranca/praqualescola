@@ -40,11 +40,16 @@ const Index = () => {
   const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
   
-  // Calculate distances from home location to all schools
-  const { schoolsWithDistances, sortedSchools, hasDistances } = useSchoolDistances(
-    schools,
-    homeLocation
-  );
+  // Calculate distances from home location to all schools (manual calculation)
+  const { 
+    schoolsWithDistances, 
+    sortedSchools, 
+    hasDistances,
+    isCalculating,
+    calculateAndCacheDistances,
+    hasCachedDistances,
+    clearDistances,
+  } = useSchoolDistances(schools, homeLocation);
 
   const hasLevel = (school: School, level: SchoolLevel): boolean => {
     switch (level) {
@@ -294,14 +299,17 @@ const Index = () => {
         <HomeLocationInput
           onLocationSelected={(location) => {
             setHome(location);
-            setShowHomeInput(false);
           }}
           onClose={() => setShowHomeInput(false)}
           homeLocation={homeLocation}
           onClearLocation={() => {
             clearHome();
+            clearDistances();
             setShowHomeInput(false);
           }}
+          onCalculateDistances={calculateAndCacheDistances}
+          isCalculating={isCalculating}
+          hasCachedDistances={hasCachedDistances}
         />
       )}
 
