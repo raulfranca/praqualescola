@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { GoogleMap, Marker } from "@react-google-maps/api";
 import { School } from "@/types/school";
 import { HomeLocation } from "@/hooks/useHomeLocation";
@@ -12,6 +12,7 @@ interface MapViewProps {
   onSchoolClick: (school: School) => void;
   shouldCenterMap: boolean;
   homeLocation: HomeLocation | null;
+  isActive?: boolean; // Whether the map tab is currently active
 }
 
 // Default to Pindamonhangaba center
@@ -49,10 +50,13 @@ const mapOptions = {
   ],
 };
 
-export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolClick, shouldCenterMap, homeLocation }: MapViewProps) {
+export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolClick, shouldCenterMap, homeLocation, isActive = true }: MapViewProps) {
   const [currentZoom, setCurrentZoom] = useState(13);
   const mapRef = useRef<google.maps.Map | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const userInteractingRef = useRef(false);
+  const fitBoundsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const prevSchoolIdsRef = useRef<string>("");
 
   // Check if Google Maps is loaded
   useEffect(() => {
@@ -80,6 +84,93 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       mapRef.current.setZoom(16);
     }
   }, [selectedSchool, shouldCenterMap]);
+
+  // Create stable school IDs string for comparison
+  const schoolIdsString = useMemo(() => {
+    return schools
+      .filter(s => s.lat && s.lng)
+      .map(s => s.id)
+      .sort((a, b) => a - b)
+      .join(',');
+  }, [schools]);
+
+  // Fit bounds to visible markers with debouncing
+  const fitBoundsToMarkers = useCallback(() => {
+    if (!mapRef.current || !isLoaded || userInteractingRef.current) return;
+
+    const validSchools = schools.filter(s => s.lat && s.lng);
+    
+    if (validSchools.length === 0) {
+      // No markers - keep default view
+      return;
+    }
+
+    if (validSchools.length === 1) {
+      // Single marker - center on it with reasonable zoom
+      const school = validSchools[0];
+      mapRef.current.panTo({ lat: school.lat, lng: school.lng });
+      mapRef.current.setZoom(14);
+      return;
+    }
+
+    // Multiple markers - calculate bounds
+    const bounds = new google.maps.LatLngBounds();
+    validSchools.forEach(school => {
+      bounds.extend({ lat: school.lat, lng: school.lng });
+    });
+
+    // Add home location to bounds if set
+    if (homeLocation) {
+      bounds.extend({ lat: homeLocation.lat, lng: homeLocation.lng });
+    }
+
+    // Fit with padding
+    mapRef.current.fitBounds(bounds, {
+      top: 80,    // Space for search bar
+      right: 20,
+      bottom: 80, // Space for bottom nav on mobile
+      left: 20
+    });
+  }, [schools, homeLocation, isLoaded]);
+
+  // Debounced fitBounds when schools change or tab becomes active
+  useEffect(() => {
+    if (!isLoaded || !isActive) return;
+
+    // Skip if schools haven't actually changed
+    if (prevSchoolIdsRef.current === schoolIdsString && prevSchoolIdsRef.current !== "") {
+      return;
+    }
+    prevSchoolIdsRef.current = schoolIdsString;
+
+    // Clear any pending timeout
+    if (fitBoundsTimeoutRef.current) {
+      clearTimeout(fitBoundsTimeoutRef.current);
+    }
+
+    // Debounce fitBounds to avoid rapid calls during filter changes
+    fitBoundsTimeoutRef.current = setTimeout(() => {
+      fitBoundsToMarkers();
+    }, 300);
+
+    return () => {
+      if (fitBoundsTimeoutRef.current) {
+        clearTimeout(fitBoundsTimeoutRef.current);
+      }
+    };
+  }, [schoolIdsString, isActive, isLoaded, fitBoundsToMarkers]);
+
+  // Track user interaction to prevent fitBounds during manual pan/zoom
+  const handleUserInteractionStart = useCallback(() => {
+    userInteractingRef.current = true;
+  }, []);
+
+  const handleUserInteractionEnd = useCallback(() => {
+    // Small delay to ensure interaction is complete
+    setTimeout(() => {
+      userInteractingRef.current = false;
+    }, 100);
+  }, []);
 
   // Determine school category
   const getSchoolCategory = (school: School) => {
@@ -394,6 +485,10 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       onLoad={(map) => {
         mapRef.current = map;
         setIsLoaded(true);
+        // Trigger initial fitBounds after map loads
+        setTimeout(() => {
+          fitBoundsToMarkers();
+        }, 100);
       }}
       onZoomChanged={() => {
         if (mapRef.current) {
@@ -403,6 +498,8 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
           }
         }
       }}
+      onDragStart={handleUserInteractionStart}
+      onDragEnd={handleUserInteractionEnd}
     >
           {isLoaded && schools.map((school) => {
             if (!school.lat || !school.lng) return null;

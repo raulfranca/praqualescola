@@ -289,6 +289,7 @@ const Index = () => {
               onSchoolClick={handleSchoolClickOnMap}
               shouldCenterMap={shouldCenterMap}
               homeLocation={homeLocation}
+              isActive={true}
             />
           </div>
         </>
