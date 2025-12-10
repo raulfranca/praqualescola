@@ -2,9 +2,10 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { School } from "@/types/school";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { removeAccents } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
+import { useToast } from "@/hooks/use-toast";
 
 interface SearchBarProps {
   value: string;
@@ -12,14 +13,42 @@ interface SearchBarProps {
   schools: School[];
   onSelectSchool: (school: School) => void;
   showDropdown?: boolean;
+  onDevModeChange?: (enabled: boolean) => void;
 }
 
-export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdown = true }: SearchBarProps) {
+export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdown = true, onDevModeChange }: SearchBarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [devModeEnabled, setDevModeEnabled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
-  // Filter schools based on search query
-  const filteredSchools = value.trim()
+  // Toggle dev mode handler
+  const handleDevModeToggle = useCallback(() => {
+    const newState = !devModeEnabled;
+    setDevModeEnabled(newState);
+    onDevModeChange?.(newState);
+    onChange(""); // Clear the search input
+    
+    toast({
+      title: newState ? "Modo Desenvolvedor Ativado" : "Modo Desenvolvedor Desativado",
+      description: newState 
+        ? "Limite diário de endereço removido." 
+        : "Limite diário de endereço restaurado.",
+      variant: newState ? "default" : "default",
+    });
+  }, [devModeEnabled, onDevModeChange, onChange, toast]);
+
+  // Handle key press for /dev command
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && value.trim().toLowerCase() === "/dev") {
+      e.preventDefault();
+      handleDevModeToggle();
+    }
+  }, [value, handleDevModeToggle]);
+
+  // Filter schools based on search query (hide suggestions for /dev command)
+  const filteredSchools = value.trim() && value.trim().toLowerCase() !== "/dev"
     ? schools.filter((school) => {
         const query = removeAccents(value.toLowerCase());
         return (
@@ -71,13 +100,19 @@ export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdo
   return (
     <div className="relative w-full md:w-96" ref={dropdownRef}>
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
+        <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 z-10 ${devModeEnabled ? "text-red-500" : "text-muted-foreground"}`} />
         <Input
+          ref={inputRef}
           type="text"
-          placeholder="Buscar escola por nome, endereço ou bairro..."
+          placeholder={devModeEnabled ? "Modo Desenvolvedor" : "Buscar escola por nome, endereço ou bairro..."}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="pl-12 pr-4 h-12 bg-white border-0 rounded-full shadow-lg focus-visible:ring-2 focus-visible:ring-primary text-foreground"
+          onKeyDown={handleKeyDown}
+          className={`pl-12 pr-4 h-12 bg-white rounded-full shadow-lg focus-visible:ring-2 text-foreground ${
+            devModeEnabled 
+              ? "border-2 border-red-500 focus-visible:ring-red-500" 
+              : "border-0 focus-visible:ring-primary"
+          }`}
         />
       </div>
       

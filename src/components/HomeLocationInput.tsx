@@ -14,6 +14,7 @@ interface HomeLocationInputProps {
   onCalculateDistances?: (location: HomeLocation) => Promise<boolean>;
   isCalculating?: boolean;
   hasCachedDistances?: (location: HomeLocation) => boolean;
+  devModeEnabled?: boolean;
 }
 
 export function HomeLocationInput({ 
@@ -24,6 +25,7 @@ export function HomeLocationInput({
   onCalculateDistances,
   isCalculating = false,
   hasCachedDistances,
+  devModeEnabled = false,
 }: HomeLocationInputProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [inputValue, setInputValue] = useState(homeLocation?.address || "");
@@ -34,8 +36,13 @@ export function HomeLocationInput({
   const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
   const { toast } = useToast();
 
-  // Check rate limit on mount
+  // Check rate limit on mount (skip if dev mode is enabled)
   useEffect(() => {
+    if (devModeEnabled) {
+      setCanChangeAddress(true);
+      return;
+    }
+    
     const allowed = canSetNewAddress();
     setCanChangeAddress(allowed);
     if (!allowed && !homeLocation) {
@@ -45,7 +52,7 @@ export function HomeLocationInput({
         variant: "destructive",
       });
     }
-  }, [homeLocation, toast]);
+  }, [homeLocation, toast, devModeEnabled]);
 
   useEffect(() => {
     // Wait for Google Maps to be loaded
