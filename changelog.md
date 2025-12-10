@@ -24,6 +24,8 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ### Corrigido
 
+* Remove funções nativas do navegador que atrapalham a experiência nativa do PWA: autocomplete com sugestões de senha e cartão de crédito, sugestões de busca do Google quando seleciona texto
+
 ## \[1.3.0\] \- 2025-11-30
 
 ### Adicionado
