@@ -9,14 +9,16 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 ### Adicionado
 
 * Aba "Lista", com visualização em lista de todas as escolas e funções de filtro e ordenamento.
-* Nova identidade visual: ícone da coruja no mapa.
-* Mensagens personalizadas para nova versão (editar arquivo version.json)
+* Nova identidade visual: ícone da coruja em cima do mapa.
+* Mensagens personalizadas para nova versão (editar arquivo version.json).
+* Modo desenvolvedor (desativa os limites de definição de endereço). Digitar "/dev" na caixa de busca.
 
 ### Modificado
 
-* Refatoração 
-* Diminui a largura do slider do filtro de distância para não acionar acidentalmente o gesto de voltar
-* Filtros persistentes entre a aba Mapa e Lista
+* Limites para uso da API Google Maps: só é possível definir endereço 1x ao dia. Após definir endereço, é preciso clicar em um botão para calcular a distância e tempo. Cache agressivo. Autocomplete da busca de endereços segue a lógica Session Tokens.
+* Diminui a largura do slider do filtro de distância para não acionar acidentalmente o gesto de voltar.
+* Zoom do mapa muda automaticamente para enquadrar as escolas ativas no filtro.
+* Filtros persistentes entre a aba Mapa e Lista.
 
 ### Removido
 
