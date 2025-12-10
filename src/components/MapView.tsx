@@ -94,7 +94,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       .join(',');
   }, [schools]);
 
-  // Fit bounds to visible markers with debouncing
+  // Fit bounds to visible SCHOOL markers only (excludes home location)
   const fitBoundsToMarkers = useCallback(() => {
     if (!mapRef.current || !isLoaded || userInteractingRef.current) return;
 
@@ -105,33 +105,50 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       return;
     }
 
+    // Responsive padding: smaller on mobile, larger on desktop
+    const isMobile = window.innerWidth < 768;
+    const padding = {
+      top: isMobile ? 60 : 80,    // Space for search bar
+      right: isMobile ? 40 : 60,
+      bottom: isMobile ? 60 : 80, // Space for bottom nav on mobile
+      left: isMobile ? 40 : 60
+    };
+
     if (validSchools.length === 1) {
-      // Single marker - center on it with reasonable zoom
+      // Single marker - center on it with neighborhood zoom
       const school = validSchools[0];
       mapRef.current.panTo({ lat: school.lat, lng: school.lng });
       mapRef.current.setZoom(14);
       return;
     }
 
-    // Multiple markers - calculate bounds
+    // 2-3 schools: closer zoom with maxZoom constraint
+    if (validSchools.length <= 3) {
+      const bounds = new google.maps.LatLngBounds();
+      validSchools.forEach(school => {
+        bounds.extend({ lat: school.lat, lng: school.lng });
+      });
+      mapRef.current.fitBounds(bounds, padding);
+      // Constrain max zoom for 2-3 schools
+      const listener = mapRef.current.addListener('idle', () => {
+        const currentZoom = mapRef.current?.getZoom();
+        if (currentZoom !== undefined && currentZoom > 15) {
+          mapRef.current?.setZoom(15);
+        }
+        google.maps.event.removeListener(listener);
+      });
+      return;
+    }
+
+    // 4+ schools - let fitBounds calculate naturally (no maxZoom)
     const bounds = new google.maps.LatLngBounds();
     validSchools.forEach(school => {
       bounds.extend({ lat: school.lat, lng: school.lng });
     });
 
-    // Add home location to bounds if set
-    if (homeLocation) {
-      bounds.extend({ lat: homeLocation.lat, lng: homeLocation.lng });
-    }
-
-    // Fit with padding
-    mapRef.current.fitBounds(bounds, {
-      top: 80,    // Space for search bar
-      right: 20,
-      bottom: 80, // Space for bottom nav on mobile
-      left: 20
-    });
-  }, [schools, homeLocation, isLoaded]);
+    // Fit bounds to SCHOOL markers only - home marker is visible but doesn't affect zoom
+    mapRef.current.fitBounds(bounds, padding);
+  }, [schools, isLoaded]);
 
   // Debounced fitBounds when schools change or tab becomes active
   useEffect(() => {
