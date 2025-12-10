@@ -108,6 +108,13 @@ export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdo
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-form-type="other"
+          data-lpignore="true"
+          data-1p-ignore="true"
           className={`pl-12 pr-4 h-12 bg-white rounded-full shadow-lg focus-visible:ring-2 text-foreground ${
             devModeEnabled 
               ? "border-2 border-red-500 focus-visible:ring-red-500" 
