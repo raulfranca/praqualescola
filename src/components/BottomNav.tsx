@@ -1,4 +1,4 @@
-import { MapIcon, Star, MessageSquare } from "lucide-react";
+import { MapIcon, List, Star, MessageSquare } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,12 @@ export function BottomNav() {
       label: "Mapa",
       path: "/",
       isActive: location.pathname === "/",
+    },
+    {
+      icon: List,
+      label: "Lista",
+      path: "/lista",
+      isActive: location.pathname === "/lista",
     },
     {
       icon: Star,

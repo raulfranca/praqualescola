@@ -8,7 +8,9 @@ import { LoadScript } from "@react-google-maps/api";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { BottomNav } from "@/components/BottomNav";
 import { SideNav } from "@/components/SideNav";
+import { FilterProvider } from "@/contexts/FilterContext";
 import Index from "./pages/Index";
+import Lista from "./pages/Lista";
 import Favoritos from "./pages/Favoritos";
 import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
@@ -36,17 +38,20 @@ const App = () => (
           }}
         />
         <UpdatePrompt />
-        <BrowserRouter>
-          <SideNav />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/favoritos" element={<Favoritos />} />
-            <Route path="/feedback" element={<Feedback />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <BottomNav />
-        </BrowserRouter>
+        <FilterProvider>
+          <BrowserRouter>
+            <SideNav />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/lista" element={<Lista />} />
+              <Route path="/favoritos" element={<Favoritos />} />
+              <Route path="/feedback" element={<Feedback />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <BottomNav />
+          </BrowserRouter>
+        </FilterProvider>
       </TooltipProvider>
       <Analytics />
     </LoadScript>

@@ -19,6 +19,18 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg}"],
         runtimeCaching: [
           {
+            urlPattern: /^\/version\.json$/,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "version-info-cache",
+              networkTimeoutSeconds: 3,
+              expiration: {
+                maxEntries: 1,
+                maxAgeSeconds: 60, // 1 minute - very short to ensure fresh version info
+              },
+            },
+          },
+          {
             urlPattern: /^https:\/\/maps\.googleapis\.com\/.*/i,
             handler: "CacheFirst",
             options: {
@@ -43,8 +55,8 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       manifest: {
-        name: "PraQualEscola",
-        short_name: "PraQualEscola",
+        name: "Pra Qual Escola",
+        short_name: "Pra Qual Escola",
         description: "Encontre e compare escolas públicas de Pindamonhangaba",
         theme_color: "#1ba3c6",
         background_color: "#ffffff",
