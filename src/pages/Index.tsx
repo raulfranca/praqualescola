@@ -19,6 +19,7 @@ const Index = () => {
   const [shouldCenterMap, setShouldCenterMap] = useState(false);
   const [showHomeInput, setShowHomeInput] = useState(false);
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+  const [devModeEnabled, setDevModeEnabled] = useState(false);
   
   // Use shared filter context
   const {
@@ -40,11 +41,16 @@ const Index = () => {
   const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
   
-  // Calculate distances from home location to all schools
-  const { schoolsWithDistances, sortedSchools, hasDistances } = useSchoolDistances(
-    schools,
-    homeLocation
-  );
+  // Calculate distances from home location to all schools (manual calculation)
+  const { 
+    schoolsWithDistances, 
+    sortedSchools, 
+    hasDistances,
+    isCalculating,
+    calculateAndCacheDistances,
+    hasCachedDistances,
+    clearDistances,
+  } = useSchoolDistances(schools, homeLocation);
 
   const hasLevel = (school: School, level: SchoolLevel): boolean => {
     switch (level) {
@@ -258,6 +264,7 @@ const Index = () => {
               onChange={setSearchQuery}
               schools={schools}
               onSelectSchool={handleSelectSchool}
+              onDevModeChange={setDevModeEnabled}
             />
             <ActionChips
               hasHome={hasHome}
@@ -284,6 +291,7 @@ const Index = () => {
               onSchoolClick={handleSchoolClickOnMap}
               shouldCenterMap={shouldCenterMap}
               homeLocation={homeLocation}
+              isActive={true}
             />
           </div>
         </>
@@ -294,14 +302,18 @@ const Index = () => {
         <HomeLocationInput
           onLocationSelected={(location) => {
             setHome(location);
-            setShowHomeInput(false);
           }}
           onClose={() => setShowHomeInput(false)}
           homeLocation={homeLocation}
           onClearLocation={() => {
             clearHome();
+            clearDistances();
             setShowHomeInput(false);
           }}
+          onCalculateDistances={calculateAndCacheDistances}
+          isCalculating={isCalculating}
+          hasCachedDistances={hasCachedDistances}
+          devModeEnabled={devModeEnabled}
         />
       )}
 
