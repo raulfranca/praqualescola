@@ -11,9 +11,10 @@ interface SearchBarProps {
   onChange: (value: string) => void;
   schools: School[];
   onSelectSchool: (school: School) => void;
+  showDropdown?: boolean;
 }
 
-export function SearchBar({ value, onChange, schools, onSelectSchool }: SearchBarProps) {
+export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdown = true }: SearchBarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -81,7 +82,7 @@ export function SearchBar({ value, onChange, schools, onSelectSchool }: SearchBa
       </div>
       
       {/* Dropdown */}
-      {isOpen && (
+      {isOpen && showDropdown && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border rounded-2xl shadow-xl max-h-[60vh] overflow-y-auto z-50">
           {filteredSchools.map((school) => (
             <button

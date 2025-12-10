@@ -218,6 +218,7 @@ const Lista = () => {
               onChange={setSearchQuery}
               schools={schools}
               onSelectSchool={setSelectedSchool}
+              showDropdown={false}
             />
             <ActionChips
               hasHome={hasHome}
