@@ -6,11 +6,13 @@ import { HomeLocationInput } from "@/components/HomeLocationInput";
 import { SchoolDetailModal } from "@/components/SchoolDetailModal";
 import { CampaignBanner } from "@/components/CampaignBanner";
 import { FilterDrawer, SchoolLevel, ManagementType, FilterMetric } from "@/components/FilterDrawer";
+import { IOSInstallBanner } from "@/components/IOSInstallBanner";
 import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
 import { useSchoolDistances } from "@/hooks/useSchoolDistances";
 import { useFilters } from "@/contexts/FilterContext";
+import { usePWAInstallPrompt } from "@/hooks/usePWAInstallPrompt";
 import { School } from "@/types/school";
 
 const Index = () => {
@@ -40,6 +42,7 @@ const Index = () => {
   const { schools, loading } = useSchoolsData();
   const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
+  const { isIOS, showIOSBanner, dismissIOSBanner } = usePWAInstallPrompt();
   
   // Calculate distances from home location to all schools (manual calculation)
   const { 
@@ -356,6 +359,11 @@ const Index = () => {
         showOnlyVacancies={showOnlyVacancies}
         onVacanciesChange={setShowOnlyVacancies}
       />
+
+      {/* iOS Install Banner */}
+      {isIOS && showIOSBanner && (
+        <IOSInstallBanner onDismiss={dismissIOSBanner} />
+      )}
     </div>
   );
 };
