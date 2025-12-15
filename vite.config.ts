@@ -19,6 +19,13 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg}"],
         runtimeCaching: [
           {
+            urlPattern: /^\/maintenance\.json$/,
+            handler: "NetworkOnly",
+            options: {
+              cacheName: "maintenance-config",
+            },
+          },
+          {
             urlPattern: /^\/version\.json$/,
             handler: "NetworkFirst",
             options: {
@@ -26,7 +33,7 @@ export default defineConfig(({ mode }) => ({
               networkTimeoutSeconds: 3,
               expiration: {
                 maxEntries: 1,
-                maxAgeSeconds: 60, // 1 minute - very short to ensure fresh version info
+                maxAgeSeconds: 60,
               },
             },
           },
