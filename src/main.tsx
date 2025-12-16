@@ -15,7 +15,8 @@ async function checkMaintenance(): Promise<MaintenanceConfig | null> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-    const response = await fetch(`/maintenance.json?t=${Date.now()}`, {
+    // Fetch from Vercel Edge Function that reads from Edge Config
+    const response = await fetch(`/api/maintenance?t=${Date.now()}`, {
       cache: 'no-store',
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
