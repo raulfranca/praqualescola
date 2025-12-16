@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { LoadScript } from "@react-google-maps/api";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
+import { InstallPromptBanner } from "@/components/InstallPromptBanner";
 import { BottomNav } from "@/components/BottomNav";
 import { SideNav } from "@/components/SideNav";
 import { FilterProvider } from "@/contexts/FilterContext";
@@ -38,6 +39,7 @@ const App = () => (
           }}
         />
         <UpdatePrompt />
+        <InstallPromptBanner />
         <FilterProvider>
           <BrowserRouter>
             <SideNav />
