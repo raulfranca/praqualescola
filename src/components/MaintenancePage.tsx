@@ -9,7 +9,7 @@ export function MaintenancePage({ title, message }: MaintenancePageProps) {
       <div className="flex flex-col items-center text-center max-w-md">
         {/* App Logo */}
         <img 
-          src="/icon-512.png" 
+          src="/web-app-manifest-512x512.png" 
           alt="Pra Qual Escola" 
           className="w-20 h-20 sm:w-32 sm:h-32 mb-8 rounded-2xl shadow-lg"
         />
