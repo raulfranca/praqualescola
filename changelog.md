@@ -4,16 +4,23 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## \[unreleased\] \-
+## \[1.4.1\] \- 2025-12-15
 
 ### Adicionado
 
+- Modo Manutenção pode ser ativado/desativado por meio de Edge Config no Vercel, sem necessidade de novo deploy. 
+
 ### Modificado
+
+- Botão "Ver no Google Maps" modificado para "Como Chegar?". No Mobile, chama uma função GEO e permite ao usuário escolher com qual aplicativo quer continuar (Maps, Waze, Uber, etc.). O destino é definido por coordenadas, não por endereço.
 
 ### Removido
 
+- Arquivos de ícones antigos removidos e referências atualizadas.
+
 ### Corrigido
 
+- PWA instalável em Windows
 - Toast de nova versão não usa a mensagem em cache, mas puxa o arquivo novo do servidor para mostrar mensagem atualizada.
 
 ## \[1.4.0\] \- 2025-12-10
