@@ -19,13 +19,6 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg}"],
         runtimeCaching: [
           {
-            urlPattern: /^\/maintenance\.json$/,
-            handler: "NetworkOnly",
-            options: {
-              cacheName: "maintenance-config",
-            },
-          },
-          {
             urlPattern: /^\/version\.json$/,
             handler: "NetworkFirst",
             options: {
