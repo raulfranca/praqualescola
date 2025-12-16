@@ -1,6 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { useVersionInfo } from "./useVersionInfo";
+
+export interface VersionInfo {
+  title: string;
+  subtitle: string;
+}
+
+const FALLBACK_VERSION: VersionInfo = {
+  title: "Nova versão disponível",
+  subtitle: "Clique em atualizar para ver as novidades",
+};
+
+const VERSION_CACHE_KEY = "app-version-seen";
 
 export interface UseVersionedUpdatePromptReturn {
   showUpdatePrompt: boolean;
@@ -12,13 +23,46 @@ export interface UseVersionedUpdatePromptReturn {
 }
 
 /**
- * Enhanced service worker hook that integrates version info
- * Manages PWA updates with custom versioned messages
- * Handles localStorage tracking to avoid showing the same message twice
+ * Fetches version.json from network, bypassing all caches
+ * This ensures we always get the NEWEST version's message when an update is available
+ */
+async function fetchFreshVersionInfo(): Promise<VersionInfo> {
+  try {
+    // Add timestamp to bust any proxy/CDN caches
+    const cacheBuster = `?t=${Date.now()}`;
+    const response = await fetch(`/version.json${cacheBuster}`, {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch version.json: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.title || !data.subtitle) {
+      throw new Error("version.json missing required fields");
+    }
+
+    return data as VersionInfo;
+  } catch (err) {
+    console.warn("Failed to fetch fresh version info:", err);
+    return FALLBACK_VERSION;
+  }
+}
+
+/**
+ * Enhanced service worker hook that fetches NEW version info when update is detected
+ * Fixes timing issue where old version's message was shown instead of new version's
  */
 export function useVersionedUpdatePrompt(): UseVersionedUpdatePromptReturn {
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
-  const { versionInfo, isLoading, saveCurrentVersion } = useVersionInfo();
+  const [versionInfo, setVersionInfo] = useState<VersionInfo>(FALLBACK_VERSION);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     needRefresh: [needRefresh, setNeedRefresh],
@@ -37,29 +81,32 @@ export function useVersionedUpdatePrompt(): UseVersionedUpdatePromptReturn {
     onRegisterError(error) {
       console.error("Service Worker registration error:", error);
     },
-    onNeedRefresh() {
+    async onNeedRefresh() {
+      // When SW detects update, fetch the NEW version's info from network
+      setIsLoading(true);
+      const freshInfo = await fetchFreshVersionInfo();
+      setVersionInfo(freshInfo);
+      setIsLoading(false);
       setShowUpdatePrompt(true);
     },
   });
 
-  const handleUpdate = async () => {
+  const handleUpdate = useCallback(async () => {
     setShowUpdatePrompt(false);
     try {
-      // Save the current version to localStorage before updating
-      // This prevents showing the same update message again
-      saveCurrentVersion();
+      // Save current version to localStorage to track what user has seen
+      localStorage.setItem(VERSION_CACHE_KEY, JSON.stringify(versionInfo));
       await updateServiceWorker(true);
     } catch (error) {
       console.error("Error during service worker update:", error);
-      // Re-show prompt if update fails
       setShowUpdatePrompt(true);
     }
-  };
+  }, [updateServiceWorker, versionInfo]);
 
-  const handleDismiss = () => {
+  const handleDismiss = useCallback(() => {
     setShowUpdatePrompt(false);
     setNeedRefresh(false);
-  };
+  }, [setNeedRefresh]);
 
   return {
     showUpdatePrompt,

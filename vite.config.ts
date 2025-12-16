@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => ({
               networkTimeoutSeconds: 3,
               expiration: {
                 maxEntries: 1,
-                maxAgeSeconds: 60, // 1 minute - very short to ensure fresh version info
+                maxAgeSeconds: 60,
               },
             },
           },
@@ -61,16 +61,20 @@ export default defineConfig(({ mode }) => ({
         theme_color: "#1ba3c6",
         background_color: "#ffffff",
         display: "standalone",
+        start_url: "/",
+        orientation: "portrait",
         icons: [
           {
-            src: "/icon-192.png",
+            src: "/web-app-manifest-192x192.png",
             sizes: "192x192",
             type: "image/png",
+            purpose: "any maskable",
           },
           {
-            src: "/icon-512.png",
+            src: "/web-app-manifest-512x512.png",
             sizes: "512x512",
             type: "image/png",
+            purpose: "any maskable",
           },
         ],
       },

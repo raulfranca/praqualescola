@@ -1,5 +1,5 @@
 import { School } from "@/types/school";
-import { Star, MapPin, Phone, Building2, Car, Clock, School2, X, LogIn } from "lucide-react";
+import { Star, MapPin, Phone, Building2, Car, Clock, School2, LogIn, Navigation } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { HomeLocation } from "@/hooks/useHomeLocation";
 import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
@@ -53,8 +53,8 @@ export function SchoolDetailModal({
       setLoadingDistance(false);
     });
   }, [homeLocation, school?.lat, school?.lng]);
-  const handleOpenInMaps = () => {
-    if (!school?.address) return;
+  const handleGetDirections = () => {
+    if (!school?.lat || !school?.lng) return;
     
     // Track directions view
     trackEvent('view_directions', {
@@ -62,8 +62,20 @@ export function SchoolDetailModal({
       school_name: school.name
     });
     
-    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(school.address)}`;
-    window.open(mapsUrl, "_blank");
+    const { lat, lng, name } = school;
+    
+    // Detect mobile device
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobileDevice) {
+      // Use geo: URI to trigger native app picker on mobile
+      const geoUri = `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(name)})`;
+      window.location.href = geoUri;
+    } else {
+      // Desktop: Open Google Maps directions in new tab
+      const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+      window.open(mapsUrl, "_blank");
+    }
   };
   const formatPhone = (phone: string, extension?: string) => {
     if (!phone) return "Não disponível";
@@ -207,9 +219,9 @@ export function SchoolDetailModal({
           <span className="whitespace-nowrap">{isFavorite ? "Remover dos Favoritos" : "Adicionar aos Favoritos"}</span>
         </Button>
         
-        <Button onClick={handleOpenInMaps} className="flex items-center justify-center gap-2">
-          <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span className="whitespace-nowrap">Ver no Google Maps</span>
+        <Button onClick={handleGetDirections} className="flex items-center justify-center gap-2">
+          <Navigation className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="whitespace-nowrap">Como Chegar?</span>
         </Button>
       </div>
     </div> : null;
