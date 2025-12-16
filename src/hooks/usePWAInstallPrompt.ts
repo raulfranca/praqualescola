@@ -100,6 +100,15 @@ export function usePWAInstallPrompt() {
     setShowIOSBanner(false);
   }, [fetchCurrentVersion]);
 
+  // Dismiss install banner without triggering prompt
+  const dismissInstallBanner = useCallback(async () => {
+    const currentVersion = await fetchCurrentVersion();
+    if (currentVersion) {
+      localStorage.setItem(INSTALL_PROMPT_VERSION_KEY, currentVersion);
+    }
+    setDeferredPrompt(null);
+  }, [fetchCurrentVersion]);
+
   useEffect(() => {
     // Check if already installed
     setIsInstalled(checkIfInstalled());
@@ -178,5 +187,6 @@ export function usePWAInstallPrompt() {
     showIOSBanner,
     triggerInstallPrompt,
     dismissIOSBanner,
+    dismissInstallBanner,
   };
 }
