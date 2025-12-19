@@ -14,7 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      address_distance_cache: {
+        Row: {
+          created_at: string
+          distance_km: number
+          duration_minutes: number | null
+          id: string
+          lat: number
+          lng: number
+          school_id: number
+        }
+        Insert: {
+          created_at?: string
+          distance_km: number
+          duration_minutes?: number | null
+          id?: string
+          lat: number
+          lng: number
+          school_id: number
+        }
+        Update: {
+          created_at?: string
+          distance_km?: number
+          duration_minutes?: number | null
+          id?: string
+          lat?: number
+          lng?: number
+          school_id?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
