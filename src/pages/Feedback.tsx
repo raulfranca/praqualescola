@@ -1,19 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
+
 const Feedback = () => {
   const navigate = useNavigate();
-  useEffect(() => {
-    // Load Tally embed script
-    const script = document.createElement('script');
-    script.src = 'https://tally.so/widgets/embed.js';
-    script.async = true;
-    document.body.appendChild(script);
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
   return <div className="relative w-full h-screen bg-background pb-16 md:pb-0 md:ml-16">
       {/* Close Button */}
       

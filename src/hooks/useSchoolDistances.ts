@@ -66,18 +66,18 @@ export function useSchoolDistances(
   const syncLocalCacheToSupabase = useCallback(async (): Promise<void> => {
     const syncStatus = localStorage.getItem(SYNC_STATUS_KEY);
     if (syncStatus === "synced") {
-      console.log("✅ localStorage already synced with Supabase, skipping check");
+      if (import.meta.env.DEV) console.log("✅ localStorage already synced with Supabase, skipping check");
       return;
     }
 
-    console.log("🔄 Checking if local cache can contribute to shared cache...");
+    if (import.meta.env.DEV) console.log("🔄 Checking if local cache can contribute to shared cache...");
 
     try {
       const allKeys = Object.keys(localStorage);
       const cacheKeys = allKeys.filter(key => key.startsWith("cachedDistances_"));
 
       if (cacheKeys.length === 0) {
-        console.log("📭 No local cache found to sync");
+        if (import.meta.env.DEV) console.log("📭 No local cache found to sync");
         localStorage.setItem(SYNC_STATUS_KEY, "synced");
         return;
       }
@@ -92,7 +92,7 @@ export function useSchoolDistances(
 
         const existsInSupabase = await checkIfAddressExistsInCache(lat, lng);
         if (existsInSupabase) {
-          console.log(`⏭️ Address (${lat.toFixed(5)}, ${lng.toFixed(5)}) already in Supabase, skipping`);
+          if (import.meta.env.DEV) console.log(`⏭️ Address (${lat.toFixed(5)}, ${lng.toFixed(5)}) already in Supabase, skipping`);
           continue;
         }
 
@@ -108,13 +108,13 @@ export function useSchoolDistances(
 
         if (distancesArray.length === 0) continue;
 
-        console.log(`☁️ Uploading 1 row with ${distancesArray.length} schools for address (${lat.toFixed(5)}, ${lng.toFixed(5)}) to Supabase...`);
+        if (import.meta.env.DEV) console.log(`☁️ Uploading 1 row with ${distancesArray.length} schools for address (${lat.toFixed(5)}, ${lng.toFixed(5)}) to Supabase...`);
         await saveCacheForAddress(lat, lng, distancesArray);
-        console.log(`✅ Successfully contributed local cache to shared cache`);
+        if (import.meta.env.DEV) console.log(`✅ Successfully contributed local cache to shared cache`);
       }
 
       localStorage.setItem(SYNC_STATUS_KEY, "synced");
-      console.log("🎉 Local cache sync complete!");
+      if (import.meta.env.DEV) console.log("🎉 Local cache sync complete!");
     } catch (error) {
       console.error("⚠️ Error during cache sync:", error);
     }
@@ -131,7 +131,7 @@ export function useSchoolDistances(
    * Clear all distance data when home location is removed
    */
   const clearDistances = useCallback(() => {
-    console.log("🏠 Clearing all distance calculations");
+    if (import.meta.env.DEV) console.log("🏠 Clearing all distance calculations");
     setDistances({});
     localStorage.removeItem(DISTANCES_STORAGE_KEY);
   }, []);
@@ -148,7 +148,7 @@ export function useSchoolDistances(
     // 1. Check local cache first (Offline-First)
     const cachedData = localStorage.getItem(cacheKey);
     if (cachedData) {
-      console.log("📦 Loading distances from local cache (Offline-First)");
+      if (import.meta.env.DEV) console.log("📦 Loading distances from local cache (Offline-First)");
       const cached = JSON.parse(cachedData) as SchoolDistances;
       setDistances(cached);
       localStorage.setItem(DISTANCES_STORAGE_KEY, JSON.stringify(cached));
@@ -156,7 +156,7 @@ export function useSchoolDistances(
     }
 
     // 2. Check Supabase shared cache for nearby address
-    console.log("🔍 Checking shared cache for nearby addresses...");
+    if (import.meta.env.DEV) console.log("🔍 Checking shared cache for nearby addresses...");
     
     try {
       const nearbyCoords = await findNearbyCache(location.lat, location.lng);
@@ -170,7 +170,7 @@ export function useSchoolDistances(
           nearbyCoords.lng
         );
         
-        console.log(`📍 Found cached address ${distanceMeters.toFixed(0)}m away`);
+        if (import.meta.env.DEV) console.log(`📍 Found cached address ${distanceMeters.toFixed(0)}m away`);
         
         const cachedDistances = await getCachedDistances(nearbyCoords.lat, nearbyCoords.lng);
         
@@ -184,7 +184,7 @@ export function useSchoolDistances(
             };
           });
           
-          console.log(`📦 Using shared cache (${cachedDistances.length} schools) - Zero API cost`);
+          if (import.meta.env.DEV) console.log(`📦 Using shared cache (${cachedDistances.length} schools) - Zero API cost`);
           
           // Save to localStorage using USER'S coordinates (not nearby coords)
           setDistances(newDistances);
@@ -194,7 +194,7 @@ export function useSchoolDistances(
           return true;
         }
       } else {
-        console.log("❌ No nearby cached addresses found within 100m");
+        if (import.meta.env.DEV) console.log("❌ No nearby cached addresses found within 100m");
       }
     } catch (error) {
       console.error("⚠️ Error checking shared cache, falling back to API:", error);
@@ -202,8 +202,10 @@ export function useSchoolDistances(
     }
 
     // 3. Calculate via Google Distance Matrix API
-    console.log("🏠 Home location set:", location.address);
-    console.log("📍 Starting driving distance calculation for", schools.length, "schools...");
+    if (import.meta.env.DEV) {
+      console.log("🏠 Home location set:", location.address);
+      console.log("📍 Starting driving distance calculation for", schools.length, "schools...");
+    }
     
     setIsCalculating(true);
 
@@ -221,15 +223,16 @@ export function useSchoolDistances(
         };
       });
 
-      // Log first 5 schools for verification
-      const firstFive = results.slice(0, 5);
-      firstFive.forEach((result) => {
-        const method = result.usedFallback ? "(fallback)" : "(API)";
-        console.log(`📏 School ${result.schoolId}: ${result.distanceInKm} km ${method}`);
-      });
-
-      console.log("✅ Driving distance calculation complete!");
-      console.log("💾 Saving to localStorage...");
+      // Log first 5 schools for verification (dev only)
+      if (import.meta.env.DEV) {
+        const firstFive = results.slice(0, 5);
+        firstFive.forEach((result) => {
+          const method = result.usedFallback ? "(fallback)" : "(API)";
+          console.log(`📏 School ${result.schoolId}: ${result.distanceInKm} km ${method}`);
+        });
+        console.log("✅ Driving distance calculation complete!");
+        console.log("💾 Saving to localStorage...");
+      }
       
       // Save to localStorage
       setDistances(newDistances);
@@ -237,7 +240,7 @@ export function useSchoolDistances(
       localStorage.setItem(cacheKey, JSON.stringify(newDistances));
       
       // Save to Supabase shared cache
-      console.log("☁️ Saving to shared cache for future users...");
+      if (import.meta.env.DEV) console.log("☁️ Saving to shared cache for future users...");
       await saveCacheForAddress(location.lat, location.lng, results);
       
       // Record timestamp for rate limiting
@@ -266,10 +269,12 @@ export function useSchoolDistances(
     if (!homeLocation) return schoolsWithDistances;
     
     const sorted = sortSchoolsByDistance(schoolsWithDistances);
-    console.log("🔢 Schools sorted by distance (closest 5):");
-    sorted.slice(0, 5).forEach((school, index) => {
-      console.log(`${index + 1}. ${school.name}: ${school.distanceInKm} km`);
-    });
+    if (import.meta.env.DEV) {
+      console.log("🔢 Schools sorted by distance (closest 5):");
+      sorted.slice(0, 5).forEach((school, index) => {
+        console.log(`${index + 1}. ${school.name}: ${school.distanceInKm} km`);
+      });
+    }
     
     return sorted;
   }, [schoolsWithDistances, homeLocation]);
