@@ -20,10 +20,8 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ### Corrigido
 
-- PWA instalável em Windows.
-- Banner convidando para instalar aparece corretamente a cada nova versão.
+- PWA instalável em Windows
 - Toast de nova versão não usa a mensagem em cache, mas puxa o arquivo novo do servidor para mostrar mensagem atualizada.
-- Refatoração do código e remoção de partes obsoletas.
 
 ## \[1.4.0\] \- 2025-12-10
 
