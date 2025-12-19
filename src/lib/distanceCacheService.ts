@@ -132,39 +132,55 @@ export async function getCachedDistances(
 export async function saveCacheForAddress(
   lat: number,
   lng: number,
-  distances: Array<{
-    schoolId: number;
-    distanceInKm: number;
-    durationInMinutes?: number;
-  }>
+  distances: { schoolId: number; distanceInKm: number; durationInMinutes?: number }[]
 ): Promise<void> {
   try {
-    if (distances.length === 0) {
-      return;
-    }
-    
-    // Transform input array to table format
     const rows = distances.map(d => ({
-      lat: Number(lat.toFixed(7)),
-      lng: Number(lng.toFixed(7)),
+      lat,
+      lng,
       school_id: d.schoolId,
-      distance_km: Number(d.distanceInKm.toFixed(2)),
+      distance_km: d.distanceInKm,
       duration_minutes: d.durationInMinutes ?? null
     }));
-    
+
     const { error } = await supabase
       .from("address_distance_cache")
-      .upsert(rows, { 
-        onConflict: "lat,lng,school_id",
-        ignoreDuplicates: false 
-      });
-    
+      .insert(rows);
+
     if (error) {
       console.error("Error saving to cache:", error);
     } else {
-      console.log(`Saved ${rows.length} distances to shared cache`);
+      console.log(`✅ Saved ${rows.length} distances to shared cache`);
     }
   } catch (err) {
     console.error("Error in saveCacheForAddress:", err);
+  }
+}
+
+/**
+ * Checks if a specific address already exists in Supabase cache
+ * Returns true if at least one school is found for these coordinates
+ */
+export async function checkIfAddressExistsInCache(
+  lat: number,
+  lng: number
+): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from("address_distance_cache")
+      .select("school_id")
+      .eq("lat", lat)
+      .eq("lng", lng)
+      .limit(1);
+    
+    if (error) {
+      console.error("Error checking address in cache:", error);
+      return false;
+    }
+    
+    return data && data.length > 0;
+  } catch (err) {
+    console.error("Error in checkIfAddressExistsInCache:", err);
+    return false;
   }
 }
