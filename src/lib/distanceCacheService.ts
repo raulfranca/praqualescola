@@ -28,13 +28,6 @@ export function haversineDistanceMeters(
 /**
  * Searches Supabase for an address already calculated within 100m
  * Returns the coordinates of the found cache or null
- * 
- * Logic:
- * - Uses Haversine formula to calculate distance between coordinates
- * - Searches Supabase for addresses in an approximate radius (lat/lng ± 0.001 degrees)
- * - For each result, calculates exact distance
- * - If any is found < 100m, returns its coordinates
- * - If none found < 100m, returns null
  */
 export async function findNearbyCache(
   lat: number,
@@ -62,17 +55,14 @@ export async function findNearbyCache(
       return null;
     }
     
-    // Get unique coordinates (since multiple school entries share same lat/lng)
-    const uniqueCoords = new Map<string, { lat: number; lng: number }>();
-    for (const row of data) {
-      const key = `${row.lat},${row.lng}`;
-      if (!uniqueCoords.has(key)) {
-        uniqueCoords.set(key, { lat: Number(row.lat), lng: Number(row.lng) });
-      }
-    }
+    // Get coordinates (1 row per address now - no need to dedupe!)
+    const coords = data.map(row => ({
+      lat: Number(row.lat),
+      lng: Number(row.lng)
+    }));
     
     // Find first coordinate within 100 meters
-    for (const coord of uniqueCoords.values()) {
+    for (const coord of coords) {
       const distance = haversineDistanceMeters(lat, lng, coord.lat, coord.lng);
       if (distance < 100) {
         return coord;
@@ -101,24 +91,40 @@ export async function getCachedDistances(
   try {
     const { data, error } = await supabase
       .from("address_distance_cache")
-      .select("school_id, distance_km, duration_minutes")
+      .select("distances")
       .eq("lat", lat)
-      .eq("lng", lng);
+      .eq("lng", lng)
+      .maybeSingle();
     
     if (error) {
       console.error("Error getting cached distances:", error);
       return [];
     }
     
-    if (!data || data.length === 0) {
+    if (!data?.distances) {
       return [];
     }
     
-    return data.map(row => ({
-      school_id: row.school_id,
-      distance_km: Number(row.distance_km),
-      duration_minutes: row.duration_minutes
-    }));
+    // Transform JSONB back to array format
+    // From: {"1": {"km": 44.31, "min": 41}, ...}
+    // To: [{school_id: 1, distance_km: 44.31, duration_minutes: 41}, ...]
+    const result: Array<{
+      school_id: number;
+      distance_km: number;
+      duration_minutes: number | null;
+    }> = [];
+    
+    const distances = data.distances as Record<string, { km: number; min: number | null }>;
+    
+    for (const [schoolId, values] of Object.entries(distances)) {
+      result.push({
+        school_id: parseInt(schoolId),
+        distance_km: values.km,
+        duration_minutes: values.min
+      });
+    }
+    
+    return result;
   } catch (err) {
     console.error("Error in getCachedDistances:", err);
     return [];
@@ -127,7 +133,7 @@ export async function getCachedDistances(
 
 /**
  * Saves all calculated distances for an address to Supabase
- * Receives the result from Distance Matrix API and persists it
+ * Uses JSONB to store all schools in a single row (denormalized)
  */
 export async function saveCacheForAddress(
   lat: number,
@@ -135,22 +141,37 @@ export async function saveCacheForAddress(
   distances: { schoolId: number; distanceInKm: number; durationInMinutes?: number }[]
 ): Promise<void> {
   try {
-    const rows = distances.map(d => ({
-      lat,
-      lng,
-      school_id: d.schoolId,
-      distance_km: d.distanceInKm,
-      duration_minutes: d.durationInMinutes ?? null
-    }));
+    if (distances.length === 0) {
+      return;
+    }
+    
+    // Transform array into JSONB object
+    // Format: {"1": {"km": 44.31, "min": 41}, "2": {"km": 55.52, "min": 53}, ...}
+    const distancesJsonb: Record<string, { km: number; min: number | null }> = {};
+    
+    distances.forEach(d => {
+      distancesJsonb[d.schoolId.toString()] = {
+        km: Number(d.distanceInKm.toFixed(2)),
+        min: d.durationInMinutes ?? null
+      };
+    });
 
     const { error } = await supabase
       .from("address_distance_cache")
-      .insert(rows);
+      .upsert({
+        lat: Number(lat.toFixed(7)),
+        lng: Number(lng.toFixed(7)),
+        distances: distancesJsonb,
+        created_at: new Date().toISOString()
+      }, { 
+        onConflict: "lat,lng",
+        ignoreDuplicates: false 
+      });
 
     if (error) {
       console.error("Error saving to cache:", error);
     } else {
-      console.log(`✅ Saved ${rows.length} distances to shared cache`);
+      console.log(`✅ Saved 1 row with ${distances.length} schools to shared cache`);
     }
   } catch (err) {
     console.error("Error in saveCacheForAddress:", err);
@@ -159,7 +180,7 @@ export async function saveCacheForAddress(
 
 /**
  * Checks if a specific address already exists in Supabase cache
- * Returns true if at least one school is found for these coordinates
+ * Returns true if the address exists
  */
 export async function checkIfAddressExistsInCache(
   lat: number,
@@ -168,17 +189,17 @@ export async function checkIfAddressExistsInCache(
   try {
     const { data, error } = await supabase
       .from("address_distance_cache")
-      .select("school_id")
+      .select("id")
       .eq("lat", lat)
       .eq("lng", lng)
-      .limit(1);
+      .maybeSingle();
     
     if (error) {
       console.error("Error checking address in cache:", error);
       return false;
     }
     
-    return data && data.length > 0;
+    return !!data;
   } catch (err) {
     console.error("Error in checkIfAddressExistsInCache:", err);
     return false;
