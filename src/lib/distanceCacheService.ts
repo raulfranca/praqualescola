@@ -138,7 +138,8 @@ export async function getCachedDistances(
 export async function saveCacheForAddress(
   lat: number,
   lng: number,
-  distances: { schoolId: number; distanceInKm: number; durationInMinutes?: number }[]
+  distances: { schoolId: number; distanceInKm: number; durationInMinutes?: number }[],
+  address?: string
 ): Promise<void> {
   try {
     if (distances.length === 0) {
@@ -162,6 +163,7 @@ export async function saveCacheForAddress(
         lat: Number(lat.toFixed(7)),
         lng: Number(lng.toFixed(7)),
         distances: distancesJsonb,
+        address: address || null,
         created_at: new Date().toISOString()
       }, { 
         onConflict: "lat,lng",
@@ -180,12 +182,13 @@ export async function saveCacheForAddress(
           details: error.details
         });
       }
-    } else {
-      if (import.meta.env.DEV) {
-        console.log(`✅ Saved 1 row with ${distances.length} schools to shared cache`);
-        console.log(`   Coordinates: lat=${lat.toFixed(7)}, lng=${lng.toFixed(7)}`);
-      }
+  } else {
+    if (import.meta.env.DEV) {
+      console.log(`✅ Saved 1 row with ${distances.length} schools to shared cache`);
+      console.log(`   Coordinates: lat=${lat.toFixed(7)}, lng=${lng.toFixed(7)}`);
+      if (address) console.log(`   Address: ${address}`);
     }
+  }
   } catch (err) {
     console.error("Error in saveCacheForAddress:", err);
   }

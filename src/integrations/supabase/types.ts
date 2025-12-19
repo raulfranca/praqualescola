@@ -17,6 +17,7 @@ export type Database = {
       address_distance_cache: {
         Row: {
           access_count: number | null
+          address: string | null
           created_at: string | null
           distances: Json
           id: string
@@ -26,6 +27,7 @@ export type Database = {
         }
         Insert: {
           access_count?: number | null
+          address?: string | null
           created_at?: string | null
           distances: Json
           id?: string
@@ -35,6 +37,7 @@ export type Database = {
         }
         Update: {
           access_count?: number | null
+          address?: string | null
           created_at?: string | null
           distances?: Json
           id?: string
