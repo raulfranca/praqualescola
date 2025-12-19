@@ -1,0 +1,74 @@
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    # Run every 6 days at midnight UTC (0 0 */6 * *)
+    - cron: '0 0 */6 * *'
+  
+  # Allow manual trigger for testing
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install @supabase/supabase-js
+
+      - name: Run keep-alive query
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          node -e "
+          const { createClient } = require('@supabase/supabase-js');
+          
+          (async () => {
+            try {
+              const supabase = createClient(
+                process.env.SUPABASE_URL,
+                process.env.SUPABASE_ANON_KEY
+              );
+              
+              // Generate random string
+              const randomString = Math.random().toString(36).substring(7);
+              
+              // Query database (keeps it active)
+              const { data, error } = await supabase
+                .from('keep_alive')
+                .select('name')
+                .eq('name', randomString)
+                .limit(1);
+              
+              if (error) throw error;
+              
+              // Update last_ping timestamp
+              await supabase
+                .from('keep_alive')
+                .update({ last_ping: new Date().toISOString() })
+                .eq('name', 'github-actions-cron');
+              
+              console.log('✅ Keep-alive successful');
+              console.log('Queried for:', randomString);
+              console.log('Results:', data?.length || 0);
+              console.log('Timestamp:', new Date().toISOString());
+              
+            } catch (error) {
+              console.error('❌ Keep-alive failed:', error);
+              process.exit(1);
+            }
+          })();
+          "
+
+      - name: Log completion
+        if: always()
+        run: echo "Keep-alive job completed at $(date)"
