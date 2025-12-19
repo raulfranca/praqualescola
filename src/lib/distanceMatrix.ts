@@ -25,7 +25,7 @@ export async function calculateDistancesForSchools(
   const TORTUOSITY_FACTOR = 1.3;
   const results: SchoolDistanceResult[] = [];
 
-  if (import.meta.env.DEV) console.log(`🚗 Starting Distance Matrix calculation for ${schools.length} schools...`);
+  console.log(`🚗 Starting Distance Matrix calculation for ${schools.length} schools...`);
 
   // Check if Google Maps API is available
   if (!window.google?.maps?.DistanceMatrixService) {
@@ -43,12 +43,12 @@ export async function calculateDistancesForSchools(
     batches.push(schools.slice(i, i + BATCH_SIZE));
   }
 
-  if (import.meta.env.DEV) console.log(`📦 Split into ${batches.length} batches`);
+  console.log(`📦 Split into ${batches.length} batches`);
 
   // Process each batch
   for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
     const batch = batches[batchIndex];
-    if (import.meta.env.DEV) console.log(`⏳ Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} schools)...`);
+    console.log(`⏳ Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} schools)...`);
 
     try {
       const batchResults = await calculateBatch(origin, batch, TORTUOSITY_FACTOR);
@@ -56,7 +56,7 @@ export async function calculateDistancesForSchools(
       
       // Log progress
       const successCount = batchResults.filter(r => !r.usedFallback).length;
-      if (import.meta.env.DEV) console.log(`✅ Batch ${batchIndex + 1} complete: ${successCount}/${batch.length} via API, ${batch.length - successCount} via fallback`);
+      console.log(`✅ Batch ${batchIndex + 1} complete: ${successCount}/${batch.length} via API, ${batch.length - successCount} via fallback`);
     } catch (error) {
       console.error(`❌ Batch ${batchIndex + 1} failed:`, error);
       // Use fallback for entire batch
@@ -75,7 +75,7 @@ export async function calculateDistancesForSchools(
   }
 
   const apiCount = results.filter(r => !r.usedFallback).length;
-  if (import.meta.env.DEV) console.log(`🎉 Distance calculation complete: ${apiCount} via API, ${results.length - apiCount} via fallback`);
+  console.log(`🎉 Distance calculation complete: ${apiCount} via API, ${results.length - apiCount} via fallback`);
 
   return results;
 }

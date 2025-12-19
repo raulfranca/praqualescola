@@ -16,55 +16,31 @@ export type Database = {
     Tables: {
       address_distance_cache: {
         Row: {
-          access_count: number | null
-          address: string | null
-          created_at: string | null
-          distances: Json
+          created_at: string
+          distance_km: number
+          duration_minutes: number | null
           id: string
-          last_accessed_at: string | null
           lat: number
           lng: number
+          school_id: number
         }
         Insert: {
-          access_count?: number | null
-          address?: string | null
-          created_at?: string | null
-          distances: Json
+          created_at?: string
+          distance_km: number
+          duration_minutes?: number | null
           id?: string
-          last_accessed_at?: string | null
           lat: number
           lng: number
+          school_id: number
         }
         Update: {
-          access_count?: number | null
-          address?: string | null
-          created_at?: string | null
-          distances?: Json
+          created_at?: string
+          distance_km?: number
+          duration_minutes?: number | null
           id?: string
-          last_accessed_at?: string | null
           lat?: number
           lng?: number
-        }
-        Relationships: []
-      }
-      keep_alive: {
-        Row: {
-          id: number
-          last_ping: string | null
-          name: string | null
-          random: string | null
-        }
-        Insert: {
-          id?: number
-          last_ping?: string | null
-          name?: string | null
-          random?: string | null
-        }
-        Update: {
-          id?: number
-          last_ping?: string | null
-          name?: string | null
-          random?: string | null
+          school_id?: number
         }
         Relationships: []
       }

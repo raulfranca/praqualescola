@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { School } from "@/types/school";
 import { HomeLocation } from "@/hooks/useHomeLocation";
 import { sortSchoolsByDistance } from "@/lib/distanceCalculator";
@@ -8,12 +8,10 @@ import {
   findNearbyCache, 
   getCachedDistances, 
   saveCacheForAddress,
-  haversineDistanceMeters,
-  checkIfAddressExistsInCache
+  haversineDistanceMeters 
 } from "@/lib/distanceCacheService";
 
 const DISTANCES_STORAGE_KEY = "school-distances";
-const SYNC_STATUS_KEY = "supabase-sync-status";
 
 interface SchoolDistances {
   [schoolId: number]: {
@@ -29,11 +27,11 @@ export interface SchoolWithDistance extends School {
 
 /**
  * Generates a cache key based on location coordinates
- * Uses 7 decimal places to match Supabase storage format
  */
 function getCacheKey(lat: number, lng: number): string {
-  const roundedLat = Number(lat.toFixed(7));
-  const roundedLng = Number(lng.toFixed(7));
+  // Round to 5 decimal places (~1m precision) to avoid floating point issues
+  const roundedLat = Math.round(lat * 100000) / 100000;
+  const roundedLng = Math.round(lng * 100000) / 100000;
   return `cachedDistances_${roundedLat}_${roundedLng}`;
 }
 
@@ -61,208 +59,10 @@ export function useSchoolDistances(
   }, []);
 
   /**
-   * Migrates old format localStorage to new format with coordinate-based keys
-   * Run once to ensure all cached data can be synced to Supabase
-   */
-  const migrateOldCacheFormat = useCallback((): void => {
-    try {
-      const hasSchoolDistances = localStorage.getItem(DISTANCES_STORAGE_KEY);
-      const hasHomeLocation = localStorage.getItem("home-location");
-      
-      if (!hasSchoolDistances || !hasHomeLocation) {
-        if (import.meta.env.DEV) console.log("📭 No old cache format found, skipping migration");
-        return;
-      }
-      
-      const homeLocationParsed = JSON.parse(hasHomeLocation) as { lat: number; lng: number; address?: string };
-      const cacheKey = getCacheKey(homeLocationParsed.lat, homeLocationParsed.lng);
-      
-      if (localStorage.getItem(cacheKey)) {
-        if (import.meta.env.DEV) console.log("✅ Coordinate-based cache key already exists, skipping migration");
-        return;
-      }
-      
-      if (import.meta.env.DEV) {
-        console.log("🔄 Migrating old cache format to coordinate-based key...");
-        console.log(`   Creating key: ${cacheKey}`);
-      }
-      
-      // Migrate to new format with address
-      const cacheData = {
-        address: homeLocationParsed.address,
-        distances: JSON.parse(hasSchoolDistances),
-        savedAt: new Date().toISOString()
-      };
-      
-      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-      
-      if (import.meta.env.DEV) {
-        console.log("✅ Migration complete! Old data now has coordinate-based key with address");
-      }
-    } catch (error) {
-      console.error("⚠️ Error during cache migration:", error);
-    }
-  }, []);
-
-  /**
-   * One-time sync: Upload localStorage distances to Supabase if not already there
-   * Marks localStorage as synced to avoid future unnecessary checks
-   */
-  const syncLocalCacheToSupabase = useCallback(async (): Promise<void> => {
-    const syncStatus = localStorage.getItem(SYNC_STATUS_KEY);
-    const forceResync = import.meta.env.DEV;
-    
-    if (syncStatus === "synced" && !forceResync) {
-      if (import.meta.env.DEV) console.log("✅ localStorage already synced with Supabase, skipping check");
-      return;
-    }
-
-    if (forceResync && syncStatus === "synced") {
-      if (import.meta.env.DEV) console.log("🔄 DEV MODE: Forcing resync...");
-    }
-
-    if (import.meta.env.DEV) console.log("🔍 Checking if local cache can contribute to shared cache...");
-
-    try {
-      const allKeys = Object.keys(localStorage);
-      const cacheKeys = allKeys.filter(key => key.startsWith("cachedDistances_"));
-
-      if (import.meta.env.DEV) {
-        console.log(`📋 Found ${cacheKeys.length} cached addresses in localStorage:`, cacheKeys);
-      }
-
-      if (cacheKeys.length === 0) {
-        if (import.meta.env.DEV) console.log("📭 No local cache found to sync");
-        localStorage.setItem(SYNC_STATUS_KEY, "synced");
-        return;
-      }
-
-      for (const cacheKey of cacheKeys) {
-        if (import.meta.env.DEV) console.log(`\n🔍 Processing: ${cacheKey}`);
-        
-        const parts = cacheKey.replace("cachedDistances_", "").split("_");
-        if (parts.length !== 2) {
-          if (import.meta.env.DEV) console.warn(`⚠️ Invalid key format: ${cacheKey}`);
-          continue;
-        }
-
-        // CRITICAL: Round to 7 decimals to match Supabase format
-        const lat = Number(parseFloat(parts[0]).toFixed(7));
-        const lng = Number(parseFloat(parts[1]).toFixed(7));
-
-        if (isNaN(lat) || isNaN(lng)) {
-          if (import.meta.env.DEV) console.warn(`⚠️ Invalid coordinates in key: ${cacheKey}`);
-          continue;
-        }
-
-        if (import.meta.env.DEV) {
-          console.log(`   Parsed coordinates: lat=${lat}, lng=${lng}`);
-        }
-
-        const existsInSupabase = await checkIfAddressExistsInCache(lat, lng);
-        
-        if (import.meta.env.DEV) {
-          console.log(`   Exists in Supabase: ${existsInSupabase}`);
-        }
-
-        // If exists, still update to ensure address field is populated
-        if (existsInSupabase) {
-          if (import.meta.env.DEV) console.log(`   ⚠️ Data exists, but will update to ensure address is set`);
-          // Don't skip - continue to update below
-        } else {
-          if (import.meta.env.DEV) console.log(`   🆕 New address, will insert`);
-        }
-
-        const cachedData = localStorage.getItem(cacheKey);
-        if (!cachedData) {
-          if (import.meta.env.DEV) console.warn(`   ⚠️ Key exists but no data found`);
-          continue;
-        }
-
-        // Parse cached data (support both old and new formats)
-        let distances: SchoolDistances;
-        let address: string | undefined;
-
-        try {
-          const parsed = JSON.parse(cachedData);
-          
-          // NEW FORMAT: { address: "...", distances: {...}, savedAt: "..." }
-          if (parsed.distances && typeof parsed.distances === 'object') {
-            distances = parsed.distances;
-            address = parsed.address;
-            if (import.meta.env.DEV) console.log(`   📍 Address from cache: ${address}`);
-          } 
-          // OLD FORMAT: Direct SchoolDistances object (backward compatibility)
-          else {
-            distances = parsed as SchoolDistances;
-            
-            // Fallback: Try to get address from home-location (only for old format)
-            try {
-              const homeLocationData = localStorage.getItem("home-location");
-              if (homeLocationData) {
-                const homeLocation = JSON.parse(homeLocationData) as { address?: string };
-                address = homeLocation.address;
-                if (import.meta.env.DEV) console.warn(`   ⚠️ Using fallback address (old format): ${address}`);
-              }
-            } catch (err) {
-              // Ignore parse errors
-            }
-          }
-        } catch (err) {
-          if (import.meta.env.DEV) console.error(`   ❌ Failed to parse cached data:`, err);
-          continue;
-        }
-
-        const distancesArray = Object.entries(distances).map(([schoolId, data]) => ({
-          schoolId: parseInt(schoolId),
-          distanceInKm: data.distanceInKm,
-          durationInMinutes: data.durationInMinutes
-        }));
-
-        if (distancesArray.length === 0) {
-          if (import.meta.env.DEV) console.warn(`   ⚠️ No schools found in cache`);
-          continue;
-        }
-
-        if (import.meta.env.DEV) {
-          const action = existsInSupabase ? "Updating" : "Inserting";
-          console.log(`   ☁️ ${action} 1 row with ${distancesArray.length} schools to Supabase...`);
-          if (address) {
-            console.log(`   Address: ${address}`);
-          } else {
-            console.warn(`   ⚠️ No address found in localStorage`);
-          }
-        }
-
-        await saveCacheForAddress(lat, lng, distancesArray, address);
-
-        if (import.meta.env.DEV) {
-          const action = existsInSupabase ? "updated" : "inserted";
-          console.log(`   ✅ Successfully ${action} data in shared cache`);
-        }
-      }
-
-      localStorage.setItem(SYNC_STATUS_KEY, "synced");
-      if (import.meta.env.DEV) console.log("\n🎉 Local cache sync complete!");
-    } catch (error) {
-      console.error("⚠️ Error during cache sync:", error);
-    }
-  }, []);
-
-  // Run migration + sync on mount
-  useEffect(() => {
-    migrateOldCacheFormat();
-    
-    syncLocalCacheToSupabase().catch(err => {
-      console.error("Background sync failed:", err);
-    });
-  }, [migrateOldCacheFormat, syncLocalCacheToSupabase]);
-
-  /**
    * Clear all distance data when home location is removed
    */
   const clearDistances = useCallback(() => {
-    if (import.meta.env.DEV) console.log("🏠 Clearing all distance calculations");
+    console.log("🏠 Clearing all distance calculations");
     setDistances({});
     localStorage.removeItem(DISTANCES_STORAGE_KEY);
   }, []);
@@ -279,25 +79,15 @@ export function useSchoolDistances(
     // 1. Check local cache first (Offline-First)
     const cachedData = localStorage.getItem(cacheKey);
     if (cachedData) {
-      if (import.meta.env.DEV) console.log("📦 Loading distances from local cache (Offline-First)");
-      
-      try {
-        const parsed = JSON.parse(cachedData);
-        
-        // Support both new format (with address) and old format (direct distances)
-        const cached = parsed.distances ? parsed.distances : parsed;
-        
-        setDistances(cached);
-        localStorage.setItem(DISTANCES_STORAGE_KEY, JSON.stringify(cached));
-        return true;
-      } catch (err) {
-        console.error("Error parsing cached data:", err);
-        // Continue to recalculate if cache is corrupted
-      }
+      console.log("📦 Loading distances from local cache (Offline-First)");
+      const cached = JSON.parse(cachedData) as SchoolDistances;
+      setDistances(cached);
+      localStorage.setItem(DISTANCES_STORAGE_KEY, JSON.stringify(cached));
+      return true;
     }
 
     // 2. Check Supabase shared cache for nearby address
-    if (import.meta.env.DEV) console.log("🔍 Checking shared cache for nearby addresses...");
+    console.log("🔍 Checking shared cache for nearby addresses...");
     
     try {
       const nearbyCoords = await findNearbyCache(location.lat, location.lng);
@@ -311,7 +101,7 @@ export function useSchoolDistances(
           nearbyCoords.lng
         );
         
-        if (import.meta.env.DEV) console.log(`📍 Found cached address ${distanceMeters.toFixed(0)}m away`);
+        console.log(`📍 Found cached address ${distanceMeters.toFixed(0)}m away`);
         
         const cachedDistances = await getCachedDistances(nearbyCoords.lat, nearbyCoords.lng);
         
@@ -325,23 +115,17 @@ export function useSchoolDistances(
             };
           });
           
-          if (import.meta.env.DEV) console.log(`📦 Using shared cache (${cachedDistances.length} schools) - Zero API cost`);
+          console.log(`📦 Using shared cache (${cachedDistances.length} schools) - Zero API cost`);
           
-          // Save to localStorage using USER'S coordinates and address (new format)
-          const cacheData = {
-            address: location.address,
-            distances: newDistances,
-            savedAt: new Date().toISOString()
-          };
-          
+          // Save to localStorage using USER'S coordinates (not nearby coords)
           setDistances(newDistances);
           localStorage.setItem(DISTANCES_STORAGE_KEY, JSON.stringify(newDistances));
-          localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+          localStorage.setItem(cacheKey, JSON.stringify(newDistances));
           
           return true;
         }
       } else {
-        if (import.meta.env.DEV) console.log("❌ No nearby cached addresses found within 100m");
+        console.log("❌ No nearby cached addresses found within 100m");
       }
     } catch (error) {
       console.error("⚠️ Error checking shared cache, falling back to API:", error);
@@ -349,10 +133,8 @@ export function useSchoolDistances(
     }
 
     // 3. Calculate via Google Distance Matrix API
-    if (import.meta.env.DEV) {
-      console.log("🏠 Home location set:", location.address);
-      console.log("📍 Starting driving distance calculation for", schools.length, "schools...");
-    }
+    console.log("🏠 Home location set:", location.address);
+    console.log("📍 Starting driving distance calculation for", schools.length, "schools...");
     
     setIsCalculating(true);
 
@@ -370,31 +152,24 @@ export function useSchoolDistances(
         };
       });
 
-      // Log first 5 schools for verification (dev only)
-      if (import.meta.env.DEV) {
-        const firstFive = results.slice(0, 5);
-        firstFive.forEach((result) => {
-          const method = result.usedFallback ? "(fallback)" : "(API)";
-          console.log(`📏 School ${result.schoolId}: ${result.distanceInKm} km ${method}`);
-        });
-        console.log("✅ Driving distance calculation complete!");
-        console.log("💾 Saving to localStorage...");
-      }
+      // Log first 5 schools for verification
+      const firstFive = results.slice(0, 5);
+      firstFive.forEach((result) => {
+        const method = result.usedFallback ? "(fallback)" : "(API)";
+        console.log(`📏 School ${result.schoolId}: ${result.distanceInKm} km ${method}`);
+      });
+
+      console.log("✅ Driving distance calculation complete!");
+      console.log("💾 Saving to localStorage...");
       
-      // Save to localStorage (include address with distances)
-      const cacheData = {
-        address: location.address,
-        distances: newDistances,
-        savedAt: new Date().toISOString()
-      };
-      
+      // Save to localStorage
       setDistances(newDistances);
       localStorage.setItem(DISTANCES_STORAGE_KEY, JSON.stringify(newDistances));
-      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      localStorage.setItem(cacheKey, JSON.stringify(newDistances));
       
-      // Save to Supabase shared cache (with address)
-      if (import.meta.env.DEV) console.log("☁️ Saving to shared cache for future users...");
-      await saveCacheForAddress(location.lat, location.lng, results, location.address);
+      // Save to Supabase shared cache
+      console.log("☁️ Saving to shared cache for future users...");
+      await saveCacheForAddress(location.lat, location.lng, results);
       
       // Record timestamp for rate limiting
       recordAddressSetTimestamp();
@@ -422,12 +197,10 @@ export function useSchoolDistances(
     if (!homeLocation) return schoolsWithDistances;
     
     const sorted = sortSchoolsByDistance(schoolsWithDistances);
-    if (import.meta.env.DEV) {
-      console.log("🔢 Schools sorted by distance (closest 5):");
-      sorted.slice(0, 5).forEach((school, index) => {
-        console.log(`${index + 1}. ${school.name}: ${school.distanceInKm} km`);
-      });
-    }
+    console.log("🔢 Schools sorted by distance (closest 5):");
+    sorted.slice(0, 5).forEach((school, index) => {
+      console.log(`${index + 1}. ${school.name}: ${school.distanceInKm} km`);
+    });
     
     return sorted;
   }, [schoolsWithDistances, homeLocation]);

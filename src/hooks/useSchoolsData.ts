@@ -13,14 +13,12 @@ export function useSchoolsData() {
   const [error, setError] = useState<string | null>(null);
   const { isActive, config } = useCampaign();
   
-  // Log campaign status (dev only)
-  if (import.meta.env.DEV) {
-    console.log('🎪 Campaign Status:', {
-      isActive,
-      campaign: config.title,
-      period: `${config.startsAt} → ${config.endsAt}`
-    });
-  }
+  // Log campaign status
+  console.log('🎪 Campaign Status:', {
+    isActive,
+    campaign: config.title,
+    period: `${config.startsAt} → ${config.endsAt}`
+  });
 
   useEffect(() => {
     const fetchSchools = async () => {

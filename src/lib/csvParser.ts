@@ -29,11 +29,9 @@ export function parseCSV(csv: string, vacancyColumnHeader: string): School[] {
     header => header === vacancyColumnHeader
   );
   
-  if (import.meta.env.DEV) {
-    console.log('📊 CSV Headers:', headerValues);
-    console.log(`🎯 Looking for vacancy column: "${vacancyColumnHeader}"`);
-    console.log(`📍 Vacancy column found at index: ${vacancyColumnIndex}`);
-  }
+  console.log('📊 CSV Headers:', headerValues);
+  console.log(`🎯 Looking for vacancy column: "${vacancyColumnHeader}"`);
+  console.log(`📍 Vacancy column found at index: ${vacancyColumnIndex}`);
   
   // Skip header line, start from data rows
   for (let i = 1; i < lines.length; i++) {
@@ -109,16 +107,14 @@ export function parseCSV(csv: string, vacancyColumnHeader: string): School[] {
     schools.push(school);
   }
   
-  // Log sample schools with vacancy data for verification (dev only)
-  if (import.meta.env.DEV) {
-    const schoolsWithVacancies = schools.filter(s => s.vacancies && s.vacancies > 0);
-    console.log(`✅ Parsed ${schools.length} schools total`);
-    console.log(`🎓 ${schoolsWithVacancies.length} schools have vacancies`);
-    console.log('📝 Sample schools with vacancies:', schoolsWithVacancies.slice(0, 3).map(s => ({
-      name: s.name,
-      vacancies: s.vacancies
-    })));
-  }
+  // Log sample schools with vacancy data for verification
+  const schoolsWithVacancies = schools.filter(s => s.vacancies && s.vacancies > 0);
+  console.log(`✅ Parsed ${schools.length} schools total`);
+  console.log(`🎓 ${schoolsWithVacancies.length} schools have vacancies`);
+  console.log('📝 Sample schools with vacancies:', schoolsWithVacancies.slice(0, 3).map(s => ({
+    name: s.name,
+    vacancies: s.vacancies
+  })));
   
   return schools;
 }
