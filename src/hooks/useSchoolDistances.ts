@@ -158,9 +158,12 @@ export function useSchoolDistances(
           console.log(`   Exists in Supabase: ${existsInSupabase}`);
         }
 
+        // If exists, still update to ensure address field is populated
         if (existsInSupabase) {
-          if (import.meta.env.DEV) console.log(`   ⏭️ Skipping (already in Supabase)`);
-          continue;
+          if (import.meta.env.DEV) console.log(`   ⚠️ Data exists, but will update to ensure address is set`);
+          // Don't skip - continue to update below
+        } else {
+          if (import.meta.env.DEV) console.log(`   🆕 New address, will insert`);
         }
 
         const cachedData = localStorage.getItem(cacheKey);
@@ -194,14 +197,20 @@ export function useSchoolDistances(
         }
 
         if (import.meta.env.DEV) {
-          console.log(`   ☁️ Uploading 1 row with ${distancesArray.length} schools to Supabase...`);
-          if (address) console.log(`   Address: ${address}`);
+          const action = existsInSupabase ? "Updating" : "Inserting";
+          console.log(`   ☁️ ${action} 1 row with ${distancesArray.length} schools to Supabase...`);
+          if (address) {
+            console.log(`   Address: ${address}`);
+          } else {
+            console.warn(`   ⚠️ No address found in localStorage`);
+          }
         }
 
         await saveCacheForAddress(lat, lng, distancesArray, address);
 
         if (import.meta.env.DEV) {
-          console.log(`   ✅ Successfully contributed local cache to shared cache`);
+          const action = existsInSupabase ? "updated" : "inserted";
+          console.log(`   ✅ Successfully ${action} data in shared cache`);
         }
       }
 
