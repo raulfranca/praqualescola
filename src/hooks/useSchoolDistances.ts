@@ -181,11 +181,24 @@ export function useSchoolDistances(
           continue;
         }
 
-        if (import.meta.env.DEV) {
-          console.log(`   ☁️ Uploading 1 row with ${distancesArray.length} schools to Supabase...`);
+        // Try to get address from home-location (if available)
+        let address: string | undefined;
+        try {
+          const homeLocationData = localStorage.getItem("home-location");
+          if (homeLocationData) {
+            const homeLocation = JSON.parse(homeLocationData) as { address?: string };
+            address = homeLocation.address;
+          }
+        } catch (err) {
+          // Ignore parse errors
         }
 
-        await saveCacheForAddress(lat, lng, distancesArray);
+        if (import.meta.env.DEV) {
+          console.log(`   ☁️ Uploading 1 row with ${distancesArray.length} schools to Supabase...`);
+          if (address) console.log(`   Address: ${address}`);
+        }
+
+        await saveCacheForAddress(lat, lng, distancesArray, address);
 
         if (import.meta.env.DEV) {
           console.log(`   ✅ Successfully contributed local cache to shared cache`);
@@ -320,9 +333,9 @@ export function useSchoolDistances(
       localStorage.setItem(DISTANCES_STORAGE_KEY, JSON.stringify(newDistances));
       localStorage.setItem(cacheKey, JSON.stringify(newDistances));
       
-      // Save to Supabase shared cache
+      // Save to Supabase shared cache (with address)
       if (import.meta.env.DEV) console.log("☁️ Saving to shared cache for future users...");
-      await saveCacheForAddress(location.lat, location.lng, results);
+      await saveCacheForAddress(location.lat, location.lng, results, location.address);
       
       // Record timestamp for rate limiting
       recordAddressSetTimestamp();
