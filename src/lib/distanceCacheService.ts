@@ -170,6 +170,10 @@ export async function saveCacheForAddress(
 
     if (error) {
       console.error("Error saving to cache:", error);
+      // If constraint violation (coordinates out of region), log it
+      if (error.code === '23514') {
+        console.warn("⚠️ Address outside allowed region (60km from Pindamonhangaba)");
+      }
     } else {
       console.log(`✅ Saved 1 row with ${distances.length} schools to shared cache`);
     }
