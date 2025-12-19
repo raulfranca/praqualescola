@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 /**
  * Calculates the distance in meters between two coordinates using Haversine formula
  */
-function haversineDistanceMeters(
+export function haversineDistanceMeters(
   lat1: number,
   lng1: number,
   lat2: number,
