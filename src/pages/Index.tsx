@@ -37,6 +37,7 @@ const Index = () => {
     setFilterMetric,
     showOnlyVacancies,
     setShowOnlyVacancies,
+    initializeDistanceFilters,
   } = useFilters();
   
   const { schools, loading } = useSchoolsData();
@@ -149,7 +150,7 @@ const Index = () => {
     return Math.max(...bucketArray, 1);
   }, [schoolsWithDistances, distanceRange, durationRange, filterMetric, hasDistances]);
 
-  const { initializeDistanceFilters } = useFilters();
+  
 
   useEffect(() => {
     initializeDistanceFilters(hasDistances, distanceRange.max, durationRange.max);
