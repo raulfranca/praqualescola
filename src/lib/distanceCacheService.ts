@@ -169,13 +169,22 @@ export async function saveCacheForAddress(
       });
 
     if (error) {
-      console.error("Error saving to cache:", error);
-      // If constraint violation (coordinates out of region), log it
+      console.error("❌ Error saving to cache:", error);
       if (error.code === '23514') {
         console.warn("⚠️ Address outside allowed region (60km from Pindamonhangaba)");
+      } else {
+        console.error("Full error details:", {
+          code: error.code,
+          message: error.message,
+          hint: error.hint,
+          details: error.details
+        });
       }
     } else {
-      if (import.meta.env.DEV) console.log(`✅ Saved 1 row with ${distances.length} schools to shared cache`);
+      if (import.meta.env.DEV) {
+        console.log(`✅ Saved 1 row with ${distances.length} schools to shared cache`);
+        console.log(`   Coordinates: lat=${lat.toFixed(7)}, lng=${lng.toFixed(7)}`);
+      }
     }
   } catch (err) {
     console.error("Error in saveCacheForAddress:", err);

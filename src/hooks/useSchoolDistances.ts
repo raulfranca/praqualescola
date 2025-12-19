@@ -29,11 +29,11 @@ export interface SchoolWithDistance extends School {
 
 /**
  * Generates a cache key based on location coordinates
+ * Uses 7 decimal places to match Supabase storage format
  */
 function getCacheKey(lat: number, lng: number): string {
-  // Round to 5 decimal places (~1m precision) to avoid floating point issues
-  const roundedLat = Math.round(lat * 100000) / 100000;
-  const roundedLng = Math.round(lng * 100000) / 100000;
+  const roundedLat = Number(lat.toFixed(7));
+  const roundedLng = Number(lng.toFixed(7));
   return `cachedDistances_${roundedLat}_${roundedLng}`;
 }
 
@@ -61,20 +61,68 @@ export function useSchoolDistances(
   }, []);
 
   /**
+   * Migrates old format localStorage to new format with coordinate-based keys
+   * Run once to ensure all cached data can be synced to Supabase
+   */
+  const migrateOldCacheFormat = useCallback((): void => {
+    try {
+      const hasSchoolDistances = localStorage.getItem(DISTANCES_STORAGE_KEY);
+      const hasHomeLocation = localStorage.getItem("home-location");
+      
+      if (!hasSchoolDistances || !hasHomeLocation) {
+        if (import.meta.env.DEV) console.log("📭 No old cache format found, skipping migration");
+        return;
+      }
+      
+      const homeLocation = JSON.parse(hasHomeLocation) as { lat: number; lng: number };
+      const cacheKey = getCacheKey(homeLocation.lat, homeLocation.lng);
+      
+      if (localStorage.getItem(cacheKey)) {
+        if (import.meta.env.DEV) console.log("✅ Coordinate-based cache key already exists, skipping migration");
+        return;
+      }
+      
+      if (import.meta.env.DEV) {
+        console.log("🔄 Migrating old cache format to coordinate-based key...");
+        console.log(`   Creating key: ${cacheKey}`);
+      }
+      
+      localStorage.setItem(cacheKey, hasSchoolDistances);
+      
+      if (import.meta.env.DEV) {
+        console.log("✅ Migration complete! Old data now has coordinate-based key");
+      }
+    } catch (error) {
+      console.error("⚠️ Error during cache migration:", error);
+    }
+  }, []);
+
+  /**
    * One-time sync: Upload localStorage distances to Supabase if not already there
+   * Marks localStorage as synced to avoid future unnecessary checks
    */
   const syncLocalCacheToSupabase = useCallback(async (): Promise<void> => {
     const syncStatus = localStorage.getItem(SYNC_STATUS_KEY);
-    if (syncStatus === "synced") {
+    const forceResync = import.meta.env.DEV;
+    
+    if (syncStatus === "synced" && !forceResync) {
       if (import.meta.env.DEV) console.log("✅ localStorage already synced with Supabase, skipping check");
       return;
     }
 
-    if (import.meta.env.DEV) console.log("🔄 Checking if local cache can contribute to shared cache...");
+    if (forceResync && syncStatus === "synced") {
+      if (import.meta.env.DEV) console.log("🔄 DEV MODE: Forcing resync...");
+    }
+
+    if (import.meta.env.DEV) console.log("🔍 Checking if local cache can contribute to shared cache...");
 
     try {
       const allKeys = Object.keys(localStorage);
       const cacheKeys = allKeys.filter(key => key.startsWith("cachedDistances_"));
+
+      if (import.meta.env.DEV) {
+        console.log(`📋 Found ${cacheKeys.length} cached addresses in localStorage:`, cacheKeys);
+      }
 
       if (cacheKeys.length === 0) {
         if (import.meta.env.DEV) console.log("📭 No local cache found to sync");
@@ -83,21 +131,43 @@ export function useSchoolDistances(
       }
 
       for (const cacheKey of cacheKeys) {
+        if (import.meta.env.DEV) console.log(`\n🔍 Processing: ${cacheKey}`);
+        
         const parts = cacheKey.replace("cachedDistances_", "").split("_");
-        if (parts.length !== 2) continue;
+        if (parts.length !== 2) {
+          if (import.meta.env.DEV) console.warn(`⚠️ Invalid key format: ${cacheKey}`);
+          continue;
+        }
 
-        const lat = parseFloat(parts[0]);
-        const lng = parseFloat(parts[1]);
-        if (isNaN(lat) || isNaN(lng)) continue;
+        // CRITICAL: Round to 7 decimals to match Supabase format
+        const lat = Number(parseFloat(parts[0]).toFixed(7));
+        const lng = Number(parseFloat(parts[1]).toFixed(7));
+
+        if (isNaN(lat) || isNaN(lng)) {
+          if (import.meta.env.DEV) console.warn(`⚠️ Invalid coordinates in key: ${cacheKey}`);
+          continue;
+        }
+
+        if (import.meta.env.DEV) {
+          console.log(`   Parsed coordinates: lat=${lat}, lng=${lng}`);
+        }
 
         const existsInSupabase = await checkIfAddressExistsInCache(lat, lng);
+        
+        if (import.meta.env.DEV) {
+          console.log(`   Exists in Supabase: ${existsInSupabase}`);
+        }
+
         if (existsInSupabase) {
-          if (import.meta.env.DEV) console.log(`⏭️ Address (${lat.toFixed(5)}, ${lng.toFixed(5)}) already in Supabase, skipping`);
+          if (import.meta.env.DEV) console.log(`   ⏭️ Skipping (already in Supabase)`);
           continue;
         }
 
         const cachedData = localStorage.getItem(cacheKey);
-        if (!cachedData) continue;
+        if (!cachedData) {
+          if (import.meta.env.DEV) console.warn(`   ⚠️ Key exists but no data found`);
+          continue;
+        }
 
         const distances = JSON.parse(cachedData) as SchoolDistances;
         const distancesArray = Object.entries(distances).map(([schoolId, data]) => ({
@@ -106,26 +176,37 @@ export function useSchoolDistances(
           durationInMinutes: data.durationInMinutes
         }));
 
-        if (distancesArray.length === 0) continue;
+        if (distancesArray.length === 0) {
+          if (import.meta.env.DEV) console.warn(`   ⚠️ No schools found in cache`);
+          continue;
+        }
 
-        if (import.meta.env.DEV) console.log(`☁️ Uploading 1 row with ${distancesArray.length} schools for address (${lat.toFixed(5)}, ${lng.toFixed(5)}) to Supabase...`);
+        if (import.meta.env.DEV) {
+          console.log(`   ☁️ Uploading 1 row with ${distancesArray.length} schools to Supabase...`);
+        }
+
         await saveCacheForAddress(lat, lng, distancesArray);
-        if (import.meta.env.DEV) console.log(`✅ Successfully contributed local cache to shared cache`);
+
+        if (import.meta.env.DEV) {
+          console.log(`   ✅ Successfully contributed local cache to shared cache`);
+        }
       }
 
       localStorage.setItem(SYNC_STATUS_KEY, "synced");
-      if (import.meta.env.DEV) console.log("🎉 Local cache sync complete!");
+      if (import.meta.env.DEV) console.log("\n🎉 Local cache sync complete!");
     } catch (error) {
       console.error("⚠️ Error during cache sync:", error);
     }
   }, []);
 
-  // Run one-time sync on mount
+  // Run migration + sync on mount
   useEffect(() => {
+    migrateOldCacheFormat();
+    
     syncLocalCacheToSupabase().catch(err => {
       console.error("Background sync failed:", err);
     });
-  }, [syncLocalCacheToSupabase]);
+  }, [migrateOldCacheFormat, syncLocalCacheToSupabase]);
 
   /**
    * Clear all distance data when home location is removed
