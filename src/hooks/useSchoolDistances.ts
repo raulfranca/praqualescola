@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { School } from "@/types/school";
 import { HomeLocation } from "@/hooks/useHomeLocation";
 import { sortSchoolsByDistance } from "@/lib/distanceCalculator";
@@ -8,10 +8,12 @@ import {
   findNearbyCache, 
   getCachedDistances, 
   saveCacheForAddress,
-  haversineDistanceMeters 
+  haversineDistanceMeters,
+  checkIfAddressExistsInCache
 } from "@/lib/distanceCacheService";
 
 const DISTANCES_STORAGE_KEY = "school-distances";
+const SYNC_STATUS_KEY = "supabase-sync-status";
 
 interface SchoolDistances {
   [schoolId: number]: {
@@ -57,6 +59,73 @@ export function useSchoolDistances(
     const cacheKey = getCacheKey(location.lat, location.lng);
     return localStorage.getItem(cacheKey) !== null;
   }, []);
+
+  /**
+   * One-time sync: Upload localStorage distances to Supabase if not already there
+   */
+  const syncLocalCacheToSupabase = useCallback(async (): Promise<void> => {
+    const syncStatus = localStorage.getItem(SYNC_STATUS_KEY);
+    if (syncStatus === "synced") {
+      console.log("✅ localStorage already synced with Supabase, skipping check");
+      return;
+    }
+
+    console.log("🔄 Checking if local cache can contribute to shared cache...");
+
+    try {
+      const allKeys = Object.keys(localStorage);
+      const cacheKeys = allKeys.filter(key => key.startsWith("cachedDistances_"));
+
+      if (cacheKeys.length === 0) {
+        console.log("📭 No local cache found to sync");
+        localStorage.setItem(SYNC_STATUS_KEY, "synced");
+        return;
+      }
+
+      for (const cacheKey of cacheKeys) {
+        const parts = cacheKey.replace("cachedDistances_", "").split("_");
+        if (parts.length !== 2) continue;
+
+        const lat = parseFloat(parts[0]);
+        const lng = parseFloat(parts[1]);
+        if (isNaN(lat) || isNaN(lng)) continue;
+
+        const existsInSupabase = await checkIfAddressExistsInCache(lat, lng);
+        if (existsInSupabase) {
+          console.log(`⏭️ Address (${lat.toFixed(5)}, ${lng.toFixed(5)}) already in Supabase, skipping`);
+          continue;
+        }
+
+        const cachedData = localStorage.getItem(cacheKey);
+        if (!cachedData) continue;
+
+        const distances = JSON.parse(cachedData) as SchoolDistances;
+        const distancesArray = Object.entries(distances).map(([schoolId, data]) => ({
+          schoolId: parseInt(schoolId),
+          distanceInKm: data.distanceInKm,
+          durationInMinutes: data.durationInMinutes
+        }));
+
+        if (distancesArray.length === 0) continue;
+
+        console.log(`☁️ Uploading ${distancesArray.length} distances for address (${lat.toFixed(5)}, ${lng.toFixed(5)}) to Supabase...`);
+        await saveCacheForAddress(lat, lng, distancesArray);
+        console.log(`✅ Successfully contributed local cache to shared cache`);
+      }
+
+      localStorage.setItem(SYNC_STATUS_KEY, "synced");
+      console.log("🎉 Local cache sync complete!");
+    } catch (error) {
+      console.error("⚠️ Error during cache sync:", error);
+    }
+  }, []);
+
+  // Run one-time sync on mount
+  useEffect(() => {
+    syncLocalCacheToSupabase().catch(err => {
+      console.error("Background sync failed:", err);
+    });
+  }, [syncLocalCacheToSupabase]);
 
   /**
    * Clear all distance data when home location is removed
