@@ -47,6 +47,27 @@ export type Database = {
         }
         Relationships: []
       }
+      keep_alive: {
+        Row: {
+          id: number
+          last_ping: string | null
+          name: string | null
+          random: string | null
+        }
+        Insert: {
+          id?: number
+          last_ping?: string | null
+          name?: string | null
+          random?: string | null
+        }
+        Update: {
+          id?: number
+          last_ping?: string | null
+          name?: string | null
+          random?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
