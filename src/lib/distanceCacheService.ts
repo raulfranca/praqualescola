@@ -175,7 +175,7 @@ export async function saveCacheForAddress(
         console.warn("⚠️ Address outside allowed region (60km from Pindamonhangaba)");
       }
     } else {
-      console.log(`✅ Saved 1 row with ${distances.length} schools to shared cache`);
+      if (import.meta.env.DEV) console.log(`✅ Saved 1 row with ${distances.length} schools to shared cache`);
     }
   } catch (err) {
     console.error("Error in saveCacheForAddress:", err);
