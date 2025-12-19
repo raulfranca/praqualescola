@@ -16,31 +16,31 @@ export type Database = {
     Tables: {
       address_distance_cache: {
         Row: {
-          created_at: string
-          distance_km: number
-          duration_minutes: number | null
+          access_count: number | null
+          created_at: string | null
+          distances: Json
           id: string
+          last_accessed_at: string | null
           lat: number
           lng: number
-          school_id: number
         }
         Insert: {
-          created_at?: string
-          distance_km: number
-          duration_minutes?: number | null
+          access_count?: number | null
+          created_at?: string | null
+          distances: Json
           id?: string
+          last_accessed_at?: string | null
           lat: number
           lng: number
-          school_id: number
         }
         Update: {
-          created_at?: string
-          distance_km?: number
-          duration_minutes?: number | null
+          access_count?: number | null
+          created_at?: string | null
+          distances?: Json
           id?: string
+          last_accessed_at?: string | null
           lat?: number
           lng?: number
-          school_id?: number
         }
         Relationships: []
       }

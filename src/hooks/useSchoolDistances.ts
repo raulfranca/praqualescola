@@ -108,7 +108,7 @@ export function useSchoolDistances(
 
         if (distancesArray.length === 0) continue;
 
-        console.log(`☁️ Uploading ${distancesArray.length} distances for address (${lat.toFixed(5)}, ${lng.toFixed(5)}) to Supabase...`);
+        console.log(`☁️ Uploading 1 row with ${distancesArray.length} schools for address (${lat.toFixed(5)}, ${lng.toFixed(5)}) to Supabase...`);
         await saveCacheForAddress(lat, lng, distancesArray);
         console.log(`✅ Successfully contributed local cache to shared cache`);
       }
