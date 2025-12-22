@@ -6,6 +6,7 @@ import { ActionChips, SortOption } from "@/components/ActionChips";
 import { HomeLocationInput } from "@/components/HomeLocationInput";
 import { CampaignBanner } from "@/components/CampaignBanner";
 import { FilterDrawer, SchoolLevel, ManagementType, FilterMetric } from "@/components/FilterDrawer";
+import { FilterToast } from "@/components/FilterToast";
 import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
@@ -322,6 +323,18 @@ const Lista = () => {
         onMetricChange={setFilterMetric}
         showOnlyVacancies={showOnlyVacancies}
         onVacanciesChange={setShowOnlyVacancies}
+      />
+
+      {/* Filter Toast - Shows active filter count */}
+      <FilterToast 
+        schoolCount={filteredSchools.length}
+        hasActiveFilters={
+          selectedLevels.length < 3 || 
+          selectedManagement.length < 2 ||
+          (hasDistances && filterMetric === "distance" && maxDistanceFilter !== null && maxDistanceFilter < distanceRange.max) ||
+          (hasDistances && filterMetric === "time" && maxDurationFilter !== null && maxDurationFilter < durationRange.max) ||
+          showOnlyVacancies
+        }
       />
     </div>
   );

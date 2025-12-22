@@ -15,7 +15,7 @@ export const FilterToast = ({ schoolCount, hasActiveFilters }: FilterToastProps)
       <div className="bg-black/80 text-white text-xs px-4 py-2 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-2">
         <Filter className="w-3.5 h-3.5" />
         <span>
-          {schoolCount === 1 ? "1 escola filtrada" : `${schoolCount} escolas filtradas`}
+          {schoolCount === 1 ? "Exibindo 1 escola filtrada" : `Exibindo ${schoolCount} escolas filtradas`}
         </span>
       </div>
     </div>
