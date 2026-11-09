@@ -64,7 +64,7 @@ Como rodar: `node .claude/scripts/portao.mjs`. Comandos em `.claude/loop.json`.
 
 ## 8. Estado de implementação
 
-Todas as funcionalidades do PRD estão no ar (versão 1.4.1). Pontos conhecidos:
+Todas as funcionalidades do PRD estão no ar (versão 2.0.0). Pontos conhecidos:
 
 - Logs de depuração (`console.log` com emojis) espalhados por hooks e `csvParser`.
 - `strict: false` no TypeScript: o typecheck pega pouco.

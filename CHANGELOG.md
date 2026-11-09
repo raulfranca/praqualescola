@@ -4,17 +4,27 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-
 ## [Unreleased]
+
+## [2.0.0] - 2026-11-09 - Não mais desenvolvido no Lovable, agora em loop agêntico (local e nuvem)
+
+Nova fase do projeto: o aplicativo deixa o Lovable, a plataforma em que foi criado, e passa a ser desenvolvido num ciclo próprio, com verificação automática antes de cada publicação. Para quem usa o app, nada muda na tela.
+
+### Adicionado
+
+- Testes automáticos: a cada envio de código, o GitHub confere se o app continua montando e funcionando. Uma versão com defeito é barrada antes de chegar ao site.
+- Documentação do que o app faz e de como ele é construído, para que qualquer pessoa (ou agente de IA) possa dar manutenção.
 
 ### Alterado
 
+- O desenvolvimento saiu do Lovable e passou a ser feito localmente e na nuvem com o Claude Code, num ciclo de planejamento, testes e publicação. Mudanças feitas pelo Lovable não são mais aceitas no repositório.
 - A chave do Google Maps saiu do código-fonte e passou a ser configurada no painel da Vercel. O repositório é público, e chave no código pode ser copiada por robôs que vasculham o GitHub.
 
 ### Removido
 
 - Restos do Lovable, a ferramenta em que o app foi criado: arquivos de documentação gerados automaticamente, código e arquivos que não eram mais usados, e a imagem de prévia com a marca do Lovable ao compartilhar o link.
 - Configuração do Supabase, um banco de dados que nunca chegou a ser usado, e a rotina automática que o mantinha ligado.
+
 ## [1.4.1] - 2025-12-15
 
 ### Adicionado
