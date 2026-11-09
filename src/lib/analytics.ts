@@ -30,7 +30,7 @@ export const initGA = () => {
  */
 export const trackEvent = (
   action: string,
-  params?: Record<string, any>
+  params?: Record<string, unknown>
 ) => {
   try {
     ReactGA.event(action, params);

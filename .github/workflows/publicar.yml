@@ -1,0 +1,58 @@
+name: Publicar
+
+# Sobe a dev para a main, de qualquer lugar: é o equivalente na nuvem do alias git-deploy, para
+# publicar sem depender de um computador. Se a dev trouxer migration que a main não tem, ela vai
+# para o banco de produção ANTES da main, porque o código novo não pode rodar contra um banco sem
+# a estrutura que ele usa.
+#
+#   gh workflow run publicar.yml --ref dev
+#   gh api -X POST repos/{owner}/{repo}/actions/workflows/publicar.yml/dispatches -f ref=dev
+#
+# O GitHub só dispara workflow que já existe na branch padrão: este arquivo precisa estar na main.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publicar
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: Detectar migration nova
+        id: migrations
+        run: |
+          NOVAS=$(git diff --name-only --diff-filter=A origin/main HEAD -- 'supabase/migrations/*.sql')
+          echo "$NOVAS"
+          if [ -n "$NOVAS" ]; then echo "tem=sim" >> "$GITHUB_OUTPUT"; fi
+
+      - uses: supabase/setup-cli@v1
+        if: steps.migrations.outputs.tem == 'sim'
+        with:
+          version: 2.117.0
+
+      - name: Aplicar migrations na produção
+        if: steps.migrations.outputs.tem == 'sim'
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          supabase db push --db-url "$SUPABASE_DB_URL" --dry-run
+          supabase db push --db-url "$SUPABASE_DB_URL" --yes
+
+      - name: Mesclar dev na main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch main
+          git merge --no-edit dev
+          git push origin main

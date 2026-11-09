@@ -1,0 +1,74 @@
+{
+  "enableAllProjectMcpServers": true,
+  "permissions": {
+    "allow": [
+      "Bash(node .claude/scripts/portao.mjs)",
+      "Bash(node .claude/scripts/portao.mjs *)",
+      "PowerShell(node .claude/scripts/portao.mjs)",
+      "PowerShell(node .claude/scripts/portao.mjs *)",
+      "Bash(node .claude/scripts/loop-conferir.mjs)",
+      "PowerShell(node .claude/scripts/loop-conferir.mjs)",
+      "Bash(graphify query *)",
+      "Bash(graphify explain *)",
+      "Bash(graphify affected *)",
+      "Bash(graphify path *)",
+      "PowerShell(graphify query *)",
+      "PowerShell(graphify explain *)",
+      "PowerShell(graphify affected *)",
+      "PowerShell(graphify path *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git branch *)",
+      "PowerShell(git status *)",
+      "PowerShell(git diff *)",
+      "PowerShell(git log *)",
+      "PowerShell(git show *)",
+      "PowerShell(git branch *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/bootstrap-nuvem.cjs"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guard-changelog-imutavel.cjs"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell|Read|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/graphify-lembrete.cjs"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/revezamento-nuvem.cjs"
+          }
+        ]
+      }
+    ]
+  }
+}

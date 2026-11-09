@@ -1,0 +1,38 @@
+name: Verificação
+
+# A rede que não depende de alguém lembrar de rodar o portão. Roda os mesmos comandos de
+# .claude/loop.json, instalando do zero, a cada push e em pull requests.
+#
+# Depois de definir a stack em loop.json, acrescente aqui, antes do passo "Portão", o preparo da
+# linguagem (oven-sh/setup-bun, actions/setup-python, ...). Node já vem no runner.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verificacao-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: |
+          CMD=$(node -p "require('./.claude/loop.json').comandos.instalar || ''")
+          if [ -n "$CMD" ]; then bash -c "$CMD"; fi
+
+      - name: Portão
+        run: node .claude/scripts/portao.mjs

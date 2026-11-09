@@ -1,0 +1,15 @@
+/* Tokens do design system. A skill mock-canvas e o código de interface leem daqui. */
+:root {
+  /* Cores */
+  --cor-fundo: #ffffff;
+  --cor-texto: #1a1a1a;
+  --cor-primaria: #1a1a1a;
+
+  /* Tipografia */
+  --fonte-base: system-ui, sans-serif;
+  --tamanho-base: 16px;
+
+  /* Espaçamento e forma */
+  --espaco: 8px;
+  --raio: 8px;
+}

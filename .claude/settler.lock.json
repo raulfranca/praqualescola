@@ -1,0 +1,21 @@
+{
+  "versao": "0.1.0",
+  "modulos": [
+    "web",
+    "design"
+  ],
+  "arquivos": {
+    ".claude/hooks/bootstrap-nuvem.cjs": "9319c8ec9e80c0a7",
+    ".claude/hooks/graphify-lembrete.cjs": "6060d46f9586661c",
+    ".claude/hooks/guard-changelog-imutavel.cjs": "d18b7cf8c0cd9639",
+    ".claude/hooks/revezamento-nuvem.cjs": "5641477531b42de3",
+    ".claude/scripts/loop-conferir.mjs": "76f2abf95892e1a2",
+    ".claude/scripts/portao.mjs": "fe4a0d22d9fbc9d7",
+    ".claude/skills/explica/SKILL.md": "9130d6a1931e84c8",
+    ".claude/skills/plano/SKILL.md": "c1557863a23aa8b3",
+    ".claude/skills/plano/template.md": "d4d059a38a7b90dc",
+    ".claude/skills/safe-commit/SKILL.md": "0a293230b63f8d95",
+    ".claude/skills/link-celular/SKILL.md": "a12d9a42c23adbd5",
+    ".claude/skills/mock-canvas/SKILL.md": "f33c385562620f69"
+  }
+}

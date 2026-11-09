@@ -1,0 +1,32 @@
+{
+  "projeto": "Pra Qual Escola",
+  "modulos": [
+    "web",
+    "design"
+  ],
+  "comandos": {
+    "instalar": "npm ci --no-audit --no-fund",
+    "instalar_nuvem": "npm install --no-audit --no-fund",
+    "dev": "npm run dev",
+    "lint": "npm run lint",
+    "tipos": "npm run typecheck",
+    "testes": "npm test",
+    "teste_direcionado": "npx vitest run {arquivos}",
+    "build": "npm run build",
+    "e2e": "npx playwright test",
+    "e2e_tag": "npx playwright test --grep @{tag}"
+  },
+  "web": {
+    "portas": [
+      {
+        "porta": 8080,
+        "caminho": "/",
+        "nome": "aplicativo"
+      }
+    ]
+  },
+  "supabase": {
+    "producao_ref": "",
+    "homolog_ref": ""
+  }
+}

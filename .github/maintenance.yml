@@ -1,0 +1,9 @@
+# Agenda de manutenção — itens com data previsível de revisão.
+#
+# O workflow .github/workflows/maintenance-check.yml lê este arquivo todo mês e abre ou atualiza
+# uma Issue quando um item entra na janela de alerta (due menos alert_days <= hoje).
+#
+# Campos: id (kebab-case), titulo, due (YYYY-MM-DD), alert_days, link (opcional), acao (opcional).
+# Ao resolver um item, remova-o daqui, ou ajuste a data se for recorrente.
+
+items: []

@@ -26,7 +26,7 @@ export function usePWAInstallPrompt() {
   // Check if app is already installed
   const checkIfInstalled = useCallback(() => {
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
-    const isIOSStandalone = (window.navigator as any).standalone === true;
+    const isIOSStandalone = (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
     return isStandalone || isIOSStandalone;
   }, []);
 
@@ -114,7 +114,7 @@ export function usePWAInstallPrompt() {
     setIsInstalled(checkIfInstalled());
 
     // Detect iOS
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
     setIsIOS(isIOSDevice);
 
     // Handle beforeinstallprompt event

@@ -70,7 +70,7 @@ export function ActionChips({
               size="sm"
               className={cn(
                 "rounded-full shadow-md h-8 px-3 gap-1.5 shrink-0 transition-all",
-                !!sortBy
+                sortBy
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
                   : "bg-white text-foreground hover:bg-white/90 border border-border"
               )}

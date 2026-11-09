@@ -16,8 +16,8 @@ import Favoritos from "./pages/Favoritos";
 import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
 
-// Google Maps API Key and Libraries
-const GOOGLE_MAPS_API_KEY = "AIzaSyAB6PNWQ6m8gkTSRXKfXtfvBthU50sljA8";
+// Chave do Google Maps: vem do ambiente (.env local ou variáveis da Vercel), nunca do código.
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? "";
 const GOOGLE_MAPS_LIBRARIES: ("places")[] = ["places"];
 
 const queryClient = new QueryClient();

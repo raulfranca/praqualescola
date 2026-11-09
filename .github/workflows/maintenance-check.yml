@@ -1,0 +1,81 @@
+name: Agenda de manutenção
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 1 * *"   # dia 1 de cada mês, 09:00 UTC (06:00 BRT)
+
+permissions:
+  contents: read
+  issues: write           # necessário para abrir/atualizar a Issue de alerta
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Avaliar itens vencendo
+        id: scan
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import datetime, sys
+          try:
+              import yaml
+          except ImportError:
+              import subprocess
+              subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "pyyaml"])
+              import yaml
+
+          today = datetime.date.today()
+          with open(".github/maintenance.yml", encoding="utf-8") as f:
+              data = yaml.safe_load(f) or {}
+
+          due_items = []
+          for it in data.get("items", []):
+              due = datetime.date.fromisoformat(str(it["due"]))
+              alert = int(it.get("alert_days", 30))
+              if today >= due - datetime.timedelta(days=alert):
+                  dias = (due - today).days
+                  status = f"VENCIDO há {-dias} dia(s)" if dias < 0 else f"vence em {dias} dia(s)"
+                  due_items.append((it, status))
+
+          if not due_items:
+              print("has_alerts=false")
+              sys.exit(0)
+
+          lines = ["Itens da agenda de manutenção que precisam de atenção:\n"]
+          for it, status in sorted(due_items, key=lambda x: x[0]["due"]):
+              lines.append(f"### {it['titulo']}")
+              lines.append(f"- **Prazo:** {it['due']} ({status})")
+              if it.get("acao"):
+                  lines.append(f"- **Ação:** {it['acao']}")
+              if it.get("link"):
+                  lines.append(f"- **Referência:** {it['link']}")
+              lines.append(f"- **id:** `{it['id']}`")
+              lines.append("")
+          lines.append("---")
+          lines.append("Gerado automaticamente por `.github/workflows/maintenance-check.yml`. "
+                       "Ao resolver um item, remova-o de `.github/maintenance.yml`.")
+
+          body = "\n".join(lines)
+          with open("issue_body.md", "w", encoding="utf-8") as f:
+              f.write(body)
+          print("has_alerts=true")
+          PY
+
+      - name: Abrir ou atualizar a Issue
+        if: steps.scan.outputs.has_alerts == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE="🔧 Manutenção: itens a revisar"
+          BODY="$(cat issue_body.md)"
+          NUM="$(gh issue list --state open --label maintenance --json number --jq '.[0].number' || true)"
+          if [ -n "$NUM" ]; then
+            gh issue edit "$NUM" --body "$BODY"
+            echo "Issue #$NUM atualizada."
+          else
+            gh label create maintenance --color FBCA04 --description "Agenda de manutenção" 2>/dev/null || true
+            gh issue create --title "$TITLE" --label maintenance --body "$BODY"
+          fi

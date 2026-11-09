@@ -1,0 +1,3 @@
+# Fim de linha LF no repositório inteiro. Sem isto, um .sh gravado no Windows com CRLF quebra na
+# VM Linux da nuvem, e cada arquivo aparece como alterado entre os dois ambientes.
+* text=auto eol=lf

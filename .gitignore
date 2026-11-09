@@ -22,3 +22,20 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# >>> settler
+# Configuração pessoal e segredos: nunca vão para o repositório
+.claude/settings.local.json
+.env
+.env.*
+!.env.example
+# Estado local do loop
+.claude/.revezamento-nuvem.json
+.claude/.nuvem.log
+.claude/.supabase-nuvem.log
+# Grafo do Graphify: cache regenerável
+/graphify-out/
+# Saída do Playwright: capturas, traces e relatório
+/test-results/
+/playwright-report/
+# <<< settler
