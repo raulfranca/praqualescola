@@ -20,6 +20,13 @@ items:
     alert_days: 30
     acao: Até lá quase todo aparelho já passou pelo recomeço da troca planilha → Supabase. Apagar recomeco.ts (+ teste), AvisoRecomeco.tsx, a chamada em main.tsx e marcarMigrado/cenários do e2e; a marca school-data-version pode ficar gravada nos aparelhos. Atualizar DOC §4 e PRD §3.1.
 
+  - id: revisar-cota-google
+    titulo: Revisar preços e cota grátis da Routes API do Google (Compute Route Matrix)
+    due: 2027-11-01
+    alert_days: 30
+    link: https://developers.google.com/maps/billing-and-pricing/pricing
+    acao: Conferir se a cota grátis mensal continua 10.000 elementos e se a cobrança por elemento mudou. Se mudou, ajustar COTA_MENSAL, LIMIAR_ECONOMIA e TETO_MENSAL em src/lib/cota.ts, os tetos diário/por minuto no Google Cloud (hoje 3.300/dia e 700/min) e o PRD §3.3. Recorrente: depois, avançar a data um ano.
+
   - id: turmas-limite-1000-linhas
     titulo: Turmas do Supabase perto do limite de 1000 linhas por GET do PostgREST
     due: 2027-10-01

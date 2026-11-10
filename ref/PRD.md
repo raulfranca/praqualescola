@@ -12,9 +12,11 @@ Desenvolvido pelo professor Raul Cabral. Público: professores da rede; não há
 
 ## 2. Perfis de acesso
 
-Um único perfil: **visitante anônimo**. Não há login. Tudo o que é pessoal (casa, favoritos, distâncias) fica guardado só no aparelho da pessoa (`localStorage`).
+Um único perfil público: **visitante anônimo**. Não há login para o público. Tudo o que é pessoal (casa, favoritos, distâncias) fica guardado só no aparelho da pessoa (`localStorage`).
 
-Há um **modo desenvolvedor** escondido: digitar `/dev` na busca e apertar Enter desliga o limite diário de troca de endereço (seção 3.3).
+Há uma **área do administrador** escondida: digitar `/admin` na busca e apertar Enter pede uma senha (validada no servidor; tentativas limitadas). Com a sessão aberta (8 h, só naquela aba), o administrador vê o painel da cota do Google: estado atual (Normal, Economia ou Aproximado), unidades usadas no mês contra a cota grátis, reaproveitamentos de cálculo; pode forçar o modo aproximado e conferir o contador com os números do Google, ajustando-o para cima. A sessão também dispensa o limite diário de endereços do aparelho (seção 3.3).
+
+O endereço de casa sai do aparelho só para o servidor do app, que calcula as distâncias. O Google recebe apenas o centro de um quadrado de cerca de 200 m, nunca a coordenada exata; o servidor guarda as distâncias por quadrado (para reaproveitar entre pessoas) e o IP só como resumo criptográfico, para limitar abusos.
 
 ## 3. Funcionalidades
 
@@ -22,7 +24,7 @@ Há um **modo desenvolvedor** escondido: digitar `/dev` na busca e apertar Enter
 
 ### 3.1 Lista de escolas (fonte de dados)
 
-- As escolas e turmas vêm do **cadastro oficial da Secretaria de Educação** (banco Supabase "Dados", mantido pela SME), lido a cada abertura do app. Quando a SME atualiza o cadastro, o app muda sem publicar código. O app só lê esse banco, nunca escreve nele.
+- As escolas e turmas vêm do **cadastro oficial da Secretaria de Educação** (banco Supabase "Dados", mantido pela SME), lido a cada abertura do app. Quando a SME atualiza o cadastro, o app muda sem publicar código. O app só lê o cadastro, nunca escreve nele (o que o app grava, o cache de distâncias e o contador da cota, fica numa área separada do mesmo banco).
 - Cada escola é identificada pelo **código INEP**. Tem: tipo (EM/CMEI), nome, endereço, CEP, telefone, bairro, coordenadas (conferidas pela SME), setor, polo, se é terceirizada, observação e o número de turmas por nível (berçário, infantil 1 e 2, pré 1 e 2, 1º ao 5º ano), contadas no ano letivo mais recente do cadastro. Ramal não é mostrado.
 - As turmas contam para a **escola responsável**. Turma multisseriada conta em cada nível que atende.
 - Escola **inativa** (hoje, o CAIC, de prédio desativado) continua aparecendo, com o selo "Prédio desativado". No detalhe, ela mostra onde as turmas dela funcionam, com link que abre o detalhe da escola-sede.
@@ -37,10 +39,15 @@ Há um **modo desenvolvedor** escondido: digitar `/dev` na busca e apertar Enter
 ### 3.3 Minha Casa e distâncias
 
 - A pessoa informa o endereço de casa (autocomplete do Google Places).
-- **Limite: um endereço novo por dia** (vira à meia-noite, hora local), para conter o custo da API do Google. O modo desenvolvedor ignora o limite.
-- Depois de definir a casa, um botão calcula **distância e tempo de carro** até todas as escolas (Google Distance Matrix, em lotes de 25).
-- Se a API falhar, a distância vira a linha reta multiplicada por 1,3 e o tempo fica sem valor *(dedução: fator de tortuosidade escolhido no código)*.
-- Resultados ficam em cache no aparelho por endereço: voltar a um endereço já calculado não gasta API.
+- **Limite: três endereços novos por dia por aparelho** (vira à meia-noite, hora local), para conter o custo da API do Google. Voltar a um endereço já calculado no aparelho não conta. A sessão do administrador ignora o limite.
+- Depois de definir a casa, o app pede ao **servidor** a **distância e o tempo de carro** até todas as escolas. O servidor usa a Routes API do Google e guarda o resultado num cache compartilhado: outra pessoa num endereço próximo (mesmo quadrado de ~200 m) recebe o mesmo cálculo sem nova consulta ao Google.
+- **Regra da cota: o app fica sempre dentro da cota gratuita do Google** (10.000 unidades por mês; cada cálculo novo gasta uma unidade por escola). O servidor conta as unidades e muda de estado sozinho:
+  - **Normal** (até 8.000): cálculo novo vai ao Google.
+  - **Economia** (de 8.000 a 9.500): reaproveita o cálculo de um quadrado vizinho que cubra todas as escolas; só vai ao Google se não houver.
+  - **Aproximado** (a partir de 9.500, ou forçado pelo administrador): o Google não é chamado; vale o cache, e o resto é estimado.
+  - Além disso, cada IP tem um teto diário de idas ao Google, e há teto diário configurado no próprio Google.
+- **Estimativa aproximada:** linha reta × 1,3 para a distância e essa distância a 30 km/h para o tempo. É usada no estado Aproximado e quando o servidor não responde. Distâncias estimadas mostram o selo "aproximado" (lista, detalhe, prioridades) e o app tenta trocá-las pelas reais uma vez por sessão.
+- Resultados ficam também em cache no aparelho por endereço: voltar a um endereço já calculado não chama o servidor. Abrir o detalhe de uma escola ou as prioridades usa a distância salva, sem chamar nada.
 - Escola que entra no cadastro depois do cálculo ganha distância automaticamente para quem já tem casa definida: o app calcula só as que faltam, sem refazer as outras.
 - Remover a casa apaga as distâncias mostradas.
 

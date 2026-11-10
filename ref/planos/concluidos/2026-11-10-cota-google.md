@@ -1,5 +1,5 @@
 ---
-status: em_andamento
+status: concluido
 revezamento: aguardando_usuario
 criado: 2026-11-10
 demanda: Fase 1 do controle da cota do Google — cache compartilhado, função de servidor, contador com três estados, painel /admin, testes sem Google
@@ -20,17 +20,17 @@ demanda: Fase 1 do controle da cota do Google — cache compartilhado, função 
 
 ## ▶ Ponto de retomada
 
-- **Atualizado:** 2026-11-10 — Etapa 9 aberta; passo a passo entregue ao dono no chat
-- **Etapa 9 — Configuração externa e prova real no preview da `dev`** (`opus`) — em andamento
-  - [x] 9.1 Passo a passo para o dono (Google Cloud + Vercel + commit/push da `dev`) — entregue no chat; `.env.example` deixou de citar Distance Matrix na chave do navegador
-  - [ ] 9.2 Dono confirma: chaves, segredos na Vercel (Production + Preview), push da `dev` e URL do preview
-  - [ ] 9.3 No preview: `/admin` → login, "Conferir com o Google", ajustar contador se oferecido; anotar `pqe_resumo()` antes (`execute_sql` no Dados)
-  - [ ] 9.4 Definir casa (endereço novo) → `pqe_resumo()` +67 unidades; mesmo endereço em aba anônima → +0 unidades e `acertos_cache` +1
-  - [ ] 9.5 Dono confirma que a chave do navegador recusa Distance Matrix; registrar no Diário o que a Etapa 9 confirmou (header `apikey` só, empacotamento do import de `src/lib/cota`, nomes dos serviços no Monitoring, `alignmentPeriod` de um mês)
-- **Próxima ação:** esperar o dono dizer que concluiu os passos e informar a URL do preview; então 9.3
-- **Tocados e não verificados:** `.env.example` (só comentário)
+- **Atualizado:** 2026-11-10 — plano concluído
+- **Encerramento do plano** (`opus`) — concluído
+  - [x] E.1 Portão `--final` (verde: lint, tipos, testes, build, e2e)
+  - [x] E.2 `CHANGELOG.md` `[Unreleased]`
+  - [x] E.3 `ref/DOC.md` e `ref/PRD.md`
+  - [x] E.4 `.github/maintenance.yml` (`revisar-cota-google`; `addressSetDate` já sai pelo recomeço e pelo item `remover-recomeco-aparelho`)
+  - [x] E.5 Frontmatter `concluido` + `git mv` para `concluidos/`
+- **Próxima ação:** nenhuma — plano concluído
+- **Tocados e não verificados:** nenhum (só documentação após o portão final)
 - **Em execução:** nenhum subagente
-- **Esperando o usuário:** executar o passo a passo da Etapa 9 (Google Cloud, Vercel, commit e push da `dev`) e mandar a URL do preview
+- **Esperando o usuário:** nada
 
 ## Progresso
 
@@ -42,7 +42,7 @@ demanda: Fase 1 do controle da cota do Google — cache compartilhado, função 
 - [x] 6. APIs do painel: login, resumo, forçar aproximado, conferir com o Google — `opus` *(depende de 1)*
 - [x] 7. Rascunho visual do painel `/admin` — `opus` *(paralelo com 2–6)* · ⛔ portão: dono aprova o visual
 - [x] 8. Painel `/admin` na tela, substituindo `/dev` — `opus` *(depende de 6, 7)*
-- [ ] 9. Configuração externa e prova real no preview da `dev` — `opus` *(depende de 5, 8)* · ⛔ portão: dono cria chaves/segredos e confere
+- [x] 9. Configuração externa e prova real no preview da `dev` — `opus` *(depende de 5, 8)* · ⛔ portão: dono cria chaves/segredos e confere
 
 ## Etapas
 
@@ -275,12 +275,12 @@ demanda: Fase 1 do controle da cota do Google — cache compartilhado, função 
 
 ## Encerramento do plano
 
-- [ ] Portão de fim de plano: `node .claude/scripts/portao.mjs --final`
-- [ ] `CHANGELOG.md` — entrada única da feature em `[Unreleased]`, para leitor não técnico
-- [ ] `ref/DOC.md` (regra nova do Supabase: só lê `dados_gerais`, escreve só em `praqualescola` via `pqe_*`; variáveis de servidor; `api/`; `db/migrations/`; e2e sem Google) / `ref/PRD.md` (§2 privacidade e `/admin`; §3.3 servidor, cache compartilhado, modo aproximado, limite de 3 endereços novos/dia por aparelho; §3.3 ainda cita Distance Matrix em lotes de 25)
-- [ ] `.github/maintenance.yml` — revisar a tabela de preços/cota do Google (ex.: anual) e a remoção da chave `addressSetDate` antiga
-- [ ] Migrations aplicadas no Dados listadas no aviso final
-- [ ] Frontmatter → `status: concluido`; `git mv` deste arquivo para `ref/planos/concluidos/`
+- [x] Portão de fim de plano: `node .claude/scripts/portao.mjs --final`
+- [x] `CHANGELOG.md` — entrada única da feature em `[Unreleased]`, para leitor não técnico
+- [x] `ref/DOC.md` (regra nova do Supabase: só lê `dados_gerais`, escreve só em `praqualescola` via `pqe_*`; variáveis de servidor; `api/`; `db/migrations/`; e2e sem Google) / `ref/PRD.md` (§2 privacidade e `/admin`; §3.3 servidor, cache compartilhado, modo aproximado, limite de 3 endereços novos/dia por aparelho; §3.3 ainda cita Distance Matrix em lotes de 25)
+- [x] `.github/maintenance.yml` — revisar a tabela de preços/cota do Google (ex.: anual) e a remoção da chave `addressSetDate` antiga
+- [x] Migrations aplicadas no Dados listadas no aviso final
+- [x] Frontmatter → `status: concluido`; `git mv` deste arquivo para `ref/planos/concluidos/`
 
 ## Diário de execução
 
@@ -350,3 +350,18 @@ demanda: Fase 1 do controle da cota do Google — cache compartilhado, função 
 - **Isenção:** `HomeLocationInput` não aplica o limite de 3/dia com sessão válida (`temSessaoAdmin`). O limite do servidor por IP (30 idas ao Google/dia) continua valendo para o admin.
 - **Desvios do rascunho:** cabeçalho com "Fechar" (fecha e mantém a sessão, para o admin definir endereços sem limite) e "Sair do painel" no fim (encerra a sessão). "Ajustar contador para N" só aparece se a estimativa do Google for maior que o nosso contador (`pqe_calibrar` nunca diminui).
 - **Verificado:** `e2e/admin.spec.ts` 6/6 (cenários 1–6) + teste de isenção em `distancias.spec.ts` (falha sem a mudança, passa com ela); `@distancias` 7/7; portão `--build --e2e admin` verde; `grep devMode src` = 0; capturas 390px (senha com erro, painel Aproximado forçado, rodapé) conferidas contra o canvas B.
+
+### 2026-11-10 — Etapa 9 (`opus`)
+
+- **Feito pelo dono:** Routes API e Cloud Monitoring API ativadas; chave de servidor só com Routes; cotas ComputeRouteMatrix 3.300/dia e 700/min; chave do navegador sem Distance Matrix; conta de serviço `monitoring-viewer@pra-qual-escola.iam.gserviceaccount.com`; 7 variáveis na Vercel (Production + Preview, Secret exceto `GOOGLE_CLOUD_PROJECT`); push da `dev`. Preview: https://praqualescola-git-dev-raulcabrals-projects.vercel.app/
+- **Problema e causa:** "Conferir com o Google" deu 502 → token OAuth 200, Monitoring 403: o papel Monitoring Viewer não estava no **IAM do projeto**. Dono concedeu; reproduzido localmente (script fora do repo) → 200.
+- **Confirmado na prática (pendências das Etapas 4 e 6):** empacotamento na Vercel com import de `src/lib/cota` funciona; RPC só com header `apikey` (`sb_secret_`) funciona; Routes devolve 67 escolas com metros e segundos (594 m a 21,8 km); serviços do Monitoring `maps-backend.googleapis.com` e `places-backend.googleapis.com`; `alignmentPeriod` de um mês inteiro aceito.
+- **Critérios:** `pqe_resumo()` 0 → após o 1º endereço e a repetição em aba anônima: unidades 67, calculos_google 1, acertos_cache 1, célula `-12737_-23311` com 67 escolas. Chave do navegador sem Distance Matrix: confirmado pelo dono.
+- **Nota:** o JSON da conta de serviço apareceu na conversa (seleção do editor); o dono decidiu não trocar a chave (só leitura de métricas). Não insistir.
+
+### 2026-11-10 — Encerramento (`opus`)
+
+- **Portão `--final`:** verde (lint, tipos, testes, build, e2e).
+- **Docs:** `CHANGELOG.md` `[Unreleased]`; `ref/DOC.md` §3 (`db/migrations/`), §4 (schema `praqualescola`, `pqe_*`, estados da cota), §6 (testes de `api/`); `ref/PRD.md` §2 (`/admin` substitui `/dev`, privacidade do endereço) e §3.3 (servidor, cache compartilhado, três estados, estimativa, 3 endereços/dia).
+- **Agenda:** `revisar-cota-google` (2027-11-01). `addressSetDate` já é coberta por `remover-recomeco-aparelho`.
+- **Migrations:** `db/migrations/20261110_pqe_cota.sql` já aplicada no Dados na Etapa 1 — nada pendente em produção.

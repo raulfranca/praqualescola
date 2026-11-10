@@ -4,6 +4,24 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [2.3.0] - 2026-11-10 - Controle da cota gratuita do Google Maps
+
+### Adicionado
+
+- Área do administrador (digite `/admin` na busca, com senha): mostra quanto da cota gratuita do Google já foi usada no mês, em três estados (Normal, Economia, Aproximado), permite forçar o modo aproximado e conferir o contador com os números do próprio Google.
+- Quando uma distância é estimada (sem consulta ao Google), ela aparece com o selo "aproximado" na lista, no detalhe da escola e nas prioridades.
+
+### Alterado
+
+- As distâncias e os tempos agora são calculados pelo servidor do app, e não mais direto no aparelho. Endereços iguais ou muito próximos reaproveitam o cálculo já feito por outra pessoa, sem nova consulta ao Google.
+- Perto do limite da cota gratuita, o app passa sozinho a reaproveitar cálculos de endereços vizinhos e, no limite, usa uma estimativa pela distância em linha reta, para nunca gerar cobrança. A coordenada exata da casa nunca sai do aparelho para o Google: o servidor usa o centro de um quadrado de cerca de 200 m.
+- Cada aparelho pode cadastrar até 3 endereços novos por dia (antes era 1).
+- Abrir o detalhe de uma escola ou a lista de prioridades não consulta mais o Google: usa a distância já calculada.
+
+### Removido
+
+- O atalho de desenvolvedor `/dev`, que liberava a troca de endereço sem senha. Foi substituído pela área do administrador.
+
 ## [2.2.0] - 2026-11-10 - Dados oficiais do Supabase da Secretaria de Educação
 
 ### Adicionado
