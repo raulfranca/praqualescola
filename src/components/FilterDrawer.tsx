@@ -285,17 +285,17 @@ export function FilterDrawer({
                     onValueChange={(value) => {
                       if (value) onMetricChange?.(value as FilterMetric);
                     }}
-                    className="inline-flex bg-muted border border-border p-0.5 rounded-lg gap-0.5"
+                    className="inline-flex bg-muted p-0.5 rounded-lg gap-0.5"
                   >
                     <ToggleGroupItem
                       value="distance"
-                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-primary data-[state=on]:shadow-md data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
+                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-primary data-[state=on]:shadow-ambient data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
                     >
                       Distância
                     </ToggleGroupItem>
                     <ToggleGroupItem
                       value="time"
-                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-purple data-[state=on]:shadow-md data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
+                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-primary data-[state=on]:shadow-ambient data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
                     >
                       Tempo
                     </ToggleGroupItem>
@@ -346,7 +346,7 @@ export function FilterDrawer({
                       min={minDuration}
                       max={maxDuration}
                       step={1}
-                      className="w-full [&_[role=slider]]:border-purple [&_.bg-primary]:bg-purple"
+                      className="w-full"
                     />
                   )}
                   
@@ -374,14 +374,14 @@ export function FilterDrawer({
             <Button
               variant="ghost"
               onClick={clearAll}
-              className="text-base underline"
+              className="text-base text-primary hover:text-primary"
             >
               Limpar tudo
             </Button>
             
             <Button
               onClick={applyFilters}
-              className="flex-1 bg-foreground text-background hover:bg-foreground/90 h-12 rounded-lg text-base font-semibold"
+              className="flex-1 bg-gradient-primary hover:bg-primary-strong text-primary-foreground h-12 rounded-lg text-base font-semibold"
             >
               Mostrar {schoolCount} {schoolCount === 1 ? "escola" : "escolas"}
             </Button>

@@ -100,7 +100,7 @@ export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdo
   return (
     <div className="relative w-full md:w-96" ref={dropdownRef}>
       <div className="relative">
-        <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 z-10 ${devModeEnabled ? "text-red-500" : "text-muted-foreground"}`} />
+        <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 z-10 ${devModeEnabled ? "text-destructive" : "text-muted-foreground"}`} strokeWidth={1.75} />
         <Input
           ref={inputRef}
           type="text"
@@ -115,9 +115,9 @@ export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdo
           data-form-type="other"
           data-lpignore="true"
           data-1p-ignore="true"
-          className={`pl-12 pr-4 h-12 bg-white rounded-full shadow-lg focus-visible:ring-2 text-foreground ${
-            devModeEnabled 
-              ? "border-2 border-red-500 focus-visible:ring-red-500" 
+          className={`pl-12 pr-4 h-12 bg-card rounded-full shadow-floating focus-visible:ring-2 text-foreground ${
+            devModeEnabled
+              ? "border-2 border-destructive focus-visible:ring-destructive"
               : "border-0 focus-visible:ring-primary"
           }`}
         />
@@ -125,12 +125,12 @@ export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdo
       
       {/* Dropdown */}
       {isOpen && showDropdown && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border rounded-2xl shadow-xl max-h-[60vh] overflow-y-auto z-50">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-2xl shadow-floating max-h-[60vh] overflow-y-auto z-50">
           {filteredSchools.map((school) => (
             <button
               key={school.id}
               onClick={() => handleSelectSchool(school)}
-              className="w-full px-4 py-3 flex items-center justify-between gap-3 hover:bg-muted transition-colors text-left border-b border-border last:border-0"
+              className="w-full px-4 py-3 flex items-center justify-between gap-3 min-h-11 hover:bg-muted transition-colors text-left"
             >
               <span className="text-sm font-medium text-foreground truncate flex-1 min-w-0">
                 {school.type} {school.name}

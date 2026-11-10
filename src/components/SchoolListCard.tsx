@@ -68,7 +68,7 @@ export function SchoolListCard({
             <span
               className={cn(
                 "text-xs font-medium px-1.5 py-0.5 rounded flex-shrink-0",
-                school.vacancies && school.vacancies > 0 ? "bg-green-500/15 text-green-700" : "bg-red-500/15 text-red-700"
+                school.vacancies && school.vacancies > 0 ? "bg-sucesso-bg text-sucesso-fg" : "bg-erro-bg text-erro-fg"
               )}
             >
               {school.vacancies && school.vacancies > 0
@@ -80,7 +80,7 @@ export function SchoolListCard({
 
         <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
           {levelTags.map((tag, idx) => (
-            <span key={idx} className={cn("text-xs px-1.5 py-0.5 rounded font-medium flex-shrink-0", tag.className)}>
+            <span key={idx} className={cn("text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0", tag.className)}>
               {tag.label}
             </span>
           ))}
@@ -88,7 +88,7 @@ export function SchoolListCard({
           {hasHomeLocation && school.distanceInKm !== undefined && (
             <>
               {levelTags.length > 0 && <span className="text-muted-foreground text-xs">•</span>}
-              <span className="flex items-center gap-0.5 text-xs text-orange-600 font-medium flex-shrink-0">
+              <span className="flex items-center gap-0.5 text-xs text-muted-foreground font-medium flex-shrink-0">
                 <MapPin className="w-3 h-3" />
                 {formatDistance(school.distanceInKm)}
               </span>
@@ -96,7 +96,7 @@ export function SchoolListCard({
           )}
 
           {hasHomeLocation && school.durationInMinutes !== undefined && (
-            <span className="flex items-center gap-0.5 text-xs text-orange-600 font-medium flex-shrink-0">
+            <span className="flex items-center gap-0.5 text-xs text-muted-foreground font-medium flex-shrink-0">
               <Clock className="w-3 h-3" />
               {formatDuration(school.durationInMinutes)}
             </span>
@@ -111,7 +111,7 @@ export function SchoolListCard({
             {school.neighborhood}
           </span>
           <button onClick={handleStarClick} className="p-1 rounded-full hover:bg-muted transition-colors" aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}>
-            <Star className={cn("w-5 h-5", isFavorite ? "fill-amber-400 text-amber-400" : "text-muted-foreground")} />
+            <Star className={cn("w-5 h-5", isFavorite ? "fill-favorite text-favorite" : "text-muted-foreground")} />
           </button>
         </div>
       </div>

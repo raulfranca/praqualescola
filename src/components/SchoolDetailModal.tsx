@@ -97,11 +97,11 @@ export function SchoolDetailModal({
             <p className="text-sm font-medium text-muted-foreground">{campaign.title}</p>
             <div className="mt-1">
               {school.vacancies && school.vacancies > 0 ? (
-                <Badge className="bg-green-500/15 text-green-800 dark:text-green-300 border-0 px-2.5 py-0.5 font-semibold">
+                <Badge className="bg-sucesso-bg text-sucesso-fg border-0 px-2.5 py-0.5 font-semibold">
                   {school.vacancies === 1 ? "1 vaga" : `${school.vacancies} vagas`}
                 </Badge>
               ) : (
-                <Badge className="bg-red-500/15 text-red-800 dark:text-red-300 border-0 px-2.5 py-0.5 font-semibold">
+                <Badge className="bg-erro-bg text-erro-fg border-0 px-2.5 py-0.5 font-semibold">
                   Sem vagas
                 </Badge>
               )}
@@ -171,7 +171,7 @@ export function SchoolDetailModal({
       </div>
 
       {/* Distance and Duration */}
-      {homeLocation && <div className="bg-muted/50 rounded-lg p-3 border border-border">
+      {homeLocation && <div className="bg-muted rounded-xl p-3">
           <div className="flex items-center gap-2 mb-2">
             <MapPin className="w-4 h-4 text-primary" />
             <p className="text-sm font-medium text-foreground">Distância de Casa</p>
@@ -213,7 +213,7 @@ export function SchoolDetailModal({
             onToggleFavorite(school.id);
           }} 
           variant={isFavorite ? "default" : "outline"} 
-          className={`flex items-center justify-center gap-2 ${isFavorite ? "bg-amber-500 text-white hover:bg-amber-600" : ""}`}
+          className={`flex items-center justify-center gap-2 ${isFavorite ? "bg-favorite text-favorite-foreground hover:bg-favorite-strong" : ""}`}
         >
           <Star className={`w-4 h-4 sm:w-5 sm:h-5 ${isFavorite ? "fill-white" : ""}`} />
           <span className="whitespace-nowrap">{isFavorite ? "Remover dos Favoritos" : "Adicionar aos Favoritos"}</span>

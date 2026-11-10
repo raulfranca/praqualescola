@@ -34,7 +34,7 @@ export function DistanceHistogram({
   }, [distances, minDistance, maxDistance]);
 
   const barColor = metric === "time" 
-    ? "bg-purple/20 dark:bg-purple/20" 
+    ? "bg-primary/30" 
     : "bg-primary/20";
 
   return (

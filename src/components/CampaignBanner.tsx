@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useCampaign } from "@/hooks/useCampaign";
 import { Button } from "@/components/ui/button";
-import { Info } from "lucide-react";
+import coruja from "../../design-system/assets/coruja.svg";
 
 interface CampaignBannerProps {
   onShowVacancies: () => void;
@@ -33,11 +33,11 @@ export function CampaignBanner({ onShowVacancies }: CampaignBannerProps) {
 
   return (
     <div className="absolute top-44 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-md md:max-w-lg">
-      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-xl shadow-lg p-5">
+      <div className="bg-info-bg rounded-xl shadow-floating p-5">
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="flex items-center gap-2 text-blue-900 dark:text-blue-100">
-            <Info className="h-5 w-5 flex-shrink-0" />
-            <p className="text-sm font-semibold">
+          <div className="flex items-center gap-3 text-info-fg">
+            <img src={coruja} alt="" aria-hidden="true" className="h-8 w-8 flex-shrink-0" />
+            <p className="text-sm font-semibold text-left">
               {config.bannerMessage}
             </p>
           </div>
@@ -45,7 +45,7 @@ export function CampaignBanner({ onShowVacancies }: CampaignBannerProps) {
           <div className="flex flex-col gap-2 w-full">
             <Button
               onClick={handleShowVacancies}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+              className="w-full h-11 bg-gradient-primary hover:bg-primary-strong text-primary-foreground font-semibold"
               size="default"
             >
               Ver vagas disponíveis
@@ -55,7 +55,7 @@ export function CampaignBanner({ onShowVacancies }: CampaignBannerProps) {
               onClick={handleDismiss}
               variant="ghost"
               size="default"
-              className="w-full text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="w-full h-11 text-primary hover:bg-primary/10 hover:text-primary-strong"
             >
               Agora não
             </Button>

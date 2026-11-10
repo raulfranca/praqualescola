@@ -1,4 +1,4 @@
-import { MapIcon, List, Star, MessageSquare } from "lucide-react";
+import { MapIcon, List, Star } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -25,30 +25,24 @@ export function SideNav() {
       path: "/favoritos",
       isActive: location.pathname === "/favoritos",
     },
-    {
-      icon: MessageSquare,
-      label: "Contribua",
-      path: "/feedback",
-      isActive: location.pathname === "/feedback",
-    },
   ];
 
   return (
-    <nav className="fixed left-0 top-0 h-screen w-16 z-50 bg-card border-r border-border shadow-lg hidden md:flex flex-col">
+    <nav className="fixed left-0 top-0 h-screen w-16 z-50 bg-card shadow-floating hidden md:flex flex-col">
       <div className="flex flex-col items-center justify-start gap-2 py-4">
         {items.map((item) => (
           <button
             key={item.path}
             onClick={() => navigate(item.path)}
             className={cn(
-              "flex flex-col items-center justify-center gap-1 px-2 py-3 rounded-lg transition-colors w-12",
+              "flex flex-col items-center justify-center gap-1 px-0.5 py-3 rounded-lg transition-colors w-16",
               item.isActive
                 ? "text-primary"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <item.icon className={cn("w-6 h-6", item.isActive && "fill-primary/20")} />
-            <span className="text-[10px] font-medium text-center">{item.label}</span>
+            <item.icon className={cn("w-6 h-6", item.isActive && "fill-primary/20")} strokeWidth={1.75} />
+            <span className="text-xs font-medium text-center">{item.label}</span>
           </button>
         ))}
       </div>

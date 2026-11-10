@@ -8,9 +8,9 @@ interface HeaderProps {
 
 export function Header({ activeTab, onTabChange }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
+    <header className="sticky top-0 z-50 bg-card shadow-ambient">
       <div className="px-4 py-3">
-        <h1 className="text-lg font-semibold text-center text-foreground mb-3">
+        <h1 className="text-lg font-semibold tracking-tight text-center text-foreground mb-3">
           Pra Qual Escola Eu Vou?
         </h1>
         
@@ -18,26 +18,26 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
           <button
             onClick={() => onTabChange("map")}
             className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md font-medium transition-all",
+              "flex-1 flex items-center justify-center gap-2 min-h-11 py-2.5 px-4 rounded-md font-medium transition-all",
               activeTab === "map"
                 ? "bg-card text-primary shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <MapIcon className="w-4 h-4" />
+            <MapIcon className="w-4 h-4" strokeWidth={1.75} />
             <span className="text-sm">Mapa</span>
           </button>
           
           <button
             onClick={() => onTabChange("priorities")}
             className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md font-medium transition-all",
+              "flex-1 flex items-center justify-center gap-2 min-h-11 py-2.5 px-4 rounded-md font-medium transition-all",
               activeTab === "priorities"
                 ? "bg-card text-primary shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <ListOrdered className="w-4 h-4" />
+            <ListOrdered className="w-4 h-4" strokeWidth={1.75} />
             <span className="text-sm">Minhas Prioridades</span>
           </button>
         </nav>

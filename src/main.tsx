@@ -1,5 +1,8 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
+import "@fontsource-variable/inter";
+import "@fontsource/work-sans/500.css";
+import "@fontsource/work-sans/600.css";
 import "./index.css";
 import { initGA } from "./lib/analytics";
 import { MaintenancePage } from "./components/MaintenancePage";

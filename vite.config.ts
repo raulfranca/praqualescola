@@ -14,7 +14,7 @@ export default defineConfig(() => ({
     VitePWA({
       registerType: "prompt",
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg}"],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg}", "**/*latin*.woff2"],
         runtimeCaching: [
           {
             urlPattern: /^\/version\.json$/,
@@ -56,8 +56,8 @@ export default defineConfig(() => ({
         name: "Pra Qual Escola",
         short_name: "Pra Qual Escola",
         description: "Encontre e compare escolas públicas de Pindamonhangaba",
-        theme_color: "#1ba3c6",
-        background_color: "#ffffff",
+        theme_color: "#164292",
+        background_color: "#f6f9fd",
         display: "standalone",
         start_url: "/",
         orientation: "portrait",

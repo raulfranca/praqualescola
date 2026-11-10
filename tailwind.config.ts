@@ -23,7 +23,32 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          strong: "hsl(var(--primary-strong))",
+          container: "hsl(var(--primary-container))",
         },
+        faint: "hsl(var(--faint))",
+        "surface-high": "hsl(var(--surface-high))",
+        nivel: {
+          creche: {
+            DEFAULT: "hsl(var(--nivel-creche))",
+            bg: "hsl(var(--nivel-creche-bg))",
+            fg: "hsl(var(--nivel-creche-fg))",
+          },
+          pre: {
+            DEFAULT: "hsl(var(--nivel-pre))",
+            bg: "hsl(var(--nivel-pre-bg))",
+            fg: "hsl(var(--nivel-pre-fg))",
+          },
+          fundamental: {
+            DEFAULT: "hsl(var(--nivel-fundamental))",
+            bg: "hsl(var(--nivel-fundamental-bg))",
+            fg: "hsl(var(--nivel-fundamental-fg))",
+          },
+        },
+        sucesso: { bg: "hsl(var(--sucesso-bg))", fg: "hsl(var(--sucesso-fg))" },
+        aviso: { bg: "hsl(var(--aviso-bg))", fg: "hsl(var(--aviso-fg))" },
+        erro: { bg: "hsl(var(--erro-bg))", fg: "hsl(var(--erro-fg))" },
+        info: { bg: "hsl(var(--info-bg))", fg: "hsl(var(--info-fg))" },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
@@ -51,37 +76,22 @@ export default {
         favorite: {
           DEFAULT: "hsl(var(--favorite))",
           foreground: "hsl(var(--favorite-foreground))",
+          strong: "hsl(var(--favorite-strong))",
         },
-        orange: {
-          DEFAULT: "hsl(var(--orange))",
-          foreground: "hsl(var(--orange-foreground))",
-        },
-        infantil: {
-          DEFAULT: "hsl(var(--infantil))",
-          foreground: "hsl(var(--infantil-foreground))",
-        },
-        pre: {
-          DEFAULT: "hsl(var(--pre))",
-          foreground: "hsl(var(--pre-foreground))",
-        },
-        fundamental: {
-          DEFAULT: "hsl(var(--fundamental))",
-          foreground: "hsl(var(--fundamental-foreground))",
-        },
-        purple: {
-          DEFAULT: "hsl(var(--purple))",
-          foreground: "hsl(var(--purple-foreground))",
-        },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-        },
+      },
+      fontFamily: {
+        sans: ['"Inter Variable"', "Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        label: ['"Work Sans"', "system-ui", "sans-serif"],
+      },
+      boxShadow: {
+        ambient: "var(--shadow-ambient)",
+        floating: "var(--shadow-floating)",
+      },
+      backgroundImage: {
+        "gradient-primary": "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-container)))",
+      },
+      letterSpacing: {
+        tight: "-0.02em",
       },
       borderRadius: {
         lg: "var(--radius)",

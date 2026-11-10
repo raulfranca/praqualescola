@@ -49,10 +49,10 @@ export function ActionChips({
         onClick={onHomeClick} 
         size="sm" 
         className={cn(
-          "rounded-full shadow-md h-8 px-3 gap-1.5 shrink-0 transition-all",
+          "rounded-full shadow-floating h-8 px-3 gap-1.5 shrink-0 transition-all",
           hasHome 
-            ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-            : "bg-white text-foreground hover:bg-white/90 border border-border"
+            ? "bg-secondary text-primary hover:bg-secondary/80" 
+            : "bg-card text-muted-foreground hover:bg-muted"
         )}
       >
         <Home className="w-3.5 h-3.5" />
@@ -69,10 +69,10 @@ export function ActionChips({
             <Button 
               size="sm"
               className={cn(
-                "rounded-full shadow-md h-8 px-3 gap-1.5 shrink-0 transition-all",
+                "rounded-full shadow-floating h-8 px-3 gap-1.5 shrink-0 transition-all",
                 sortBy
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "bg-white text-foreground hover:bg-white/90 border border-border"
+                  ? "bg-secondary text-primary hover:bg-secondary/80"
+                  : "bg-card text-muted-foreground hover:bg-muted"
               )}
             >
               <ArrowUpDown className="w-3.5 h-3.5" />
@@ -120,10 +120,10 @@ export function ActionChips({
         onClick={onFilterClick}
         size="sm"
         className={cn(
-          "rounded-full shadow-md h-8 px-3 gap-1.5 shrink-0 transition-all",
+          "rounded-full shadow-floating h-8 px-3 gap-1.5 shrink-0 transition-all",
           hasActiveFilters
-            ? "bg-primary text-primary-foreground hover:bg-primary/90"
-            : "bg-white text-foreground hover:bg-white/90 border border-border"
+            ? "bg-secondary text-primary hover:bg-secondary/80"
+            : "bg-card text-muted-foreground hover:bg-muted"
         )}
       >
         <Filter className="w-3.5 h-3.5" />

@@ -3,6 +3,24 @@ import { GoogleMap, Marker } from "@react-google-maps/api";
 import { School } from "@/types/school";
 import { HomeLocation } from "@/hooks/useHomeLocation";
 import { trackEvent } from "@/lib/analytics";
+import { mapColors } from "@/lib/mapColors";
+import corujaBranca from "../../design-system/assets/coruja-branca.svg?raw";
+
+// Alfinete "Minha Casa": tinta azul-noite com a coruja branca na cabeça (design-system/README.md)
+const corujaInterna = corujaBranca.replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
+const homePinSvg = `
+  <svg width="36" height="44" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="homeShadow" x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="${mapColors["on-surface"]}" flood-opacity="0.35"/>
+      </filter>
+    </defs>
+    <path d="M18 41C18 41 5 27 5 17A13 13 0 1 1 31 17C31 27 18 41 18 41Z"
+          fill="${mapColors["marcador-casa"]}" stroke="${mapColors["marcador-contorno"]}" stroke-width="2"
+          filter="url(#homeShadow)"/>
+    <svg x="5" y="4" width="26" height="26" viewBox="0 0 1200 1200">${corujaInterna}</svg>
+  </svg>
+`;
 
 interface MapViewProps {
   schools: School[];
@@ -205,11 +223,21 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     const { hasCreche, hasPre, hasFundamental } = getSchoolCategory(school);
     const categories = [hasCreche, hasPre, hasFundamental].filter(Boolean).length;
     
-    // Colors from design system
-    const crecheColor = "#80CBC4"; // Verde turquesa (Creche)
-    const preColor = "#D4A849"; // Amarelo (Pré)
-    const fundamentalColor = "#3D7C85"; // Azul petróleo (Fundamental)
-    const primaryColor = "#1ba3c6"; // Azul principal do sistema
+    // Cores do design system (design-system/tokens.css, via src/lib/mapColors.ts)
+    const crecheColor = mapColors["nivel-creche"];
+    const preColor = mapColors["nivel-pre"];
+    const fundamentalColor = mapColors["nivel-fundamental"];
+    const primaryColor = mapColors.primary;
+    const outline = mapColors["marcador-contorno"];
+    const favoriteRing = mapColors["marcador-favorito"];
+    // Sombra azul-noite (--on-surface), nunca preta
+    const shadowFilter = `<filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="${mapColors["on-surface"]}" flood-opacity="0.35"/>
+            </filter>`;
+    // Estrela do favorito: anel âmbar por fora do contorno branco
+    const starRing = (path: string) => `
+              <path d="${path}" fill="none" stroke="${favoriteRing}" stroke-width="5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+              <path d="${path}" fill="none" stroke="${outline}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
     
     // Dynamic size based on zoom level - smaller at city view, larger at street view
     // Streets with arrows typically appear at zoom 17+
@@ -224,7 +252,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     const offset = 8; // Center the circle in the larger canvas
     
     if (isFavorite) {
-      // Star for favorites with color coding and glow effect
+      // Star for favorites with color coding and amber ring
       const starSize = size * 1.8; // Significantly larger than circles (80% bigger)
       const starCanvasSize = starSize + 24; // Extra space for glow
       const starOffset = 12;
@@ -243,19 +271,10 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
         const svg = `
           <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
-                <feComponentTransfer>
-                  <feFuncA type="linear" slope="1.5"/>
-                </feComponentTransfer>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
+              ${shadowFilter}
             </defs>
-            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#glow)">
-              <path d="${starPath}" fill="${fillColor}" stroke="#ffffff" stroke-width="2" vector-effect="non-scaling-stroke"/>
+            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#shadow)">
+              <path d="${starPath}" fill="${fillColor}"/>${starRing(starPath)}
             </g>
           </svg>
         `;
@@ -286,16 +305,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
         const svg = `
           <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
-                <feComponentTransfer>
-                  <feFuncA type="linear" slope="1.5"/>
-                </feComponentTransfer>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
+              ${shadowFilter}
               <clipPath id="leftHalf">
                 <rect x="0" y="0" width="12" height="24"/>
               </clipPath>
@@ -303,10 +313,9 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 <rect x="12" y="0" width="12" height="24"/>
               </clipPath>
             </defs>
-            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#glow)">
+            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#shadow)">
               <path d="${starPath}" fill="${leftColor}" clip-path="url(#leftHalf)"/>
-              <path d="${starPath}" fill="${rightColor}" clip-path="url(#rightHalf)"/>
-              <path d="${starPath}" fill="none" stroke="#ffffff" stroke-width="2" vector-effect="non-scaling-stroke"/>
+              <path d="${starPath}" fill="${rightColor}" clip-path="url(#rightHalf)"/>${starRing(starPath)}
             </g>
           </svg>
         `;
@@ -323,16 +332,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
         const svg = `
           <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
-                <feComponentTransfer>
-                  <feFuncA type="linear" slope="1.5"/>
-                </feComponentTransfer>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
+              ${shadowFilter}
               <clipPath id="leftThird">
                 <rect x="0" y="0" width="8" height="24"/>
               </clipPath>
@@ -343,11 +343,10 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 <rect x="16" y="0" width="8" height="24"/>
               </clipPath>
             </defs>
-            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#glow)">
+            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#shadow)">
               <path d="${starPath}" fill="${crecheColor}" clip-path="url(#leftThird)"/>
               <path d="${starPath}" fill="${preColor}" clip-path="url(#centerThird)"/>
-              <path d="${starPath}" fill="${fundamentalColor}" clip-path="url(#rightThird)"/>
-              <path d="${starPath}" fill="none" stroke="#ffffff" stroke-width="2" vector-effect="non-scaling-stroke"/>
+              <path d="${starPath}" fill="${fundamentalColor}" clip-path="url(#rightThird)"/>${starRing(starPath)}
             </g>
           </svg>
         `;
@@ -370,12 +369,10 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       const svg = `
         <svg width="${canvasSize}" height="${canvasSize}" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
-            </filter>
+            ${shadowFilter}
           </defs>
-          <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
-                  fill="${color}" stroke="#ffffff" stroke-width="1.5" 
+          <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
+                  fill="${color}" stroke="${outline}" stroke-width="2" 
                   filter="url(#shadow)"/>
         </svg>
       `;
@@ -406,9 +403,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       const svg = `
         <svg width="${canvasSize}" height="${canvasSize}" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
-            </filter>
+            ${shadowFilter}
             <clipPath id="leftHalf">
               <rect x="${offset}" y="${offset}" width="${radius}" height="${size}"/>
             </clipPath>
@@ -417,12 +412,12 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             </clipPath>
           </defs>
           <g filter="url(#shadow)">
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
                     fill="${leftColor}" clip-path="url(#leftHalf)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
                     fill="${rightColor}" clip-path="url(#rightHalf)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
-                    fill="none" stroke="#ffffff" stroke-width="1.5"/>
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
+                    fill="none" stroke="${outline}" stroke-width="2"/>
           </g>
         </svg>
       `;
@@ -439,9 +434,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       const svg = `
         <svg width="${canvasSize}" height="${canvasSize}" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
-            </filter>
+            ${shadowFilter}
             <clipPath id="leftThird">
               <rect x="${offset}" y="${offset}" width="${size / 3}" height="${size}"/>
             </clipPath>
@@ -453,14 +446,14 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             </clipPath>
           </defs>
           <g filter="url(#shadow)">
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
                     fill="${crecheColor}" clip-path="url(#leftThird)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
                     fill="${preColor}" clip-path="url(#middleThird)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
                     fill="${fundamentalColor}" clip-path="url(#rightThird)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
-                    fill="none" stroke="#ffffff" stroke-width="1.5"/>
+            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
+                    fill="none" stroke="${outline}" stroke-width="2"/>
           </g>
         </svg>
       `;
@@ -480,8 +473,8 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
           </filter>
         </defs>
-        <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 1.5}" 
-                fill="${primaryColor}" stroke="#ffffff" stroke-width="1.5" 
+        <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
+                fill="${primaryColor}" stroke="${outline}" stroke-width="2" 
                 filter="url(#shadow)"/>
       </svg>
     `;
@@ -554,7 +547,8 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
                 }}
                 label={showLabel ? {
                   text: school.name,
-                  color: '#3D7C85',
+                  color: mapColors["on-surface"],
+                  fontFamily: '"Inter Variable", Inter, sans-serif',
                   fontSize: '12px',
                   fontWeight: '400',
                   className: 'marker-label'
@@ -568,21 +562,9 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             <Marker
               position={{ lat: homeLocation.lat, lng: homeLocation.lng }}
               icon={{
-                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                  <svg width="28" height="32" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                      <filter id="homeShadow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.3"/>
-                      </filter>
-                    </defs>
-                    <g filter="url(#homeShadow)">
-                      <path d="M14 2L2 12h3v12h7v-8h4v8h7V12h3L14 2z" 
-                            fill="#22c55e" stroke="#ffffff" stroke-width="1.5"/>
-                    </g>
-                  </svg>
-                `),
-                scaledSize: new google.maps.Size(28, 32),
-                anchor: new google.maps.Point(14, 32),
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(homePinSvg),
+                scaledSize: new google.maps.Size(36, 44),
+                anchor: new google.maps.Point(18, 41),
               }}
               title="🏠 Minha Casa"
               zIndex={2000}

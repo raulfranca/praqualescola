@@ -68,17 +68,13 @@ Há um **modo desenvolvedor** escondido: digitar `/dev` na busca e apertar Enter
 - Dados completos, etiquetas de nível, vagas (em campanha), distância e tempo (se calculados), botão de favoritar.
 - **"Como Chegar?"**: no celular abre o seletor de apps de navegação (Maps, Waze, Uber...) pelas coordenadas; no computador abre o Google Maps.
 
-### 3.9 Contribua (`/feedback`)
-
-- Formulário do Tally embutido para sugestões.
-
-### 3.10 PWA, atualização e manutenção
+### 3.9 PWA, atualização e manutenção
 
 - Instalável (Android, Windows; no iOS, um banner ensina a adicionar à tela inicial).
 - Quando sai versão nova, aparece um aviso com título e subtítulo próprios daquela versão (`public/version.json`) e botão para atualizar.
 - **Modo manutenção**: ligado no painel da Vercel (Edge Config), sem publicar código. Com ele ligado, o app mostra só a página de manutenção com título e mensagem configurados. Se a consulta falhar, o app abre normalmente.
 
-### 3.11 Medição de uso
+### 3.10 Medição de uso
 
 - Google Analytics 4 (IP anonimizado) registra busca, visualização de escola, favoritar, reordenar, pedir rota e aplicar filtros. Vercel Analytics mede visitas.
 

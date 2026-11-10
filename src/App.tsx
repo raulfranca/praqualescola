@@ -13,7 +13,6 @@ import { FilterProvider } from "@/contexts/FilterContext";
 import Index from "./pages/Index";
 import Lista from "./pages/Lista";
 import Favoritos from "./pages/Favoritos";
-import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
 
 // Chave do Google Maps: vem do ambiente (.env local ou variáveis da Vercel), nunca do código.
@@ -47,7 +46,6 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/lista" element={<Lista />} />
               <Route path="/favoritos" element={<Favoritos />} />
-              <Route path="/feedback" element={<Feedback />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

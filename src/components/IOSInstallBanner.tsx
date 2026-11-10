@@ -7,9 +7,9 @@ interface IOSInstallBannerProps {
 
 export function IOSInstallBanner({ onDismiss }: IOSInstallBannerProps) {
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50 bg-background border border-border rounded-xl shadow-lg p-4 md:left-20 md:max-w-sm">
+    <div className="fixed bottom-20 left-4 right-4 z-50 bg-card rounded-xl shadow-floating p-4 md:left-20 md:max-w-sm">
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+        <div className="flex-shrink-0 w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
           <Share className="w-5 h-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
@@ -25,7 +25,7 @@ export function IOSInstallBanner({ onDismiss }: IOSInstallBannerProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="flex-shrink-0 h-8 w-8"
+          className="flex-shrink-0 h-11 w-11 -m-1.5"
           onClick={onDismiss}
         >
           <X className="h-4 w-4" />

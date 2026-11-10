@@ -22,7 +22,7 @@ api/maintenance.ts     Função de borda da Vercel: lê o Edge Config (modo manu
 public/version.json    Título e subtítulo do aviso de nova versão
 src/main.tsx           Consulta /api/maintenance antes de montar o app; inicia o GA
 src/App.tsx            Providers, LoadScript do Google Maps, rotas
-src/pages/             Index (mapa), Lista, Favoritos, Feedback, NotFound
+src/pages/             Index (mapa), Lista, Favoritos, NotFound
 src/components/        Componentes do app; ui/ = shadcn
 src/contexts/          FilterContext (filtros compartilhados, em sessionStorage)
 src/hooks/             Dados (useSchoolsData), casa, distâncias, favoritos, campanha, PWA
@@ -58,6 +58,7 @@ Como rodar: `node .claude/scripts/portao.mjs`. Comandos em `.claude/loop.json`.
 ## 7. Convenções e padrões
 
 - Alias `@/` → `src/`.
+- Visual: regras em `design-system/README.md`, valores em `design-system/tokens.css` (hex); o app usa a cópia em HSL de `src/index.css` via classes do Tailwind, e `src/lib/designTokens.test.ts` garante que as duas não divergem. Fontes Inter e Work Sans empacotadas via `@fontsource` (funcionam offline).
 - Textos de interface em português; muitos comentários e logs de console herdados estão em inglês.
 - Nova campanha: acrescentar em `src/config/campaign_config.ts` e criar a coluna de vagas na planilha.
 - Nova versão publicada: atualizar `public/version.json` (`version`, `title`, `subtitle`) junto com o `CHANGELOG.md`.
