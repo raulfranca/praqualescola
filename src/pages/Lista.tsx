@@ -293,6 +293,8 @@ const Lista = () => {
         onToggleFavorite={() => selectedSchool && toggleFavorite(selectedSchool.id)}
         onClose={() => setSelectedSchool(null)}
         homeLocation={homeLocation}
+        schools={schools}
+        onSelectSchool={setSelectedSchool}
       />
 
       <FilterDrawer

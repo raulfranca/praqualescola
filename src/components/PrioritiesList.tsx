@@ -4,6 +4,7 @@ import { HomeLocation } from "@/hooks/useHomeLocation";
 import { useState, useEffect } from "react";
 import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
 import { Badge } from "@/components/ui/badge";
+import { SeloDesativado } from "@/components/SeloDesativado";
 import { getSchoolLevelTags } from "@/lib/schoolTags";
 import { useCampaign } from "@/hooks/useCampaign";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
@@ -92,6 +93,8 @@ function SortableSchoolItem({
           <p className="text-sm text-muted-foreground mb-2">
             {school.neighborhood}
           </p>
+
+          {school.active === false && <div className="mb-2"><SeloDesativado /></div>}
 
           {/* Vacancy Badge - On its own line */}
           {isCampaignActive && (

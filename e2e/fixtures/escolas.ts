@@ -3,7 +3,8 @@ import type { LinhaEscola, LinhaTurma } from "../../src/lib/escolasSupabase";
 
 // Recorte real do Supabase "Dados" da SME (schema dados_gerais), copiado em 2026-11-10.
 // O e2e nunca chama o Supabase real: `interceptarSupabase` responde com estes dados.
-// CAIC (inativo, turmas sediadas em outros prédios), Abdias, CMEI Lucineia e CMEI Jonas Abib.
+// CAIC (inativo, turmas sediadas em outros prédios), Abdias, CMEI Lucineia, CMEI Jonas Abib e
+// EM Aníbal Ferreira (só a 1ª turma dela, para aparecer nos filtros de nível).
 
 export const ESCOLAS: LinhaEscola[] = [
   {
@@ -69,6 +70,22 @@ export const ESCOLAS: LinhaEscola[] = [
     "terceirizada": "Casa Girassol",
     "ativa": true,
     "observacao": null
+  },
+  {
+    "codigo_inep": "35191644",
+    "tipo": "EM",
+    "nome": "Aníbal Ferreira Lima",
+    "endereco": "Rua General Ruy de Andrade Costa, 100",
+    "bairro": "Araretama",
+    "cep": "12423-470",
+    "latitude": -22.94364,
+    "longitude": -45.50156,
+    "telefone": "3645-3637",
+    "setor": 5,
+    "secretaria_polo": "Araretama",
+    "terceirizada": null,
+    "ativa": true,
+    "observacao": null
   }
 ];
 
@@ -109,6 +126,7 @@ export const TURMAS: LinhaTurma[] = [
   {"codigo_inep":"35073179","codigo_inep_local":"35073179","etapa":"pre_2","nome_turma":"Pré II A","ano_letivo":2027},
   {"codigo_inep":"35073179","codigo_inep_local":"35073179","etapa":"pre_2","nome_turma":"Pré II B","ano_letivo":2027},
   {"codigo_inep":"35073179","codigo_inep_local":"35073179","etapa":"pre_2","nome_turma":"Pré II C","ano_letivo":2027},
+  {"codigo_inep":"35191644","codigo_inep_local":"35191644","etapa":"pre_1","nome_turma":"Pré I A","ano_letivo":2027},
   {"codigo_inep":"35234990","codigo_inep_local":"35010633","etapa":"bercario","nome_turma":"Berçário A","ano_letivo":2027},
   {"codigo_inep":"35234990","codigo_inep_local":"35010633","etapa":"infantil_1","nome_turma":"Infantil I A","ano_letivo":2027},
   {"codigo_inep":"35234990","codigo_inep_local":"35010633","etapa":"infantil_2","nome_turma":"Infantil II A","ano_letivo":2027},

@@ -3,6 +3,7 @@ import { School } from "@/types/school";
 import { getSchoolLevelTags } from "@/lib/schoolTags";
 import { useCampaign } from "@/hooks/useCampaign";
 import { cn } from "@/lib/utils";
+import { SeloDesativado } from "@/components/SeloDesativado";
 
 interface SchoolListCardProps {
   school: School & { distanceInKm?: number; durationInMinutes?: number };
@@ -79,6 +80,7 @@ export function SchoolListCard({
         )}
 
         <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+          {school.active === false && <SeloDesativado />}
           {levelTags.map((tag, idx) => (
             <span key={idx} className={cn("text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0", tag.className)}>
               {tag.label}

@@ -1,5 +1,6 @@
 import { School } from "@/types/school";
-import { Star, MapPin, Phone, Building2, Car, Clock, School2, LogIn, Navigation } from "lucide-react";
+import { Star, MapPin, Phone, Building2, Car, Clock, School2, LogIn, Navigation, Info } from "lucide-react";
+import { SeloDesativado } from "@/components/SeloDesativado";
 import { Badge } from "@/components/ui/badge";
 import { HomeLocation } from "@/hooks/useHomeLocation";
 import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
@@ -17,13 +18,19 @@ interface SchoolDetailModalProps {
   onToggleFavorite: (schoolId: string) => void;
   onClose: () => void;
   homeLocation: HomeLocation | null;
+  /** Todas as escolas, para achar os prédios onde funcionam turmas desta. */
+  schools: School[];
+  /** Troca a escola exibida (link das escolas-sede). */
+  onSelectSchool: (school: School) => void;
 }
 export function SchoolDetailModal({
   school,
   isFavorite,
   onToggleFavorite,
   onClose,
-  homeLocation
+  homeLocation,
+  schools,
+  onSelectSchool
 }: SchoolDetailModalProps) {
   const [distanceInfo, setDistanceInfo] = useState<DistanceMatrixResult | null>(null);
   const [loadingDistance, setLoadingDistance] = useState(false);
@@ -77,18 +84,35 @@ export function SchoolDetailModal({
       window.open(mapsUrl, "_blank");
     }
   };
-  const formatPhone = (phone: string, extension?: string) => {
-    if (!phone) return "Não disponível";
-    if (extension) {
-      return `${phone} (Ramal ${extension})`;
-    }
-    return phone;
-  };
+  const sedes = (school?.hostedAt ?? [])
+    .map(codigo => schools.find(s => s.id === codigo))
+    .filter((s): s is School => !!s);
 
   // Content shared between mobile drawer and desktop dialog
   const content = school ? <div className="space-y-3 sm:space-y-4">
-      {/* Tags */}
-      
+      {/* Observação do cadastro */}
+      {school.note && <div className="flex items-start gap-2">
+          <Info className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-muted-foreground">Observação</p>
+            <p className="text-sm text-foreground mt-1">{school.note}</p>
+          </div>
+        </div>}
+
+      {/* Prédios onde funcionam turmas desta escola */}
+      {sedes.length > 0 && <div className="flex items-start gap-2">
+          <School2 className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-muted-foreground">Turmas funcionando em</p>
+            <ul className="mt-1 space-y-1">
+              {sedes.map(sede => <li key={sede.id}>
+                  <button type="button" onClick={() => onSelectSchool(sede)} className="text-sm text-primary text-left font-medium rounded-sm hover:underline focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    {sede.type} {sede.name}
+                  </button>
+                </li>)}
+            </ul>
+          </div>
+        </div>}
 
       {/* Campaign Section */}
       {isCampaignActive && <div className="flex items-start gap-2">
@@ -154,7 +178,7 @@ export function SchoolDetailModal({
           <div className="flex-1">
             <p className="text-sm font-medium text-muted-foreground">Telefone</p>
             <p className="text-sm text-foreground mt-1">
-              {formatPhone(school.phone, school.extension)}
+              {school.phone}
             </p>
           </div>
         </div>}
@@ -235,6 +259,7 @@ export function SchoolDetailModal({
                 <DrawerTitle className="text-lg sm:text-xl leading-tight pr-8">
                   {school.name}
                 </DrawerTitle>
+                {school.active === false && <SeloDesativado className="self-start justify-self-start" />}
                 <DrawerDescription className="sr-only">
                   Detalhes da escola {school.name}
                 </DrawerDescription>
@@ -255,6 +280,7 @@ export function SchoolDetailModal({
               <DialogTitle className="text-xl leading-tight pr-8">
                 {school.name}
               </DialogTitle>
+              {school.active === false && <SeloDesativado className="self-start justify-self-start" />}
               <DialogDescription className="sr-only">
                 Detalhes da escola {school.name}
               </DialogDescription>

@@ -84,14 +84,18 @@ demanda: O app passa a ler escolas e turmas do Supabase "Dados" (fonte oficial d
 
 ## ▶ Ponto de retomada
 
-- **Atualizado:** 2026-11-10 — Etapa 3 concluída (portão --e2e escolas e --build verdes, e2e 11/11); aguardando aprovação do aviso
-- **Etapa 4 — CAIC desativado e turmas sediadas em outro prédio** (`opus`) — não iniciada
-- **Próxima ação:** se o usuário aprovou o aviso, `revezamento: continuar` e abrir a Etapa 4 gravando as sub-tarefas aqui;
-  se pediu ajuste no texto/visual, aplicar em `src/components/AvisoRecomeco.tsx` e rodar `portao.mjs --e2e escolas`.
+- **Atualizado:** 2026-11-10 — Etapa 4 implementada e verificada; falta só o portão visual do usuário
+- **Etapa 4 — CAIC desativado e turmas sediadas em outro prédio** (`opus`) — aguardando aprovação das capturas
+  - [x] 4.1 Ler componentes (card, modal, prioridades, busca, páginas) + `frontend-design`. Notas: não existe evento `view_school` no analytics (nada a disparar); `--text-micro` não tem utilitário Tailwind → selo usa as mesmas classes das etiquetas de nível (`text-xs px-2 py-0.5 rounded-full font-medium`) para casar a altura.
+  - [x] 4.2 Selo "Prédio desativado" (`src/components/SeloDesativado.tsx`) em card, busca, prioridades (modal vai na 4.3)
+  - [x] 4.3 Modal: selo no cabeçalho, seção "Observação" + "Turmas funcionando em" (props novas `schools`, `onSelectSchool`); Index/Lista/Favoritos passam
+  - [x] 4.4 `formatPhone` removido (telefone direto); campo `School.extension` ficou sem leitor (só `escolasSupabase` grava undefined) — mencionar, não apagar
+  - [x] 4.5 e2e `e2e/caic.spec.ts` (4 cenários + 1 no celular), fixture ganhou a EM Aníbal Ferreira; portão `--e2e caic` verde; suíte e2e completa 15/15; capturas em `test-results/caic-*`
+- **Próxima ação:** usuário aprovou → marcar Etapa 4 no Progresso, `revezamento: aguardando_usuario`, Ponto de retomada para Etapa 5. Pediu ajuste → aplicar, rodar `portao.mjs --e2e caic`, nova captura.
 - **Tocados e não verificados:** nenhum
 - **Em execução:** nenhum subagente
-- **Esperando o usuário:** ⛔ aprovar captura e texto do aviso de recomeço (capturas em
-  `C:/Users/rfranca/AppData/Local/Temp/claude/b7e3b46eb2d370a9/66927b64-a65b-4c24-b659-a09f283007a6/scratchpad/aviso-celular.png` e `aviso-desktop.png`).
+- **Esperando o usuário:** aprovar as capturas do card e do detalhe do CAIC (desktop e celular)
+- **Lembrete Etapa 5:** `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` **já estão na Vercel** em All Environments (usuário, 2026-11-10); falta só um novo deploy para valerem. A chave do Google Maps recusa `127.0.0.1:8095` e o console do Google não aceita IP com porta curinga: e2e e testes locais ficam sem o fundo do mapa; é esperado e não bloqueia.
 
 ## Progresso
 
@@ -395,3 +399,11 @@ Supabase; `vacancyColumnHeader` saiu de `campaign_config`; `csvParser(.test)` ap
 `e2e/escolas.spec.ts` (4 cenários). Dado real (vite 8095 + Chrome): lista 67; com casa, "Mostrar 67 escolas" — fecha também o
 critério da Etapa 1. Marcadores: posição vem direto de lat/lng do banco (não conferida contra o Google Maps, mapa sem tiles no teste).
 Obs.: `portao.mjs --e2e "a|b"` quebra no Windows (o `|` vai para o shell); rodar uma tag por vez.
+
+**Etapa 4 — 2026-11-10.** `src/components/SeloDesativado.tsx` (classes das etiquetas de nível + `bg-aviso-bg text-aviso-fg`; `--text-micro`
+não tem utilitário Tailwind) em card, busca, prioridades e cabeçalho do modal. Modal: seções "Observação" e "Turmas funcionando em"
+(botões-link `text-primary`) com props novas `schools`/`onSelectSchool` passadas por Index/Lista/Favoritos; `formatPhone` saiu.
+Não há evento `view_school` no analytics: nada a disparar. `School.extension` ficou sem leitor (não apagado). Fixture e2e ganhou a
+EM Aníbal Ferreira (dado real) + 1 turma. **Armadilha:** `Get-Content | Set-Content -Encoding utf8` no PowerShell 5.1 corrompeu os
+acentos do modal (lê como ANSI) e pôs BOM; corrigido, e o e2e agora confere "Observação". Editar arquivo só com Edit/Write ou Node.
+`@caic` 5/5, suíte e2e 15/15, portão verde. Pendente: aprovação visual do usuário.

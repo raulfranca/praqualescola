@@ -1,6 +1,7 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { SeloDesativado } from "@/components/SeloDesativado";
 import { School } from "@/types/school";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { removeAccents } from "@/lib/utils";
@@ -135,6 +136,7 @@ export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdo
               <span className="text-sm font-medium text-foreground truncate flex-1 min-w-0">
                 {school.type} {school.name}
               </span>
+              {school.active === false && <SeloDesativado />}
               <Badge variant="outline" className="text-xs shrink-0">
                 {school.neighborhood}
               </Badge>

@@ -78,7 +78,7 @@ const Favoritos = () => {
         </>
       )}
 
-      {selectedSchool && <SchoolDetailModal school={selectedSchool} isFavorite={favorites.includes(selectedSchool.id)} onToggleFavorite={toggleFavorite} onClose={() => setSelectedSchool(null)} homeLocation={homeLocation} />}
+      {selectedSchool && <SchoolDetailModal school={selectedSchool} isFavorite={favorites.includes(selectedSchool.id)} onToggleFavorite={toggleFavorite} onClose={() => setSelectedSchool(null)} homeLocation={homeLocation} schools={schools} onSelectSchool={setSelectedSchool} />}
     </div>;
 };
 export default Favoritos;

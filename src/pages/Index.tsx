@@ -328,6 +328,8 @@ const Index = () => {
         onToggleFavorite={() => selectedSchool && toggleFavorite(selectedSchool.id)}
         onClose={() => setSelectedSchool(null)}
         homeLocation={homeLocation}
+        schools={schools}
+        onSelectSchool={handleSelectSchool}
       />
 
       {/* Filter Drawer */}
