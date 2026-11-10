@@ -44,7 +44,9 @@ export function ActionChips({
   };
 
   return (
-    <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto no-scrollbar py-1">
+    // A fileira rola na horizontal, o que corta a sombra dos chips nas bordas. As margens negativas com
+    // padding dão espaço à sombra (margem de baixo com ! porque o space-y da Lista a sobrescreveria); o espaço extra não captura cliques (o mapa por baixo continua clicável).
+    <div className="flex items-center gap-1.5 w-[calc(100%+2rem)] md:w-auto overflow-x-auto no-scrollbar -mx-4 px-4 pt-1 !-mb-9 pb-10 pointer-events-none [&>*]:pointer-events-auto">
       <Button 
         onClick={onHomeClick} 
         size="sm" 

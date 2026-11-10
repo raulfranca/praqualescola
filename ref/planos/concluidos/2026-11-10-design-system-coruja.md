@@ -1,5 +1,5 @@
 ---
-status: em_andamento
+status: concluido
 revezamento: aguardando_usuario
 criado: 2026-11-10
 demanda: Aplicar o design system "Coruja e Mapa" em toda a interface e deixar em design-system/ só o que é atual
@@ -36,18 +36,12 @@ demanda: Aplicar o design system "Coruja e Mapa" em toda a interface e deixar em
 
 ## ▶ Ponto de retomada
 
-- **Atualizado:** 2026-11-10 — etapa 6 no portão do usuário
-- **Etapa 6 — Revisão visual final** (`opus`) — em andamento · ⛔ portão do usuário
-  - [x] 6.1 Portão `--final` (verde)
-  - [x] 6.2 Script de capturas: `e2e/zz-capturas.spec.ts` (TEMPORÁRIO, pula sem `CAPTURAS_DIR`; apagar ao fechar a etapa)
-  - [x] 6.3 Conferido contra README + contraste (todos os pares ≥ 5,3:1)
-  - [x] 6.4 Corrigido: botão "Mostrar N escolas" → gradiente primário; "Limpar tudo" → fantasma `text-primary`; SideNav rótulo 12px (botão `w-16 px-0.5`). Portão `--e2e design` verde
-  - [x] 6.5 Usuário respondeu: chips do mapa ficam brancos (`bg-card`); remover "Contribua" → feito: itens do BottomNav/SideNav, rota `/feedback`, `pages/Feedback.tsx`, PRD §3.9 (renumerado), DOC; e2e `@design` novo (menu sem Contribua). Portão `--build --e2e design` verde
-  - [~] 6.6 Mapa nas capturas: usuário pôs `.env` (ignorado pelo git, ok); Google recusa com `RefererNotAllowedMapError` — a chave não libera `http://127.0.0.1:8090/*`
-- **Próxima ação:** aguardar o usuário liberar o referenciador da chave (ou aprovar sem a captura do mapa). Depois: refazer capturas do mapa (`$env:CAPTURAS_DIR=<pasta nova>; npx playwright test zz-capturas`), apagar `e2e/zz-capturas.spec.ts`, fechar etapa 6, Encerramento (CHANGELOG inclui remoção do Contribua)
+- **Atualizado:** 2026-11-10 — plano concluído
+- **Plano concluído** — nada a fazer
+- **Próxima ação:** nenhuma
 - **Tocados e não verificados:** nenhum
 - **Em execução:** nenhum subagente
-- **Esperando o usuário:** liberar `http://127.0.0.1:8090/*` e `http://localhost:8080/*` na restrição da chave do Maps no Google Cloud Console, ou conferir o mapa no próprio aparelho e aprovar
+- **Esperando o usuário:** nada (pendência externa: liberar o preview na chave de produção — ver Diário)
 
 ## Progresso
 
@@ -56,7 +50,7 @@ demanda: Aplicar o design system "Coruja e Mapa" em toda a interface e deixar em
 - [x] 3. Moldura: cabeçalho, navegação, busca, avisos — `sonnet` *(depende de 1; paralelo com 2 e 4)*
 - [x] 4. Escolas: etiquetas, cartões, detalhe, prioridades, filtros — `sonnet` *(depende de 1; paralelo com 2 e 3)*
 - [x] 5. Limpeza do diretório design-system/ e documentação — `opus` *(depende de 2, 3, 4)*
-- [ ] 6. Revisão visual final — `opus` *(depende de 5)* · ⛔ portão: o usuário aprova as capturas
+- [x] 6. Revisão visual final — `opus` *(depende de 5)* · ⛔ portão: o usuário aprova as capturas
 
 ## Etapas
 
@@ -254,16 +248,16 @@ Etapa 6.
 
 **Critérios de aceite:**
 
-- [ ] **Portão:** `node .claude/scripts/portao.mjs --final` verde.
-- [ ] **Usuário:** aprovou as capturas (ou pediu ajustes, que entram aqui).
+- [x] **Portão:** `node .claude/scripts/portao.mjs --final` verde.
+- [x] **Usuário:** respondeu às capturas com ajustes (chips brancos, remover Contribua) e pediu para seguir.
 
 ## Encerramento do plano
 
-- [ ] Portão de fim de plano: `node .claude/scripts/portao.mjs --final`
-- [ ] `CHANGELOG.md` — entrada única em `[Unreleased]` → *Alterado*: nova identidade visual a partir da coruja (cores, letras, marcadores do mapa)
-- [ ] `ref/DOC.md` — feito na Etapa 5; conferir
-- [ ] `.github/maintenance.yml` — nada previsto
-- [ ] Frontmatter → `status: concluido`; `git mv` deste arquivo para `ref/planos/concluidos/`
+- [x] Portão de fim de plano: `node .claude/scripts/portao.mjs --final`
+- [x] `CHANGELOG.md` — `[Unreleased]`: *Alterado* (identidade visual, marcadores) e *Removido* (Contribua)
+- [x] `ref/DOC.md` — conferido; acrescentadas as duas chaves do Google Maps
+- [x] `.github/maintenance.yml` — nada previsto
+- [x] Frontmatter → `status: concluido`; arquivo movido para `ref/planos/concluidos/` (não rastreado no git, então `Move-Item`)
 
 ## Diário de execução
 
@@ -305,3 +299,11 @@ Etapa 6.
 - **Desvios:** `ui/sidebar.tsx` não é usado, mas ficou (código morto do shadcn; agora sem tokens). `mock-canvas/SKILL.md` não precisou mudar. `icone-app.svg` mantido (só documentado).
 - **Lição:** regex de remoção sem âncora de início de linha casou `pre:`/`fundamental:` dentro de `nivel` e quebrou o config — o build pegou; restaurado.
 - **Evidência:** `ls design-system` = README.md, tokens.css, assets; `git grep smepinda` fora de ref vazio; portão `--build --e2e design` verde.
+
+### 2026-11-10 — Etapa 6 (`opus`)
+
+- **Feito:** capturas 390×844 e 1280×800 (lista, detalhe, filtros, favoritos, mapa com favoritas); contraste de todos os pares ≥ 5,3:1. Corrigidos: botão "Mostrar N escolas" (era `bg-foreground`) → gradiente; "Limpar tudo" → fantasma; SideNav 10px → 12px; sombra dos chips cortada pela fileira com rolagem (faixa visível sobre o mapa) → margens negativas + padding com `pointer-events-none`.
+- **Pedidos do usuário:** chips inativos ficam `bg-card`; "Contribua" removido (navs, rota, `pages/Feedback.tsx`, PRD §3.9 renumerado, DOC) + e2e `@design` do menu.
+- **Chave do Maps:** usuário criou chave de desenvolvimento só para localhost (no `.env`, ignorado). Preview `git-dev` ainda dá `RefererNotAllowedMapError`: falta liberar `https://praqualescola-git-dev-raulcabrals-projects.vercel.app/*` na chave de produção. Documentado no DOC.
+- **Lição:** `space-y-*` do Tailwind define margin-top **e** margin-bottom dos filhos e vence classes de margem do filho — usar `!`.
+- **Evidência:** mapa real renderizado localmente com marcadores e estrelas; portão `--final` verde.

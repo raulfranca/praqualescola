@@ -42,7 +42,7 @@ e2e/                   Testes de navegador (Playwright)
 
 - **Hospedagem:** Vercel. Todo push na `main` é publicado automaticamente. A `dev` é integração; publicar é mesclar `dev` na `main` (`git-deploy` na máquina, `publicar.yml` na nuvem).
 - **Variáveis de ambiente** (modelo em `.env.example`; o `.env` não vai para o git):
-  - `VITE_GOOGLE_MAPS_API_KEY`: chave do Google Maps. É pública por natureza (vai no JavaScript do navegador); a proteção é a **restrição por referenciador** no Google Cloud Console.
+  - `VITE_GOOGLE_MAPS_API_KEY`: chave do Google Maps. É pública por natureza (vai no JavaScript do navegador); a proteção é a **restrição por referenciador** no Google Cloud Console. São **duas chaves**: a de produção (na Vercel, Production e Preview) aceita só o domínio de produção e o preview da branch `dev` (`https://praqualescola-git-dev-raulcabrals-projects.vercel.app/*`); a de desenvolvimento fica só no `.env` local, aceita `http://localhost:8080/*` e `http://127.0.0.1:8090/*` e nunca vai para a Vercel nem para o git.
   - `VITE_GA_TRACKING_ID`: ID do Google Analytics 4.
   - Em produção, as duas ficam em *Vercel > Settings > Environment Variables*.
 - **Modo manutenção:** Edge Config da Vercel com `isUnderMaintenance`, `title`, `message`. Localmente (`vite`) a rota `/api/maintenance` não existe e o app abre normalmente.
@@ -53,7 +53,7 @@ e2e/                   Testes de navegador (Playwright)
 Como rodar: `node .claude/scripts/portao.mjs`. Comandos em `.claude/loop.json`.
 
 - **Unidade (Vitest):** `src/**/*.test.ts`, ambiente `node`. Cobrem a lógica pura de `src/lib/`.
-- **Navegador (Playwright):** `e2e/`, servidor próprio na porta 8090. Nessa porta o Google Maps mostra erro de carregamento, porque a chave só aceita os domínios autorizados; os testes não dependem do mapa.
+- **Navegador (Playwright):** `e2e/`, servidor próprio na porta 8090. Com a chave de desenvolvimento no `.env`, o mapa carrega nessa porta; sem ela, o Google Maps mostra erro de carregamento. Os testes não dependem do mapa.
 
 ## 7. Convenções e padrões
 

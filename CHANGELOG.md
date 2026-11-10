@@ -6,6 +6,15 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+### Alterado
+
+- Nova identidade visual a partir do logotipo da coruja: cores em azul-coruja, letras novas (Inter), cartões e barras mais limpos, com sombras suaves no lugar de bordas, e botões e áreas de toque maiores no celular. As letras vêm junto com o app, então continuam iguais mesmo sem internet.
+- Marcadores do mapa redesenhados: cada nível de ensino tem sua cor, as escolas favoritas aparecem como estrela com contorno dourado e a sua casa como um alfinete com a coruja.
+
+### Removido
+
+- A seção "Contribua" e o formulário de sugestões saíram do menu e do app.
+
 ## [2.0.0] - 2026-11-09 - Não mais desenvolvido no Lovable, agora em loop agêntico (local e nuvem)
 
 Nova fase do projeto: o aplicativo deixa o Lovable, a plataforma em que foi criado, e passa a ser desenvolvido num ciclo próprio, com verificação automática antes de cada publicação. Para quem usa o app, nada muda na tela.
