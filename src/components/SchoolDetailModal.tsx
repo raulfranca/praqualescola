@@ -3,8 +3,9 @@ import { Star, MapPin, Phone, Building2, Car, Clock, School2, LogIn, Navigation,
 import { SeloDesativado } from "@/components/SeloDesativado";
 import { Badge } from "@/components/ui/badge";
 import { HomeLocation } from "@/hooks/useHomeLocation";
-import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
-import { useState, useEffect } from "react";
+import { distanciaSalva } from "@/hooks/useSchoolDistances";
+import { formatarDistancia, formatarDuracao } from "@/lib/distanceCalculator";
+import { SeloAproximado } from "@/components/SeloAproximado";
 import { getSchoolLevelTags } from "@/lib/schoolTags";
 import { useCampaign } from "@/hooks/useCampaign";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
@@ -32,34 +33,13 @@ export function SchoolDetailModal({
   schools,
   onSelectSchool
 }: SchoolDetailModalProps) {
-  const [distanceInfo, setDistanceInfo] = useState<DistanceMatrixResult | null>(null);
-  const [loadingDistance, setLoadingDistance] = useState(false);
+  // Distância já calculada para a casa atual (lista/mapa); o detalhe nunca chama o Google.
+  const distanceInfo = homeLocation && school ? distanciaSalva(school.id) : null;
   const isMobile = useIsMobile();
   const {
     isActive: isCampaignActive,
     config: campaign
   } = useCampaign();
-  useEffect(() => {
-    if (!homeLocation || !school?.lat || !school?.lng) {
-      setDistanceInfo(null);
-      return;
-    }
-    setLoadingDistance(true);
-    calculateDistance({
-      lat: homeLocation.lat,
-      lng: homeLocation.lng
-    }, {
-      lat: school.lat,
-      lng: school.lng
-    }).then(result => {
-      setDistanceInfo(result);
-    }).catch(error => {
-      console.error("Error calculating distance:", error);
-      setDistanceInfo(null);
-    }).finally(() => {
-      setLoadingDistance(false);
-    });
-  }, [homeLocation, school?.lat, school?.lng]);
   const handleGetDirections = () => {
     if (!school?.lat || !school?.lng) return;
     
@@ -199,24 +179,24 @@ export function SchoolDetailModal({
           <div className="flex items-center gap-2 mb-2">
             <MapPin className="w-4 h-4 text-primary" />
             <p className="text-sm font-medium text-foreground">Distância de Casa</p>
+            {distanceInfo?.aproximado && <SeloAproximado />}
           </div>
-          
-          {loadingDistance ? <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-              Calculando rota...
-            </div> : distanceInfo ? <div className="grid grid-cols-2 gap-3">
+
+          {distanceInfo ? <div className="grid grid-cols-2 gap-3">
               <div className="flex items-center gap-2">
                 <Car className="w-4 h-4 text-muted-foreground" />
                 <div>
                   <p className="text-xs text-muted-foreground">Distância</p>
-                  <p className="text-sm font-semibold text-foreground">{distanceInfo.distance}</p>
+                  <p className="text-sm font-semibold text-foreground">{formatarDistancia(distanceInfo.distanceInKm)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-muted-foreground" />
                 <div>
                   <p className="text-xs text-muted-foreground">Tempo</p>
-                  <p className="text-sm font-semibold text-foreground">{distanceInfo.duration}</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {distanceInfo.durationInMinutes !== undefined ? formatarDuracao(distanceInfo.durationInMinutes) : "—"}
+                  </p>
                 </div>
               </div>
             </div> : <p className="text-sm text-muted-foreground">Não foi possível calcular a distância</p>}

@@ -22,7 +22,6 @@ const Index = () => {
   const [shouldCenterMap, setShouldCenterMap] = useState(false);
   const [showHomeInput, setShowHomeInput] = useState(false);
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
-  const [devModeEnabled, setDevModeEnabled] = useState(false);
   
   // Use shared filter context
   const {
@@ -50,6 +49,7 @@ const Index = () => {
     schoolsWithDistances, 
     sortedSchools, 
     hasDistances,
+    distanciasAproximadas,
     isCalculating,
     calculateAndCacheDistances,
     hasCachedDistances,
@@ -268,7 +268,6 @@ const Index = () => {
               onChange={setSearchQuery}
               schools={schools}
               onSelectSchool={handleSelectSchool}
-              onDevModeChange={setDevModeEnabled}
             />
             <ActionChips
               hasHome={hasHome}
@@ -317,7 +316,7 @@ const Index = () => {
           onCalculateDistances={calculateAndCacheDistances}
           isCalculating={isCalculating}
           hasCachedDistances={hasCachedDistances}
-          devModeEnabled={devModeEnabled}
+          distanciasAproximadas={distanciasAproximadas}
         />
       )}
 

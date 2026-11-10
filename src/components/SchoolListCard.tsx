@@ -4,9 +4,11 @@ import { getSchoolLevelTags } from "@/lib/schoolTags";
 import { useCampaign } from "@/hooks/useCampaign";
 import { cn } from "@/lib/utils";
 import { SeloDesativado } from "@/components/SeloDesativado";
+import { SeloAproximado } from "@/components/SeloAproximado";
+import { formatarDistancia, formatarDuracao } from "@/lib/distanceCalculator";
 
 interface SchoolListCardProps {
-  school: School & { distanceInKm?: number; durationInMinutes?: number };
+  school: School & { distanceInKm?: number; durationInMinutes?: number; aproximado?: boolean };
   isFavorite: boolean;
   onToggleFavorite: () => void;
   onClick: () => void;
@@ -22,19 +24,6 @@ export function SchoolListCard({
 }: SchoolListCardProps) {
   const { isActive, config } = useCampaign();
   const levelTags = getSchoolLevelTags(school);
-
-  const formatDistance = (km: number): string => {
-    return `${km.toFixed(1)} km`;
-  };
-
-  const formatDuration = (minutes: number): string => {
-    if (minutes < 60) {
-      return `${Math.round(minutes)} min`;
-    }
-    const hours = Math.floor(minutes / 60);
-    const mins = Math.round(minutes % 60);
-    return `${hours}h ${mins.toString().padStart(2, "0")}min`;
-  };
 
   const handleStarClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -92,7 +81,7 @@ export function SchoolListCard({
               {levelTags.length > 0 && <span className="text-muted-foreground text-xs">•</span>}
               <span className="flex items-center gap-0.5 text-xs text-muted-foreground font-medium flex-shrink-0">
                 <MapPin className="w-3 h-3" />
-                {formatDistance(school.distanceInKm)}
+                {formatarDistancia(school.distanceInKm)}
               </span>
             </>
           )}
@@ -100,9 +89,11 @@ export function SchoolListCard({
           {hasHomeLocation && school.durationInMinutes !== undefined && (
             <span className="flex items-center gap-0.5 text-xs text-muted-foreground font-medium flex-shrink-0">
               <Clock className="w-3 h-3" />
-              {formatDuration(school.durationInMinutes)}
+              {formatarDuracao(school.durationInMinutes)}
             </span>
           )}
+
+          {hasHomeLocation && school.distanceInKm !== undefined && school.aproximado && <SeloAproximado />}
         </div>
       </div>
 

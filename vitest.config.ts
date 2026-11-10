@@ -7,7 +7,7 @@ export default defineConfig({
     alias: { "@": path.resolve(__dirname, "./src") },
   },
   test: {
-    include: ["src/**/*.test.{ts,tsx}"],
+    include: ["src/**/*.test.{ts,tsx}", "api/**/*.test.ts"],
     exclude: ["node_modules", "dist", "e2e"],
     environment: "node",
   },

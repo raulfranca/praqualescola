@@ -2,21 +2,38 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { School } from "@/types/school";
 import { HomeLocation } from "@/hooks/useHomeLocation";
 import { escolasSemDistancia, sortSchoolsByDistance } from "@/lib/distanceCalculator";
-import { calculateDistancesForSchools } from "@/lib/distanceMatrix";
-import { recordAddressSetTimestamp } from "@/lib/utils";
+import { estimativaAproximada } from "@/lib/cota";
+import { registrarEnderecoNovo } from "@/lib/utils";
 
 const DISTANCES_STORAGE_KEY = "school-distances";
+/** Marca, nesta sessão do navegador, que já se pediu de novo a distância real das aproximadas. */
+const REPEDIDO_KEY = "distancias-reais-repedidas";
+
+export interface DistanciaEscola {
+  distanceInKm: number;
+  durationInMinutes?: number;
+  /** Estimativa em linha reta (sem o Google). */
+  aproximado?: boolean;
+}
 
 interface SchoolDistances {
-  [schoolId: string]: {
-    distanceInKm: number;
-    durationInMinutes?: number;
-  };
+  [schoolId: string]: DistanciaEscola;
 }
 
 export interface SchoolWithDistance extends School {
   distanceInKm?: number;
   durationInMinutes?: number;
+  aproximado?: boolean;
+}
+
+/** Distância já salva no aparelho para uma escola (endereço de casa atual). Não chama nada. */
+export function distanciaSalva(schoolId: string): DistanciaEscola | null {
+  try {
+    const salvo = JSON.parse(localStorage.getItem(DISTANCES_STORAGE_KEY) ?? "{}");
+    return salvo[schoolId] ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -28,6 +45,41 @@ function getCacheKey(lat: number, lng: number): string {
   const roundedLng = Math.round(lng * 100000) / 100000;
   return `cachedDistances_${roundedLat}_${roundedLng}`;
 }
+
+/**
+ * Pede as distâncias à função do servidor (`api/distancias`), que decide entre o cache
+ * compartilhado, o Google e a estimativa. Função fora do ar ou resposta inválida: estimativa
+ * local para todas as escolas pedidas.
+ */
+async function pedirDistancias(
+  location: HomeLocation,
+  escolas: School[]
+): Promise<SchoolDistances> {
+  let recebidas: SchoolDistances = {};
+  try {
+    const res = await fetch("/api/distancias", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lat: location.lat, lng: location.lng }),
+    });
+    const corpo = res.ok ? await res.json() : null;
+    if (corpo && typeof corpo.distancias === "object" && corpo.distancias) recebidas = corpo.distancias;
+  } catch (error) {
+    console.warn("Função de distâncias indisponível, usando estimativa:", error);
+  }
+
+  const resultado: SchoolDistances = {};
+  for (const escola of escolas) {
+    const d = recebidas[escola.id];
+    resultado[escola.id] =
+      d && Number.isFinite(d.distanceInKm)
+        ? { distanceInKm: d.distanceInKm, durationInMinutes: d.durationInMinutes, aproximado: !!d.aproximado }
+        : estimativaAproximada(location, escola);
+  }
+  return resultado;
+}
+
+const temAproximada = (dados: SchoolDistances) => Object.values(dados).some((d) => d.aproximado);
 
 /**
  * Hook to manage distance calculations between home location and schools
@@ -60,25 +112,7 @@ export function useSchoolDistances(
     if (tentativasRef.current.has(tentativa)) return base;
     tentativasRef.current.add(tentativa);
 
-    console.log("🧩 Completing distance cache for", faltando.length, "missing schools");
-    try {
-      const results = await calculateDistancesForSchools(
-        { lat: location.lat, lng: location.lng },
-        faltando.map(s => ({ id: s.id, lat: s.lat, lng: s.lng, name: s.name }))
-      );
-      const completo: SchoolDistances = { ...base };
-      results.forEach((result) => {
-        if (!Number.isFinite(result.distanceInKm)) return;
-        completo[result.schoolId] = {
-          distanceInKm: result.distanceInKm,
-          durationInMinutes: result.durationInMinutes,
-        };
-      });
-      return completo;
-    } catch (error) {
-      console.error("❌ Failed to complete distances:", error);
-      return base;
-    }
+    return { ...base, ...(await pedirDistancias(location, faltando)) };
   }, [schools]);
 
   const gravarDistancias = useCallback((location: HomeLocation, dados: SchoolDistances) => {
@@ -100,6 +134,23 @@ export function useSchoolDistances(
     };
   }, [homeLocation, schools, distances, completarDistancias, gravarDistancias]);
 
+  // Distâncias aproximadas salvas: pede as reais de novo, no máximo uma vez por sessão.
+  useEffect(() => {
+    if (!homeLocation || schools.length === 0 || !temAproximada(distances)) return;
+    if (sessionStorage.getItem(REPEDIDO_KEY)) return;
+    sessionStorage.setItem(REPEDIDO_KEY, "1");
+    const aproximadas = schools.filter((s) => distances[s.id]?.aproximado);
+    pedirDistancias(homeLocation, aproximadas).then((novas) => {
+      const reais = Object.entries(novas).filter(([, d]) => !d.aproximado);
+      if (reais.length === 0) return;
+      setDistances((atuais) => {
+        const juntas = { ...atuais, ...Object.fromEntries(reais) };
+        gravarDistancias(homeLocation, juntas);
+        return juntas;
+      });
+    });
+  }, [homeLocation, schools, distances, gravarDistancias]);
+
   /**
    * Check if we have cached distances for a given location
    */
@@ -112,74 +163,35 @@ export function useSchoolDistances(
    * Clear all distance data when home location is removed
    */
   const clearDistances = useCallback(() => {
-    console.log("🏠 Clearing all distance calculations");
     setDistances({});
     localStorage.removeItem(DISTANCES_STORAGE_KEY);
   }, []);
 
   /**
-   * Manually calculate and cache distances for a given location
-   * Returns true on success, false on failure
+   * Calcula e guarda as distâncias de um endereço. Nunca falha: sem a função, usa a estimativa.
+   * Devolve se o resultado tem distâncias aproximadas.
    */
   const calculateAndCacheDistances = useCallback(async (
     location: HomeLocation
-  ): Promise<boolean> => {
+  ): Promise<{ aproximado: boolean }> => {
     const cacheKey = getCacheKey(location.lat, location.lng);
-    
-    // Check cache first (Zero Cost)
+
+    // Endereço já calculado neste aparelho: não conta no limite do dia.
     const cachedData = localStorage.getItem(cacheKey);
     if (cachedData) {
-      console.log("📦 Loading distances from cache (Zero API Cost)");
       const cached = await completarDistancias(location, JSON.parse(cachedData) as SchoolDistances);
       setDistances(cached);
       gravarDistancias(location, cached);
-      return true;
+      return { aproximado: temAproximada(cached) };
     }
 
-    console.log("🏠 Home location set:", location.address);
-    console.log("📍 Starting driving distance calculation for", schools.length, "schools...");
-    
+    registrarEnderecoNovo();
     setIsCalculating(true);
-
-    try {
-      const results = await calculateDistancesForSchools(
-        { lat: location.lat, lng: location.lng },
-        schools.map(s => ({ id: s.id, lat: s.lat, lng: s.lng, name: s.name }))
-      );
-
-      const newDistances: SchoolDistances = {};
-      results.forEach((result) => {
-        newDistances[result.schoolId] = {
-          distanceInKm: result.distanceInKm,
-          durationInMinutes: result.durationInMinutes,
-        };
-      });
-
-      // Log first 5 schools for verification
-      const firstFive = results.slice(0, 5);
-      firstFive.forEach((result) => {
-        const method = result.usedFallback ? "(fallback)" : "(API)";
-        console.log(`📏 School ${result.schoolId}: ${result.distanceInKm} km ${method}`);
-      });
-
-      console.log("✅ Driving distance calculation complete!");
-      console.log("💾 Saving to localStorage and location-specific cache...");
-      
-      // Save to both general storage and location-specific cache
-      setDistances(newDistances);
-      localStorage.setItem(DISTANCES_STORAGE_KEY, JSON.stringify(newDistances));
-      localStorage.setItem(cacheKey, JSON.stringify(newDistances));
-      
-      // Record timestamp for rate limiting
-      recordAddressSetTimestamp();
-      
-      setIsCalculating(false);
-      return true;
-    } catch (error) {
-      console.error("❌ Failed to calculate distances:", error);
-      setIsCalculating(false);
-      return false;
-    }
+    const novas = await pedirDistancias(location, schools);
+    setDistances(novas);
+    gravarDistancias(location, novas);
+    setIsCalculating(false);
+    return { aproximado: temAproximada(novas) };
   }, [schools, completarDistancias, gravarDistancias]);
 
   // Enrich schools with distance and duration data
@@ -188,26 +200,21 @@ export function useSchoolDistances(
       ...school,
       distanceInKm: distances[school.id]?.distanceInKm,
       durationInMinutes: distances[school.id]?.durationInMinutes,
+      aproximado: distances[school.id]?.aproximado,
     }));
   }, [schools, distances]);
 
   // Sorted schools (closest first)
   const sortedSchools = useMemo(() => {
     if (!homeLocation) return schoolsWithDistances;
-    
-    const sorted = sortSchoolsByDistance(schoolsWithDistances);
-    console.log("🔢 Schools sorted by distance (closest 5):");
-    sorted.slice(0, 5).forEach((school, index) => {
-      console.log(`${index + 1}. ${school.name}: ${school.distanceInKm} km`);
-    });
-    
-    return sorted;
+    return sortSchoolsByDistance(schoolsWithDistances);
   }, [schoolsWithDistances, homeLocation]);
 
   return {
     schoolsWithDistances,
     sortedSchools,
     hasDistances: Object.keys(distances).length > 0,
+    distanciasAproximadas: temAproximada(distances),
     isCalculating,
     calculateAndCacheDistances,
     hasCachedDistances,

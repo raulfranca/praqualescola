@@ -4,55 +4,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { HomeLocation } from "@/hooks/useHomeLocation";
-import { canSetNewAddress } from "@/lib/utils";
+import { LIMITE_ENDERECOS_POR_DIA, enderecosRestantesHoje } from "@/lib/utils";
+import { temSessaoAdmin } from "@/lib/admin";
 
 interface HomeLocationInputProps {
   onLocationSelected: (location: HomeLocation) => void;
   onClose: () => void;
   homeLocation: HomeLocation | null;
   onClearLocation: () => void;
-  onCalculateDistances?: (location: HomeLocation) => Promise<boolean>;
+  onCalculateDistances?: (location: HomeLocation) => Promise<{ aproximado: boolean }>;
   isCalculating?: boolean;
   hasCachedDistances?: (location: HomeLocation) => boolean;
-  devModeEnabled?: boolean;
+  /** As distâncias salvas da casa atual são estimativas em linha reta. */
+  distanciasAproximadas?: boolean;
 }
 
-export function HomeLocationInput({ 
-  onLocationSelected, 
-  onClose, 
-  homeLocation, 
+export function HomeLocationInput({
+  onLocationSelected,
+  onClose,
+  homeLocation,
   onClearLocation,
   onCalculateDistances,
   isCalculating = false,
   hasCachedDistances,
-  devModeEnabled = false,
+  distanciasAproximadas = false,
 }: HomeLocationInputProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [inputValue, setInputValue] = useState(homeLocation?.address || "");
   const [pendingLocation, setPendingLocation] = useState<HomeLocation | null>(null);
-  const [canChangeAddress, setCanChangeAddress] = useState(true);
+  // Lido ao abrir: o modal fecha depois de cada cálculo.
+  const [restantesHoje] = useState(() => enderecosRestantesHoje());
+  // Sessão do painel /admin não tem limite diário.
+  const [semLimite] = useState(() => temSessaoAdmin());
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
   const { toast } = useToast();
-
-  // Check rate limit on mount (skip if dev mode is enabled)
-  useEffect(() => {
-    if (devModeEnabled) {
-      setCanChangeAddress(true);
-      return;
-    }
-    
-    const allowed = canSetNewAddress();
-    setCanChangeAddress(allowed);
-    if (!allowed && !homeLocation) {
-      toast({
-        title: "Limite diário atingido",
-        description: "Você só pode alterar seu endereço uma vez por dia.",
-        variant: "destructive",
-      });
-    }
-  }, [homeLocation, toast, devModeEnabled]);
 
   useEffect(() => {
     // Wait for Google Maps to be loaded
@@ -137,21 +124,20 @@ export function HomeLocationInput({
     }
 
     if (onCalculateDistances) {
-      const success = await onCalculateDistances(locationToCalculate);
-      if (success) {
-        toast({
-          title: "Distâncias calculadas ✓",
-          description: "As distâncias foram calculadas e salvas com sucesso!",
-        });
-        setPendingLocation(null);
-        onClose();
-      } else {
-        toast({
-          title: "Erro no cálculo",
-          description: "Houve um problema ao calcular as distâncias. Tente novamente.",
-          variant: "destructive",
-        });
-      }
+      const { aproximado } = await onCalculateDistances(locationToCalculate);
+      toast(
+        aproximado
+          ? {
+              title: "Distâncias aproximadas",
+              description: "Estimadas em linha reta. Serão atualizadas com a rota real quando possível.",
+            }
+          : {
+              title: "Distâncias calculadas ✓",
+              description: "As distâncias foram calculadas e salvas com sucesso!",
+            }
+      );
+      setPendingLocation(null);
+      onClose();
     }
   };
 
@@ -174,7 +160,8 @@ export function HomeLocationInput({
   const locationToCheck = pendingLocation || homeLocation;
   const hasCache = locationToCheck && hasCachedDistances ? hasCachedDistances(locationToCheck) : false;
   const showCalculateButton = pendingLocation || (homeLocation && !hasCache);
-  const isInputDisabled = !isLoaded || (!canChangeAddress && !homeLocation);
+  const limiteAtingido = !semLimite && restantesHoje === 0;
+  const isInputDisabled = !isLoaded || limiteAtingido;
 
   return (
     <div
@@ -200,10 +187,11 @@ export function HomeLocationInput({
         </div>
 
         <div className="p-6 space-y-4">
-          {!canChangeAddress && !homeLocation && (
-            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <p className="text-sm text-destructive font-medium">
-                Você só pode alterar seu endereço uma vez por dia.
+          {limiteAtingido && (
+            <div role="status" className="p-3 bg-aviso-bg text-aviso-fg rounded-lg">
+              <p className="text-sm font-medium">Limite diário atingido</p>
+              <p className="text-sm">
+                Você já definiu {LIMITE_ENDERECOS_POR_DIA} endereços novos hoje. Amanhã você pode definir outro.
               </p>
             </div>
           )}
@@ -226,9 +214,15 @@ export function HomeLocationInput({
               onFocus={handleInputFocus}
             />
 
-            {!isLoaded && (
+            {!isLoaded ? (
               <p className="text-xs text-muted-foreground">
                 Carregando busca de endereços...
+              </p>
+            ) : !limiteAtingido && !semLimite && (
+              <p className="text-xs text-muted-foreground">
+                {restantesHoje === 1
+                  ? "Você ainda pode definir 1 endereço novo hoje."
+                  : `Você ainda pode definir ${restantesHoje} endereços novos hoje.`}
               </p>
             )}
           </div>
@@ -259,9 +253,16 @@ export function HomeLocationInput({
           )}
 
           {homeLocation && !pendingLocation && hasCache && (
-            <p className="text-xs text-center text-muted-foreground">
-              ✓ Distâncias calculadas para este endereço
-            </p>
+            distanciasAproximadas ? (
+              <p role="status" className="p-3 text-sm bg-info-bg text-info-fg rounded-lg">
+                As distâncias deste endereço são aproximadas (linha reta). Serão atualizadas com a rota real
+                quando possível.
+              </p>
+            ) : (
+              <p className="text-xs text-center text-muted-foreground">
+                ✓ Distâncias calculadas para este endereço
+              </p>
+            )
           )}
 
           {homeLocation && (

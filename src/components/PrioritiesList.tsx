@@ -1,8 +1,9 @@
 import { Star, GripVertical, X, MapPin, Clock } from "lucide-react";
 import { School } from "@/types/school";
 import { HomeLocation } from "@/hooks/useHomeLocation";
-import { useState, useEffect } from "react";
-import { calculateDistance, DistanceMatrixResult } from "@/lib/distanceMatrix";
+import { distanciaSalva } from "@/hooks/useSchoolDistances";
+import { formatarDistancia, formatarDuracao } from "@/lib/distanceCalculator";
+import { SeloAproximado } from "@/components/SeloAproximado";
 import { Badge } from "@/components/ui/badge";
 import { SeloDesativado } from "@/components/SeloDesativado";
 import { getSchoolLevelTags } from "@/lib/schoolTags";
@@ -36,32 +37,8 @@ function SortableSchoolItem({
   onSchoolClick: (school: School) => void;
   isCampaignActive: boolean;
 }) {
-  const [distanceInfo, setDistanceInfo] = useState<DistanceMatrixResult | null>(null);
-  const [isCalculating, setIsCalculating] = useState(false);
-  useEffect(() => {
-    if (homeLocation) {
-      console.log(`[School ${school.name}] Starting calculation for home location`);
-      setIsCalculating(true);
-      calculateDistance({
-        lat: homeLocation.lat,
-        lng: homeLocation.lng
-      }, {
-        lat: school.lat,
-        lng: school.lng
-      }).then(result => {
-        console.log(`[School ${school.name}] Distance result:`, result);
-        setDistanceInfo(result);
-        setIsCalculating(false);
-      }).catch(error => {
-        console.error(`[School ${school.name}] Error calculating distance:`, error);
-        setDistanceInfo(null);
-        setIsCalculating(false);
-      });
-    } else {
-      console.log("No home location set, skipping distance calculation");
-      setIsCalculating(false);
-    }
-  }, [homeLocation, school.lat, school.lng, school.name]);
+  // Distância já calculada para a casa atual; a lista de prioridades nunca chama o Google.
+  const distanceInfo = homeLocation ? distanciaSalva(school.id) : null;
   const {
     attributes,
     listeners,
@@ -124,20 +101,19 @@ function SortableSchoolItem({
           {/* Distance/Duration Badges */}
           {homeLocation && (
             <div className="flex flex-wrap gap-1.5">
-              {isCalculating ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs rounded-full bg-muted text-muted-foreground whitespace-nowrap">
-                  Calculando...
-                </span>
-              ) : distanceInfo ? (
+              {distanceInfo ? (
                 <>
                   <span className="inline-flex items-center gap-1 text-xs text-muted-foreground font-medium whitespace-nowrap">
                     <MapPin className="w-3 h-3" />
-                    {distanceInfo.distance}
+                    {formatarDistancia(distanceInfo.distanceInKm)}
                   </span>
-                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground font-medium whitespace-nowrap">
-                    <Clock className="w-3 h-3" />
-                    {distanceInfo.duration}
-                  </span>
+                  {distanceInfo.durationInMinutes !== undefined && (
+                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground font-medium whitespace-nowrap">
+                      <Clock className="w-3 h-3" />
+                      {formatarDuracao(distanceInfo.durationInMinutes)}
+                    </span>
+                  )}
+                  {distanceInfo.aproximado && <SeloAproximado />}
                 </>
               ) : null}
             </div>

@@ -44,7 +44,15 @@ const Lista = () => {
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
   const { isActive: hasCampaign } = useCampaign();
 
-  const { schoolsWithDistances, hasDistances } = useSchoolDistances(schools, homeLocation);
+  const {
+    schoolsWithDistances,
+    hasDistances,
+    distanciasAproximadas,
+    isCalculating,
+    calculateAndCacheDistances,
+    hasCachedDistances,
+    clearDistances,
+  } = useSchoolDistances(schools, homeLocation);
 
   const hasLevel = (school: School, level: SchoolLevel): boolean => {
     switch (level) {
@@ -276,14 +284,18 @@ const Lista = () => {
         <HomeLocationInput
           onLocationSelected={(location) => {
             setHome(location);
-            setShowHomeInput(false);
           }}
           onClose={() => setShowHomeInput(false)}
           homeLocation={homeLocation}
           onClearLocation={() => {
             clearHome();
+            clearDistances();
             setShowHomeInput(false);
           }}
+          onCalculateDistances={calculateAndCacheDistances}
+          isCalculating={isCalculating}
+          hasCachedDistances={hasCachedDistances}
+          distanciasAproximadas={distanciasAproximadas}
         />
       )}
 

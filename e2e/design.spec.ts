@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/base";
 import { interceptarSupabase } from "./fixtures/escolas";
 
 // Design system "Coruja e Mapa": confere que a paleta e as fontes chegaram à tela.

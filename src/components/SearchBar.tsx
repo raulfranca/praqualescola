@@ -2,11 +2,11 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { SeloDesativado } from "@/components/SeloDesativado";
+import { PainelAdmin } from "@/components/PainelAdmin";
 import { School } from "@/types/school";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { removeAccents } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
-import { useToast } from "@/hooks/use-toast";
 
 interface SearchBarProps {
   value: string;
@@ -14,42 +14,26 @@ interface SearchBarProps {
   schools: School[];
   onSelectSchool: (school: School) => void;
   showDropdown?: boolean;
-  onDevModeChange?: (enabled: boolean) => void;
 }
 
-export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdown = true, onDevModeChange }: SearchBarProps) {
+export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdown = true }: SearchBarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [devModeEnabled, setDevModeEnabled] = useState(false);
+  const [adminAberto, setAdminAberto] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
+  const ehComandoAdmin = value.trim().toLowerCase() === "/admin";
 
-  // Toggle dev mode handler
-  const handleDevModeToggle = useCallback(() => {
-    const newState = !devModeEnabled;
-    setDevModeEnabled(newState);
-    onDevModeChange?.(newState);
-    onChange(""); // Clear the search input
-    
-    toast({
-      title: newState ? "Modo Desenvolvedor Ativado" : "Modo Desenvolvedor Desativado",
-      description: newState 
-        ? "Limite diário de endereço removido." 
-        : "Limite diário de endereço restaurado.",
-      variant: newState ? "default" : "default",
-    });
-  }, [devModeEnabled, onDevModeChange, onChange, toast]);
-
-  // Handle key press for /dev command
+  // "/admin" + Enter abre o painel do administrador (pede senha)
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && value.trim().toLowerCase() === "/dev") {
+    if (e.key === "Enter" && ehComandoAdmin) {
       e.preventDefault();
-      handleDevModeToggle();
+      onChange("");
+      setAdminAberto(true);
     }
-  }, [value, handleDevModeToggle]);
+  }, [ehComandoAdmin, onChange]);
 
-  // Filter schools based on search query (hide suggestions for /dev command)
-  const filteredSchools = value.trim() && value.trim().toLowerCase() !== "/dev"
+  // Filter schools based on search query (hide suggestions for /admin command)
+  const filteredSchools = value.trim() && !ehComandoAdmin
     ? schools.filter((school) => {
         const query = removeAccents(value.toLowerCase());
         return (
@@ -101,11 +85,11 @@ export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdo
   return (
     <div className="relative w-full md:w-96" ref={dropdownRef}>
       <div className="relative">
-        <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 z-10 ${devModeEnabled ? "text-destructive" : "text-muted-foreground"}`} strokeWidth={1.75} />
+        <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 z-10 text-muted-foreground`} strokeWidth={1.75} />
         <Input
           ref={inputRef}
           type="text"
-          placeholder={devModeEnabled ? "Modo Desenvolvedor" : "Buscar escola por nome, endereço ou bairro..."}
+          placeholder="Buscar escola por nome, endereço ou bairro..."
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -116,11 +100,7 @@ export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdo
           data-form-type="other"
           data-lpignore="true"
           data-1p-ignore="true"
-          className={`pl-12 pr-4 h-12 bg-card rounded-full shadow-floating focus-visible:ring-2 text-foreground ${
-            devModeEnabled
-              ? "border-2 border-destructive focus-visible:ring-destructive"
-              : "border-0 focus-visible:ring-primary"
-          }`}
+          className="pl-12 pr-4 h-12 bg-card rounded-full shadow-floating focus-visible:ring-2 text-foreground border-0 focus-visible:ring-primary"
         />
       </div>
       
@@ -144,6 +124,8 @@ export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdo
           ))}
         </div>
       )}
+
+      <PainelAdmin aberto={adminAberto} onFechar={() => setAdminAberto(false)} />
     </div>
   );
 }

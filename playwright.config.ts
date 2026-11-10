@@ -49,7 +49,10 @@ export default defineConfig({
     env: {
       VITE_SUPABASE_URL: "https://supabase.teste.invalid",
       VITE_SUPABASE_PUBLISHABLE_KEY: "chave-ficticia",
+      // Cota do Google: chave inválida não gasta cota de ninguém. O script do mapa ainda carrega (o app
+      // espera por ele), mas o mapa não abre; o resto do Google é barrado em e2e/fixtures/base.ts.
       ...envLocal(),
+      VITE_GOOGLE_MAPS_API_KEY: "chave-ficticia",
     },
     timeout: 60_000,
   },

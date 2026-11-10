@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/base";
 import { interceptarSupabase } from "./fixtures/escolas";
 
 // Teste de fumaça: prova que o servidor sobe e o app desenha a tela. Serve de modelo para os demais.

@@ -114,6 +114,7 @@ Toda mudança que afeta o que aparece ou acontece na tela termina com o fluxo ex
 - **Tags:** cada cenário leva `@<funcionalidade>`. Rode só os afetados: `node .claude/scripts/portao.mjs --e2e <tag>`. Leia o resultado e abra só a captura do teste que falhou (`test-results/`).
 - **Navegador:** na máquina, o Chrome instalado; na nuvem, o Chrome da VM, por `CHROME_PATH`. O `playwright.config.ts` já trata os dois.
 - **Ambiente:** sempre local. Nunca homologação nem produção.
+- **Nunca chama o Google nem as funções reais em `/api/`.** Toda spec importa `test` e `expect` de `e2e/fixtures/base.ts`, nunca direto de `@playwright/test`: a trava ali bloqueia o Google e reprova o teste que tentar usar um serviço pago (distâncias, rotas, Places) ou `/api/distancias`/`/api/admin` sem interceptá-los com `page.route`.
 - **O teste:** reproduza o fluxo real (clicar, preencher, salvar) e confira o resultado na tela. Em correção de bug, veja o teste falhar antes da correção e passar depois.
 
 <!-- settler:modulo:design -->

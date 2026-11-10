@@ -49,6 +49,17 @@ export function escolasSemDistancia<T extends { id: string | number }>(
   return schools.filter((school) => !(String(school.id) in distances));
 }
 
+export function formatarDistancia(km: number): string {
+  return `${km.toFixed(1)} km`;
+}
+
+export function formatarDuracao(minutes: number): string {
+  if (minutes < 60) return `${Math.round(minutes)} min`;
+  const hours = Math.floor(minutes / 60);
+  const mins = Math.round(minutes % 60);
+  return `${hours}h ${mins.toString().padStart(2, "0")}min`;
+}
+
 /**
  * Sort schools by distance (ascending: closest first)
  */

@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "./fixtures/base";
+import type { Page } from "@playwright/test";
 import { interceptarSupabase } from "./fixtures/escolas";
 
 // Escola inativa (CAIC) com selo, e o detalhe mostrando os prédios onde as turmas dela funcionam.

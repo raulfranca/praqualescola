@@ -9,27 +9,34 @@ export function removeAccents(str: string): string {
   return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-const ADDRESS_SET_DATE_KEY = "addressSetDate";
+const ENDERECOS_DO_DIA_KEY = "enderecos-do-dia";
+/** Endereços novos que um aparelho pode definir por dia (a cota do Google é pequena). */
+export const LIMITE_ENDERECOS_POR_DIA = 3;
 
-/**
- * Checks if the user can set a new address today.
- * Returns true if no address was set today (after midnight local time).
- */
-export function canSetNewAddress(): boolean {
-  const lastSetDate = localStorage.getItem(ADDRESS_SET_DATE_KEY);
-  if (!lastSetDate) return true;
-
-  const lastSet = new Date(lastSetDate);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  return lastSet < today;
+/** Data local "AAAA-MM-DD": o contador vira à meia-noite do aparelho. */
+function diaLocal(agora: Date): string {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${agora.getFullYear()}-${p(agora.getMonth() + 1)}-${p(agora.getDate())}`;
 }
 
-/**
- * Records the current timestamp when an address is set.
- * Used for rate-limiting address changes to once per day.
- */
-export function recordAddressSetTimestamp(): void {
-  localStorage.setItem(ADDRESS_SET_DATE_KEY, new Date().toISOString());
+function enderecosHoje(agora: Date): number {
+  try {
+    const salvo = JSON.parse(localStorage.getItem(ENDERECOS_DO_DIA_KEY) ?? "null");
+    return salvo?.data === diaLocal(agora) ? Number(salvo.quantidade) || 0 : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/** Quantos endereços novos o aparelho ainda pode definir hoje. */
+export function enderecosRestantesHoje(agora: Date = new Date()): number {
+  return Math.max(0, LIMITE_ENDERECOS_POR_DIA - enderecosHoje(agora));
+}
+
+/** Conta um endereço novo definido hoje (voltar a um endereço já calculado no aparelho não conta). */
+export function registrarEnderecoNovo(agora: Date = new Date()): void {
+  localStorage.setItem(
+    ENDERECOS_DO_DIA_KEY,
+    JSON.stringify({ data: diaLocal(agora), quantidade: enderecosHoje(agora) + 1 }),
+  );
 }

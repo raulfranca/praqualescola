@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/base";
 import { ESCOLAS, interceptarSupabase } from "./fixtures/escolas";
 
 // Escolas lidas do Supabase da SME, id = código INEP, e o recomeço do aparelho na troca.
