@@ -4,7 +4,19 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [Unreleased]
+## [2.2.0] - 2026-11-10 - Dados oficiais do Supabase da Secretaria de Educação
+
+### Adicionado
+
+- O CAIC, cujo prédio está desativado, aparece com o selo "Prédio desativado". No detalhe da escola, uma seção mostra onde as turmas dele funcionam, com link que abre a escola-sede.
+- O detalhe da escola mostra a observação cadastrada pela Secretaria, quando houver.
+
+### Alterado
+
+- As escolas agora vêm do cadastro oficial da Secretaria de Educação, e não mais de uma planilha: a localização de cada escola foi conferida e as turmas são as de 2027. Quando a Secretaria atualiza o cadastro, o app muda sozinho.
+- Recomeço do zero para todos: como as escolas ganharam uma identificação nova (o código do INEP), o endereço de casa e os favoritos guardados no aparelho são apagados uma única vez e precisam ser definidos de novo. Na primeira abertura, um aviso explica isso, e o endereço pode ser cadastrado no mesmo dia.
+- O telefone da escola aparece sem o ramal.
+- As vagas das campanhas ficam temporariamente sem fonte: não há campanha aberta agora, e elas voltarão quando o cadastro oficial tiver uma tabela de vagas.
 
 ### Corrigido
 

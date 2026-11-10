@@ -13,3 +13,15 @@ items:
     alert_days: 30
     link: https://reactrouter.com/upgrading/v6
     acao: Ligar as future flags da v6, atualizar para react-router 7, rodar o portão --final; hoje o app só navega para caminhos fixos, então o risco é baixo.
+
+  - id: remover-recomeco-aparelho
+    titulo: Remover o recomeço do aparelho (src/lib/recomeco.ts) e o aviso AvisoRecomeco
+    due: 2027-06-30
+    alert_days: 30
+    acao: Até lá quase todo aparelho já passou pelo recomeço da troca planilha → Supabase. Apagar recomeco.ts (+ teste), AvisoRecomeco.tsx, a chamada em main.tsx e marcarMigrado/cenários do e2e; a marca school-data-version pode ficar gravada nos aparelhos. Atualizar DOC §4 e PRD §3.1.
+
+  - id: turmas-limite-1000-linhas
+    titulo: Turmas do Supabase perto do limite de 1000 linhas por GET do PostgREST
+    due: 2027-10-01
+    alert_days: 30
+    acao: Hoje são 839 turmas (só 2027) num único GET em src/lib/escolasSupabase.ts. Quando a SME publicar o ano letivo seguinte junto, passa de 1000 e as turmas vêm cortadas sem erro. Antes disso, filtrar por ano_letivo na consulta ou paginar (header Range), e conferir a contagem com a view turmas_por_etapa.

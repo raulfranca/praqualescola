@@ -1,5 +1,5 @@
 ---
-status: em_andamento
+status: concluido
 revezamento: aguardando_usuario
 criado: 2026-11-10
 demanda: O app passa a ler escolas e turmas do Supabase "Dados" (fonte oficial da SME) em vez da planilha Google ESCOLAS-PINDA, e nenhuma escola some por falta de distância calculada
@@ -84,26 +84,21 @@ demanda: O app passa a ler escolas e turmas do Supabase "Dados" (fonte oficial d
 
 ## ▶ Ponto de retomada
 
-- **Atualizado:** 2026-11-10 — Etapa 4 implementada e verificada; falta só o portão visual do usuário
-- **Etapa 4 — CAIC desativado e turmas sediadas em outro prédio** (`opus`) — aguardando aprovação das capturas
-  - [x] 4.1 Ler componentes (card, modal, prioridades, busca, páginas) + `frontend-design`. Notas: não existe evento `view_school` no analytics (nada a disparar); `--text-micro` não tem utilitário Tailwind → selo usa as mesmas classes das etiquetas de nível (`text-xs px-2 py-0.5 rounded-full font-medium`) para casar a altura.
-  - [x] 4.2 Selo "Prédio desativado" (`src/components/SeloDesativado.tsx`) em card, busca, prioridades (modal vai na 4.3)
-  - [x] 4.3 Modal: selo no cabeçalho, seção "Observação" + "Turmas funcionando em" (props novas `schools`, `onSelectSchool`); Index/Lista/Favoritos passam
-  - [x] 4.4 `formatPhone` removido (telefone direto); campo `School.extension` ficou sem leitor (só `escolasSupabase` grava undefined) — mencionar, não apagar
-  - [x] 4.5 e2e `e2e/caic.spec.ts` (4 cenários + 1 no celular), fixture ganhou a EM Aníbal Ferreira; portão `--e2e caic` verde; suíte e2e completa 15/15; capturas em `test-results/caic-*`
-- **Próxima ação:** usuário aprovou → marcar Etapa 4 no Progresso, `revezamento: aguardando_usuario`, Ponto de retomada para Etapa 5. Pediu ajuste → aplicar, rodar `portao.mjs --e2e caic`, nova captura.
+- **Atualizado:** 2026-11-10 — plano concluído
+- **Plano concluído** — todas as etapas fechadas, portão `--final` verde.
+- **Próxima ação:** nenhuma; publicar é decisão do usuário.
 - **Tocados e não verificados:** nenhum
 - **Em execução:** nenhum subagente
-- **Esperando o usuário:** aprovar as capturas do card e do detalhe do CAIC (desktop e celular)
-- **Lembrete Etapa 5:** `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` **já estão na Vercel** em All Environments (usuário, 2026-11-10); falta só um novo deploy para valerem. A chave do Google Maps recusa `127.0.0.1:8095` e o console do Google não aceita IP com porta curinga: e2e e testes locais ficam sem o fundo do mapa; é esperado e não bloqueia.
+- **Esperando o usuário:** nada
+- **Lembrete Etapa 5:** `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` **já estão na Vercel** em All Environments (usuário, 2026-11-10); falta só um novo deploy para valerem. A chave do Google Maps recusa `127.0.0.1:8095` e o console do Google não aceita IP com porta curinga: e2e e testes locais ficam sem o fundo do mapa; é esperado e não bloqueia. `School.extension` ficou sem leitor (mencionar no fechamento).
 
 ## Progresso
 
 - [x] 1. Distâncias completas: calcular só as escolas que faltam no cache — `opus` · pode ser publicada sozinha
 - [x] 2. Camada de dados do Supabase e recomeço do aparelho — `opus`
 - [x] 3. Troca da fonte: app lê o Supabase, id vira código INEP, recomeço com aviso — `opus` *(depende de 1 e 2)*
-- [ ] 4. CAIC desativado e turmas sediadas em outro prédio — `opus` *(depende de 3)* · ⛔ portão: conferência visual do detalhe do CAIC
-- [ ] 5. Fechamento: documentação, Vercel e portão final — `opus` *(depende de 4)* · ⛔ portão: variáveis na Vercel antes de publicar
+- [x] 4. CAIC desativado e turmas sediadas em outro prédio — `opus` *(depende de 3)* · ⛔ portão: conferência visual do detalhe do CAIC
+- [x] 5. Fechamento: documentação, Vercel e portão final — `opus` *(depende de 4)* · ⛔ portão: variáveis na Vercel antes de publicar
 
 ## Etapas
 
@@ -360,15 +355,15 @@ prédio mostra onde, com link que abre o detalhe da escola-sede.
 
 ## Encerramento do plano
 
-- [ ] Portão de fim de plano: `node .claude/scripts/portao.mjs --final`
-- [ ] `CHANGELOG.md` — em `[Unreleased]`: o bullet de Corrigido da Etapa 1 e uma entrada para a troca:
+- [x] Portão de fim de plano: `node .claude/scripts/portao.mjs --final`
+- [x] `CHANGELOG.md` — em `[Unreleased]`: o bullet de Corrigido da Etapa 1 e uma entrada para a troca:
   escolas vêm do cadastro oficial da Secretaria (localização conferida, turmas de 2027); todos recomeçam
   do zero (endereço de casa e favoritos precisam ser definidos de novo, com aviso na primeira abertura); CAIC com aviso e link para onde as turmas funcionam; ramal deixa de aparecer; vagas de
   campanha temporariamente sem fonte
-- [ ] `ref/DOC.md` / `ref/PRD.md` — Etapa 5
-- [ ] `.github/maintenance.yml` — Etapa 5
-- [ ] Migrations: nenhuma (o app só lê o Supabase)
-- [ ] Frontmatter → `status: concluido`; `git mv` deste arquivo para `ref/planos/concluidos/`
+- [x] `ref/DOC.md` / `ref/PRD.md` — Etapa 5
+- [x] `.github/maintenance.yml` — Etapa 5
+- [x] Migrations: nenhuma (o app só lê o Supabase)
+- [x] Frontmatter → `status: concluido`; `git mv` deste arquivo para `ref/planos/concluidos/`
 
 ## Diário de execução
 
@@ -406,4 +401,11 @@ não tem utilitário Tailwind) em card, busca, prioridades e cabeçalho do modal
 Não há evento `view_school` no analytics: nada a disparar. `School.extension` ficou sem leitor (não apagado). Fixture e2e ganhou a
 EM Aníbal Ferreira (dado real) + 1 turma. **Armadilha:** `Get-Content | Set-Content -Encoding utf8` no PowerShell 5.1 corrompeu os
 acentos do modal (lê como ANSI) e pôs BOM; corrigido, e o e2e agora confere "Observação". Editar arquivo só com Edit/Write ou Node.
-`@caic` 5/5, suíte e2e 15/15, portão verde. Pendente: aprovação visual do usuário.
+`@caic` 5/5, suíte e2e 15/15, portão verde. Capturas aprovadas pelo usuário.
+
+**Etapa 5 — 2026-11-10.** PRD §3.1 (cadastro oficial, INEP, turmas pela responsável, inativa com selo "Prédio desativado" e link,
+recomeço de 2026), §3.3 (escola nova ganha distância), §3.7 (vagas sem fonte), §3.8 (observação). DOC §1/§3/§4/§5/§6/§7/§8 (Supabase
+só leitura, `montarEscolas`, `localStorage` com INEP e `school-data-version`, `VITE_SUPABASE_*`, cache `escolas-supabase`, e2e com
+`page.route`). `maintenance.yml`: `remover-recomeco-aparelho` (2027-06-30) e `turmas-limite-1000-linhas` (2027-10-01), YAML validado.
+CHANGELOG `[Unreleased]`: Adicionado/Alterado. Portão `--final` verde (lint, tipos, testes, build, e2e). Variáveis já na Vercel
+(usuário); falta só publicar, que é decisão do usuário.
