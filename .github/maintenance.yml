@@ -6,4 +6,10 @@
 # Campos: id (kebab-case), titulo, due (YYYY-MM-DD), alert_days, link (opcional), acao (opcional).
 # Ao resolver um item, remova-o daqui, ou ajuste a data se for recorrente.
 
-items: []
+items:
+  - id: react-router-v7
+    titulo: Migrar react-router-dom 6 → 7 (alerta moderate de redirecionamento aberto só corrigido na v7)
+    due: 2027-02-10
+    alert_days: 30
+    link: https://reactrouter.com/upgrading/v6
+    acao: Ligar as future flags da v6, atualizar para react-router 7, rodar o portão --final; hoje o app só navega para caminhos fixos, então o risco é baixo.

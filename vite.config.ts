@@ -4,7 +4,9 @@ import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
-export default defineConfig(() => ({
+export default defineConfig(({ mode }) => ({
+  // No app publicado, os console.log/debug de depuração são retirados; warn e error ficam.
+  esbuild: mode === "production" ? { pure: ["console.log", "console.debug"] } : {},
   server: {
     host: "::",
     port: 8080,

@@ -25,8 +25,3 @@ export interface School {
   vacancies?: number;
   durationInMinutes?: number;
 }
-
-export interface FavoriteSchool {
-  schoolId: number;
-  order: number;
-}

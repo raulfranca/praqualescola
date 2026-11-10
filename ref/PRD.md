@@ -18,6 +18,8 @@ Há um **modo desenvolvedor** escondido: digitar `/dev` na busca e apertar Enter
 
 ## 3. Funcionalidades
 
+**Navegação:** três seções — **Mapa**, **Lista** e **Favoritos** —, na barra inferior no celular e na barra lateral no computador. O app não tem canal de sugestões próprio (a seção "Contribua", com formulário do Tally, foi removida em 2026-11-10).
+
 ### 3.1 Lista de escolas (fonte de dados)
 
 - As escolas vêm de uma **planilha Google** publicada como CSV, lida a cada abertura do app. Editar a planilha atualiza o app sem publicar código.

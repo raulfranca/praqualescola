@@ -8,8 +8,9 @@ SPA (aplicação de página única) em React, empacotada como PWA, sem back-end 
 
 ## 2. Stack e dependências
 
-- **Vite 5 + React 18 + TypeScript** (`strict: false`), roteamento com `react-router-dom`.
-- **UI:** Tailwind 3 + shadcn/ui (`src/components/ui/`, gerados pelo CLI do shadcn; não editar à mão sem motivo).
+- **Vite 6 + React 18 + TypeScript** (`strict: false`), roteamento com `react-router-dom` 6. Testes com Vitest 4 e Playwright.
+- **UI:** Tailwind 3 + shadcn/ui (`src/components/ui/`, gerados pelo CLI do shadcn; não editar à mão sem motivo). **Só ficam os componentes em uso**: precisando de outro, adicione pelo CLI (`npx shadcn@latest add <nome>`, configuração em `components.json`), que traz junto a dependência do Radix.
+- **Dependências enxutas:** nada instalado "para um dia usar". Para achar arquivos, exportações e pacotes sem uso: `npx knip` (ignore `.claude/`, `api/` e `design-system/tokens.css`, que são usados fora do grafo de imports do app).
 - **Mapa:** `@react-google-maps/api` (Maps JavaScript, Places, Distance Matrix).
 - **PWA:** `vite-plugin-pwa` (Workbox), `registerType: "prompt"`.
 - **Medição:** `react-ga4` e `@vercel/analytics`.
@@ -23,7 +24,7 @@ public/version.json    Título e subtítulo do aviso de nova versão
 src/main.tsx           Consulta /api/maintenance antes de montar o app; inicia o GA
 src/App.tsx            Providers, LoadScript do Google Maps, rotas
 src/pages/             Index (mapa), Lista, Favoritos, NotFound
-src/components/        Componentes do app; ui/ = shadcn
+src/components/        Componentes do app; ui/ = shadcn (só os usados)
 src/contexts/          FilterContext (filtros compartilhados, em sessionStorage)
 src/hooks/             Dados (useSchoolsData), casa, distâncias, favoritos, campanha, PWA
 src/lib/               Lógica pura: csvParser, distanceCalculator, distanceMatrix, schoolTags, utils
@@ -60,6 +61,8 @@ Como rodar: `node .claude/scripts/portao.mjs`. Comandos em `.claude/loop.json`.
 - Alias `@/` → `src/`.
 - Visual: regras em `design-system/README.md`, valores em `design-system/tokens.css` (hex); o app usa a cópia em HSL de `src/index.css` via classes do Tailwind, e `src/lib/designTokens.test.ts` garante que as duas não divergem. Fontes Inter e Work Sans empacotadas via `@fontsource` (funcionam offline).
 - Textos de interface em português; muitos comentários e logs de console herdados estão em inglês.
+- **Logs:** `console.log`/`console.debug` servem só para depuração local; o build de produção os remove (`esbuild.pure` em `vite.config.ts`). `console.warn`/`console.error` vão para produção — use-os para o que precisa ser visto lá.
+- **Segurança das dependências:** `npm audit` deve ficar sem alertas *high*/*critical*. Os *moderate* restantes estão em ferramentas de build/lint (não chegam ao navegador) ou registrados em `.github/maintenance.yml`.
 - Nova campanha: acrescentar em `src/config/campaign_config.ts` e criar a coluna de vagas na planilha.
 - Nova versão publicada: atualizar `public/version.json` (`version`, `title`, `subtitle`) junto com o `CHANGELOG.md`.
 
@@ -67,6 +70,8 @@ Como rodar: `node .claude/scripts/portao.mjs`. Comandos em `.claude/loop.json`.
 
 Todas as funcionalidades do PRD estão no ar (versão 2.0.0). Pontos conhecidos:
 
-- Logs de depuração (`console.log` com emojis) espalhados por hooks e `csvParser`.
+- Logs de depuração (`console.log` com emojis) espalhados por hooks e `csvParser` — retirados do build de produção, mas ainda no código.
 - `strict: false` no TypeScript: o typecheck pega pouco.
-- O lint tem 9 avisos antigos (sem erros).
+- O lint tem 6 avisos antigos (sem erros).
+- O código do app sai num único arquivo JS de ~700 kB (~210 kB comprimido), acima do limite de aviso do Vite (500 kB). Não quebra nada; dividir em blocos (`manualChunks`) faria cada atualização baixar só o que mudou.
+- `react-router-dom` 6 tem um alerta *moderate* (redirecionamento aberto via barra invertida em `<Link>`/`useNavigate`) corrigido só na v7. Não afeta o app hoje, que navega só para caminhos fixos; migrar para a v7 está na agenda de manutenção.
