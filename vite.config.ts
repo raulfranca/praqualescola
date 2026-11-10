@@ -42,10 +42,11 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            urlPattern: /^https:\/\/docs\.google\.com\/.*/i,
+            urlPattern: /^https:\/\/[a-z0-9]+\.supabase\.co\/rest\/v1\/.*/i,
             handler: "NetworkFirst",
             options: {
-              cacheName: "google-sheets-cache",
+              cacheName: "escolas-supabase",
+              networkTimeoutSeconds: 5,
               expiration: {
                 maxEntries: 5,
                 maxAgeSeconds: 60 * 60, // 1 hour

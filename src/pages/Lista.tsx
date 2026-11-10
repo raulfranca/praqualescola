@@ -114,8 +114,8 @@ const Lista = () => {
   const { initializeDistanceFilters } = useFilters();
 
   useEffect(() => {
-    initializeDistanceFilters(hasDistances, distanceRange.max, durationRange.max);
-  }, [hasDistances, distanceRange.max, durationRange.max, initializeDistanceFilters]);
+    initializeDistanceFilters(hasDistances);
+  }, [hasDistances, initializeDistanceFilters]);
 
   const schoolsMatchingCriteria = useMemo(() => {
     let filtered = schoolsWithDistances;

@@ -6,7 +6,7 @@ export interface DistanceMatrixResult {
 }
 
 export interface SchoolDistanceResult {
-  schoolId: number;
+  schoolId: string;
   distanceInKm: number;
   durationInMinutes?: number;
   usedFallback: boolean;
@@ -19,7 +19,7 @@ export interface SchoolDistanceResult {
  */
 export async function calculateDistancesForSchools(
   origin: { lat: number; lng: number },
-  schools: Array<{ id: number; lat: number; lng: number; name: string }>
+  schools: Array<{ id: string; lat: number; lng: number; name: string }>
 ): Promise<SchoolDistanceResult[]> {
   const BATCH_SIZE = 25; // Google Maps API limit
   const TORTUOSITY_FACTOR = 1.3;
@@ -85,7 +85,7 @@ export async function calculateDistancesForSchools(
  */
 async function calculateBatch(
   origin: { lat: number; lng: number },
-  schools: Array<{ id: number; lat: number; lng: number; name: string }>,
+  schools: Array<{ id: string; lat: number; lng: number; name: string }>,
   tortuosityFactor: number
 ): Promise<SchoolDistanceResult[]> {
   return new Promise((resolve) => {

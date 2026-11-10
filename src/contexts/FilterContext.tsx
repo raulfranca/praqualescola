@@ -52,7 +52,7 @@ interface FilterContextType {
   setFilterMetric: (metric: FilterMetric) => void;
   showOnlyVacancies: boolean;
   setShowOnlyVacancies: (show: boolean) => void;
-  initializeDistanceFilters: (hasDistances: boolean, distanceMax: number, durationMax: number) => void;
+  initializeDistanceFilters: (hasDistances: boolean) => void;
 }
 
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
@@ -84,11 +84,10 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
     sessionStorage.setItem(FILTERS_SESSION_KEY, JSON.stringify(filtersToStore));
   }, [selectedLevels, selectedManagement, maxDistanceFilter, maxDurationFilter, filterMetric, showOnlyVacancies]);
 
-  const initializeDistanceFilters = useCallback((hasDistances: boolean, distanceMax: number, durationMax: number) => {
-    if (hasDistances) {
-      setMaxDistanceFilterInternal(prev => prev ?? distanceMax);
-      setMaxDurationFilterInternal(prev => prev ?? durationMax);
-    } else {
+  const initializeDistanceFilters = useCallback((hasDistances: boolean) => {
+    // Com distâncias, null já vale "sem limite" (o controle mostra o máximo). Fixar o máximo aqui
+    // congelava o valor provisório (10 km enquanto as escolas carregam) e escondia escolas mais longe.
+    if (!hasDistances) {
       setMaxDistanceFilterInternal(null);
       setMaxDurationFilterInternal(null);
     }

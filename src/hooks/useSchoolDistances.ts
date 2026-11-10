@@ -1,14 +1,14 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { School } from "@/types/school";
 import { HomeLocation } from "@/hooks/useHomeLocation";
-import { sortSchoolsByDistance } from "@/lib/distanceCalculator";
+import { escolasSemDistancia, sortSchoolsByDistance } from "@/lib/distanceCalculator";
 import { calculateDistancesForSchools } from "@/lib/distanceMatrix";
 import { recordAddressSetTimestamp } from "@/lib/utils";
 
 const DISTANCES_STORAGE_KEY = "school-distances";
 
 interface SchoolDistances {
-  [schoolId: number]: {
+  [schoolId: string]: {
     distanceInKm: number;
     durationInMinutes?: number;
   };
@@ -43,6 +43,62 @@ export function useSchoolDistances(
     return stored ? JSON.parse(stored) : {};
   });
   const [isCalculating, setIsCalculating] = useState(false);
+  // Conjuntos de escolas faltantes já tentados nesta montagem (evita repetir chamadas à API)
+  const tentativasRef = useRef(new Set<string>());
+
+  /**
+   * Calcula só as escolas que faltam em `base` e devolve o cache completo (ou `base`, se nada mudou).
+   * Não grava nada: quem chama decide.
+   */
+  const completarDistancias = useCallback(async (
+    location: HomeLocation,
+    base: SchoolDistances
+  ): Promise<SchoolDistances> => {
+    const faltando = escolasSemDistancia(schools, base);
+    if (faltando.length === 0) return base;
+    const tentativa = `${getCacheKey(location.lat, location.lng)}:${faltando.map((s) => s.id).join(",")}`;
+    if (tentativasRef.current.has(tentativa)) return base;
+    tentativasRef.current.add(tentativa);
+
+    console.log("🧩 Completing distance cache for", faltando.length, "missing schools");
+    try {
+      const results = await calculateDistancesForSchools(
+        { lat: location.lat, lng: location.lng },
+        faltando.map(s => ({ id: s.id, lat: s.lat, lng: s.lng, name: s.name }))
+      );
+      const completo: SchoolDistances = { ...base };
+      results.forEach((result) => {
+        if (!Number.isFinite(result.distanceInKm)) return;
+        completo[result.schoolId] = {
+          distanceInKm: result.distanceInKm,
+          durationInMinutes: result.durationInMinutes,
+        };
+      });
+      return completo;
+    } catch (error) {
+      console.error("❌ Failed to complete distances:", error);
+      return base;
+    }
+  }, [schools]);
+
+  const gravarDistancias = useCallback((location: HomeLocation, dados: SchoolDistances) => {
+    localStorage.setItem(DISTANCES_STORAGE_KEY, JSON.stringify(dados));
+    localStorage.setItem(getCacheKey(location.lat, location.lng), JSON.stringify(dados));
+  }, []);
+
+  // Escola carregada sem distância (ex.: cadastrada depois do cálculo): calcula só ela e junta ao cache.
+  useEffect(() => {
+    if (!homeLocation || schools.length === 0 || Object.keys(distances).length === 0) return;
+    let cancelado = false;
+    completarDistancias(homeLocation, distances).then((completo) => {
+      if (cancelado || completo === distances) return;
+      gravarDistancias(homeLocation, completo);
+      setDistances(completo);
+    });
+    return () => {
+      cancelado = true;
+    };
+  }, [homeLocation, schools, distances, completarDistancias, gravarDistancias]);
 
   /**
    * Check if we have cached distances for a given location
@@ -74,9 +130,9 @@ export function useSchoolDistances(
     const cachedData = localStorage.getItem(cacheKey);
     if (cachedData) {
       console.log("📦 Loading distances from cache (Zero API Cost)");
-      const cached = JSON.parse(cachedData) as SchoolDistances;
+      const cached = await completarDistancias(location, JSON.parse(cachedData) as SchoolDistances);
       setDistances(cached);
-      localStorage.setItem(DISTANCES_STORAGE_KEY, JSON.stringify(cached));
+      gravarDistancias(location, cached);
       return true;
     }
 
@@ -124,7 +180,7 @@ export function useSchoolDistances(
       setIsCalculating(false);
       return false;
     }
-  }, [schools]);
+  }, [schools, completarDistancias, gravarDistancias]);
 
   // Enrich schools with distance and duration data
   const schoolsWithDistances: SchoolWithDistance[] = useMemo(() => {

@@ -14,7 +14,7 @@ import { trackEvent } from "@/lib/analytics";
 interface SchoolDetailModalProps {
   school: School | null;
   isFavorite: boolean;
-  onToggleFavorite: (schoolId: number) => void;
+  onToggleFavorite: (schoolId: string) => void;
   onClose: () => void;
   homeLocation: HomeLocation | null;
 }

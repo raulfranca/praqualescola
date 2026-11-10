@@ -12,9 +12,9 @@ import { CSS } from "@dnd-kit/utilities";
 import { trackEvent } from "@/lib/analytics";
 interface PrioritiesListProps {
   schools: School[];
-  favorites: number[];
-  onReorder: (newOrder: number[]) => void;
-  onRemoveFavorite: (schoolId: number) => void;
+  favorites: string[];
+  onReorder: (newOrder: string[]) => void;
+  onRemoveFavorite: (schoolId: string) => void;
   homeLocation: HomeLocation | null;
   onSchoolClick: (school: School) => void;
   tipDismissed: boolean;
@@ -30,7 +30,7 @@ function SortableSchoolItem({
 }: {
   school: School;
   order: number;
-  onRemove: (id: number) => void;
+  onRemove: (id: string) => void;
   homeLocation: HomeLocation | null;
   onSchoolClick: (school: School) => void;
   isCampaignActive: boolean;
@@ -172,8 +172,8 @@ export function PrioritiesList({
       over
     } = event;
     if (over && active.id !== over.id) {
-      const oldIndex = favorites.indexOf(active.id as number);
-      const newIndex = favorites.indexOf(over.id as number);
+      const oldIndex = favorites.indexOf(active.id as string);
+      const newIndex = favorites.indexOf(over.id as string);
       
       // Track reordering
       trackEvent('reorder_favorites', {

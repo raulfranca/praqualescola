@@ -6,6 +6,7 @@ import "@fontsource/work-sans/600.css";
 import "./index.css";
 import { initGA } from "./lib/analytics";
 import { MaintenancePage } from "./components/MaintenancePage";
+import { recomecarAparelho } from "./lib/recomeco";
 
 interface MaintenanceConfig {
   isUnderMaintenance: boolean;
@@ -58,7 +59,9 @@ async function init() {
   } else {
     // Initialize Google Analytics 4
     initGA();
-    root.render(<App />);
+    // Antes do render: os hooks leem favoritos, casa e distâncias do localStorage no estado inicial.
+    const recomecou = recomecarAparelho(localStorage);
+    root.render(<App recomecou={recomecou} />);
   }
 }
 

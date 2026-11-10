@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { interceptarSupabase } from "./fixtures/escolas";
 
 // Design system "Coruja e Mapa": confere que a paleta e as fontes chegaram à tela.
 // Valores de design-system/tokens.css.
@@ -10,6 +11,8 @@ function pertoDe(rgb: string, alvo: number[]) {
   const canais = rgb.match(/\d+/g)!.slice(0, 3).map(Number);
   canais.forEach((c, i) => expect(Math.abs(c - alvo[i]), `${rgb} ≈ rgb(${alvo})`).toBeLessThanOrEqual(2));
 }
+
+test.beforeEach(({ page }) => interceptarSupabase(page));
 
 test.use({ viewport: { width: 390, height: 844 } });
 

@@ -24,8 +24,8 @@ const homePinSvg = `
 
 interface MapViewProps {
   schools: School[];
-  favorites: number[];
-  onToggleFavorite: (schoolId: number) => void;
+  favorites: string[];
+  onToggleFavorite: (schoolId: string) => void;
   selectedSchool: School | null;
   onSchoolClick: (school: School) => void;
   shouldCenterMap: boolean;
@@ -108,7 +108,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     return schools
       .filter(s => s.lat && s.lng)
       .map(s => s.id)
-      .sort((a, b) => a - b)
+      .sort()
       .join(',');
   }, [schools]);
 

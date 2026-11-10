@@ -153,8 +153,8 @@ const Index = () => {
   const { initializeDistanceFilters } = useFilters();
 
   useEffect(() => {
-    initializeDistanceFilters(hasDistances, distanceRange.max, durationRange.max);
-  }, [hasDistances, distanceRange.max, durationRange.max, initializeDistanceFilters]);
+    initializeDistanceFilters(hasDistances);
+  }, [hasDistances, initializeDistanceFilters]);
 
   // Master filtered list: applies Level, Management, and Campaign filters (NOT distance)
   // This represents "all eligible schools regardless of distance" for histogram and future UI counters

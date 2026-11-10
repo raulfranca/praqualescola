@@ -45,7 +45,12 @@ export default defineConfig({
     command: "npx vite --port 8090 --strictPort --host 127.0.0.1",
     url: `http://127.0.0.1:${PORTA}`,
     reuseExistingServer: true,
-    env: envLocal(),
+    // O e2e nunca chama o Supabase real: os testes interceptam `**/rest/v1/**` (e2e/fixtures/escolas.ts).
+    env: {
+      VITE_SUPABASE_URL: "https://supabase.teste.invalid",
+      VITE_SUPABASE_PUBLISHABLE_KEY: "chave-ficticia",
+      ...envLocal(),
+    },
     timeout: 60_000,
   },
 });

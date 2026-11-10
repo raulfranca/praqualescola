@@ -7,6 +7,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { LoadScript } from "@react-google-maps/api";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { InstallPromptBanner } from "@/components/InstallPromptBanner";
+import { AvisoRecomeco } from "@/components/AvisoRecomeco";
 import { BottomNav } from "@/components/BottomNav";
 import { SideNav } from "@/components/SideNav";
 import { FilterProvider } from "@/contexts/FilterContext";
@@ -21,7 +22,7 @@ const GOOGLE_MAPS_LIBRARIES: ("places")[] = ["places"];
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = ({ recomecou = false }: { recomecou?: boolean }) => (
   <QueryClientProvider client={queryClient}>
     <LoadScript
       googleMapsApiKey={GOOGLE_MAPS_API_KEY}
@@ -39,6 +40,7 @@ const App = () => (
         />
         <UpdatePrompt />
         <InstallPromptBanner />
+        <AvisoRecomeco mostrar={recomecou} />
         <FilterProvider>
           <BrowserRouter>
             <SideNav />

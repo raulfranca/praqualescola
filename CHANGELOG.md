@@ -4,6 +4,13 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [Unreleased]
+
+### Corrigido
+
+- Escolas novas deixam de sumir da lista e do mapa para quem já tinha o endereço de casa salvo: o app calcula a distância só das que faltam e guarda junto com as outras.
+- Com o endereço de casa salvo, o filtro de distância não fica mais preso em 10 km (ou 30 minutos) ao abrir o app, o que escondia as escolas mais longe.
+
 ## [2.1.0] - 2026-11-10 - Novo design system
 
 ### Alterado

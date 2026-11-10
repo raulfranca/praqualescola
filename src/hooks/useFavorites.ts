@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 const FAVORITES_KEY = "school-favorites";
 
 export function useFavorites() {
-  const [favorites, setFavorites] = useState<number[]>(() => {
+  const [favorites, setFavorites] = useState<string[]>(() => {
     const stored = localStorage.getItem(FAVORITES_KEY);
     return stored ? JSON.parse(stored) : [];
   });
@@ -12,7 +12,7 @@ export function useFavorites() {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
   }, [favorites]);
 
-  const toggleFavorite = (schoolId: number) => {
+  const toggleFavorite = (schoolId: string) => {
     setFavorites((prev) =>
       prev.includes(schoolId)
         ? prev.filter((id) => id !== schoolId)
@@ -20,9 +20,9 @@ export function useFavorites() {
     );
   };
 
-  const isFavorite = (schoolId: number) => favorites.includes(schoolId);
+  const isFavorite = (schoolId: string) => favorites.includes(schoolId);
 
-  const reorderFavorites = (newOrder: number[]) => {
+  const reorderFavorites = (newOrder: string[]) => {
     setFavorites(newOrder);
   };
 

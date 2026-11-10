@@ -35,8 +35,18 @@ function toRadians(degrees: number): number {
  * Extended School type with distance information
  */
 export interface SchoolWithDistance {
-  id: number;
+  id: string;
   distanceInKm?: number;
+}
+
+/**
+ * Escolas cujo id não tem entrada no cache de distâncias.
+ */
+export function escolasSemDistancia<T extends { id: string | number }>(
+  schools: T[],
+  distances: object
+): T[] {
+  return schools.filter((school) => !(String(school.id) in distances));
 }
 
 /**
