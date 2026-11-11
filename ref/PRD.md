@@ -93,7 +93,7 @@ O endereço de casa sai do aparelho só para o servidor do app, que calcula as d
 
 ### 3.11 Tour de primeira visita
 
-- Na primeira vez que o aparelho abre a tela do mapa, um tour de seis etapas apresenta o app, todo sobre o mapa, iluminando um ponto por vez: cores dos marcadores (creche, pré-escola, fundamental), busca, Minha Casa, Filtros, Lista e Favoritos (favoritar pela estrela e arrastar para montar as prioridades).
+- Na primeira vez que o aparelho abre a tela do mapa, um tour de sete etapas apresenta o app, todo sobre o mapa. Abre com a coruja e uma frase sobre o que é o app ("um mapa com todas as escolas municipais de Pindamonhangaba e informações atualizadas sobre vagas para remoção e atribuição"); depois ilumina um ponto por vez: cores dos marcadores (creche, pré-escola, fundamental), busca, Minha Casa, Filtros, Lista e Favoritos (favoritar pela estrela e arrastar para montar as prioridades).
 - O tour só aponta e explica: não abre telas nem preenche nada. Tem "Próximo", "Voltar" e "Pular".
 - Aparece **uma vez por aparelho**. Concluir, pular ou fechar (tecla Esc) grava que foi visto, e ele não volta.
 - Enquanto o tour não foi fechado, nenhum outro aviso aparece (instalar, campanha, nova versão).

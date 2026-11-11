@@ -2,10 +2,11 @@ import { useEffect, useLayoutEffect, useState, type CSSProperties, type ReactNod
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { concluirTour, useTourPendente } from "@/lib/tour";
+import coruja from "../../design-system/assets/coruja.svg";
 
 interface Etapa {
-  /** Valor de `data-tour` do elemento iluminado. */
-  alvo: string;
+  /** Valor de `data-tour` do elemento iluminado. Sem alvo, o balão fica no centro da tela. */
+  alvo?: string;
   titulo: string;
   texto: ReactNode;
 }
@@ -17,6 +18,11 @@ const NIVEIS = [
 ];
 
 const ETAPAS: Etapa[] = [
+  {
+    titulo: "Pra Qual Escola Eu Vou?",
+    texto:
+      "Um mapa com todas as escolas municipais de Pindamonhangaba e informações atualizadas sobre vagas de remoção e atribuição.",
+  },
   {
     alvo: "mapa",
     titulo: "As cores mostram as turmas",
@@ -38,7 +44,7 @@ const ETAPAS: Etapa[] = [
   {
     alvo: "busca",
     titulo: "Busque uma escola",
-    texto: "Digite o nome, o endereço ou o bairro. O mapa destaca as escolas encontradas; toque em uma para ver os detalhes.",
+    texto: "Digite o nome, o endereço ou o bairro. O mapa destaca as escolas encontradas; clique para ver os detalhes.",
   },
   {
     alvo: "casa",
@@ -48,21 +54,21 @@ const ETAPAS: Etapa[] = [
   {
     alvo: "filtros",
     titulo: "Filtros",
-    texto: "Mostre só as escolas até certa distância da sua casa, de um segmento ou de uma administração: prefeitura ou terceirizada.",
+    texto: "Filtre as escolas com as características desejadas: até certa distância da sua casa, que atende determinada turma, administrada pela Prefeitura ou terceirizada.",
   },
   {
     alvo: "lista",
     titulo: "Lista",
-    texto: "Veja as escolas em lista e ordene por nome, distância ou tempo. Os filtros valem aqui também.",
+    texto: "Veja uma lista de escolas e ordene por nome ou distância da sua casa. Os filtros valem aqui também.",
   },
   {
     alvo: "favoritos",
     titulo: "Favoritos",
     texto: (
       <>
-        No detalhe de uma escola, toque na estrela{" "}
+        Ao ver uma escola, toque na estrela{" "}
         <Star className="inline w-4 h-4 align-text-bottom text-favorite fill-favorite" aria-hidden="true" /> para
-        favoritar. Aqui você arrasta as favoritas e monta sua lista de prioridades para a atribuição.
+        favoritar. Nesta área você vê suas favoritas e organiza sua lista de prioridades para a atribuição.
       </>
     ),
   },
@@ -70,7 +76,8 @@ const ETAPAS: Etapa[] = [
 
 const MARGEM = 16;
 
-function medir(alvo: string): DOMRect | null {
+function medir(alvo?: string): DOMRect | null {
+  if (!alvo) return null;
   // Lista e Favoritos existem duas vezes (barra inferior e lateral): vale o que está visível.
   const visivel = Array.from(document.querySelectorAll(`[data-tour="${alvo}"]`)).find(
     (el) => el.getClientRects().length > 0
@@ -122,6 +129,9 @@ export function Tour() {
 
   const largura = Math.min(360, window.innerWidth - 2 * MARGEM);
   const folga = etapa.alvo === "mapa" ? 0 : 6;
+  const posicao = etapa.alvo
+    ? posicaoDoBalao(etapa.alvo, retangulo, largura)
+    : { left: (window.innerWidth - largura) / 2, top: "50%", translate: "0 -50%" };
 
   return (
     <div className="fixed inset-0 z-[60]">
@@ -146,8 +156,9 @@ export function Tour() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="tour-titulo"
-        className="fixed bg-card rounded-xl shadow-floating p-4 animate-in fade-in-0 zoom-in-95 duration-200 motion-reduce:animate-none"
-        style={{ width: largura, ...posicaoDoBalao(etapa.alvo, retangulo, largura) }}
+        data-abertura={etapa.alvo ? undefined : ""}
+        className="fixed bg-card rounded-xl shadow-floating p-4 data-[abertura]:text-center animate-in fade-in-0 zoom-in-95 duration-200 motion-reduce:animate-none"
+        style={{ width: largura, ...posicao }}
       >
         <div className="flex items-center justify-between -mt-2 -mr-2">
           <span className="font-label text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -158,6 +169,7 @@ export function Tour() {
           </Button>
         </div>
 
+        {!etapa.alvo && <img src={coruja} alt="" aria-hidden="true" className="mx-auto mb-3 h-20 w-20" />}
         <h2 id="tour-titulo" className="text-lg font-semibold text-foreground">
           {etapa.titulo}
         </h2>

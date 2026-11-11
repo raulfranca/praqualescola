@@ -5,9 +5,9 @@ import { ESCOLAS, interceptarSupabase } from "./fixtures/escolas";
 test.use({ tourVisto: false, viewport: { width: 390, height: 844 } });
 test.beforeEach(({ page }) => interceptarSupabase(page));
 
-const TITULOS = ["As cores mostram as turmas", "Busque uma escola", "Minha Casa", "Filtros", "Lista", "Favoritos"];
+const TITULOS = ["Pra Qual Escola?", "As cores mostram as turmas", "Busque uma escola", "Minha Casa", "Filtros", "Lista", "Favoritos"];
 
-test("primeira visita percorre as seis etapas e o tour não volta @tour", async ({ page }) => {
+test("primeira visita percorre as etapas e o tour não volta @tour", async ({ page }) => {
   await page.goto("/");
   const balao = page.getByRole("dialog");
 
@@ -15,7 +15,8 @@ test("primeira visita percorre as seis etapas e o tour não volta @tour", async 
     await expect(balao.getByRole("heading", { name: titulo, exact: true })).toBeVisible();
     await expect(balao).toContainText(`${i + 1} de ${TITULOS.length}`);
     await expect(balao).toBeInViewport({ ratio: 1 });
-    if (i === 0) await expect(balao).toContainText("Pré-escola");
+    if (i === 0) await expect(balao).toContainText("Pindamonhangaba");
+    if (i === 1) await expect(balao).toContainText("Pré-escola");
     await balao.getByRole("button", { name: i === TITULOS.length - 1 ? "Começar" : "Próximo" }).click();
   }
   await expect(balao).toHaveCount(0);
