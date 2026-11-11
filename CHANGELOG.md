@@ -4,12 +4,6 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [Unreleased]
-
-### Alterado
-
-- Prévia do link no WhatsApp e redes sociais: título "Pra Qual Escola Eu Vou?" e uma frase curta sobre o app.
-
 ## [2.5.0] - 2026-11-11 - Campanhas via banco de dados e painel. Dados da 1a Remoção
 
 ### Adicionado
@@ -26,6 +20,7 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 - Filtros: o filtro de vagas virou um cartão com o nome do processo e quantas escolas têm vaga; o gráfico de distância/tempo destaca as escolas dentro do limite escolhido e mostra quantas são.
 - "Sem vagas" aparece em cinza, e não mais em vermelho.
 - Ordem dos avisos ao abrir o app: primeiro o tour (na primeira visita), depois o aviso do processo aberto, depois o convite para instalar e, por fim, o selo. O aviso do processo agora aparece também para quem usa o app pelo navegador, sem instalar.
+- Prévia do link no WhatsApp e redes sociais: título "Pra Qual Escola Eu Vou?" e uma frase curta sobre o app.
 
 ### Corrigido
 
