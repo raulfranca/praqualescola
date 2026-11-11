@@ -88,19 +88,25 @@ export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdo
         <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 z-10 text-muted-foreground`} strokeWidth={1.75} />
         <Input
           ref={inputRef}
-          type="text"
+          // Busca, não formulário: reduz a barra de senha/cartão/endereço do teclado do Android
+          type="search"
+          inputMode="search"
+          enterKeyHint="search"
+          id="busca-escola"
+          name="busca-escola"
           placeholder="Buscar escola por nome, endereço ou bairro..."
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          autoComplete="off"
+          // Valor não reconhecido: o Chrome ignora "off", mas respeita token desconhecido
+          autoComplete="busca-escola"
           autoCorrect="off"
           autoCapitalize="off"
           spellCheck={false}
           data-form-type="other"
           data-lpignore="true"
           data-1p-ignore="true"
-          className="pl-12 pr-4 h-12 bg-card rounded-full shadow-floating focus-visible:ring-2 text-foreground border-0 focus-visible:ring-primary"
+          className="pl-12 pr-4 h-12 bg-card rounded-full shadow-floating focus-visible:ring-2 text-foreground border-0 focus-visible:ring-primary [&::-webkit-search-cancel-button]:appearance-none"
         />
       </div>
       

@@ -28,11 +28,11 @@ test("card do CAIC mostra prédio desativado @caic", async ({ page }, info) => {
   await cardDe(page, CAIC).screenshot({ path: info.outputPath("card-caic.png") });
 });
 
-test("detalhe do CAIC mostra aviso, observação e onde as turmas funcionam @caic", async ({ page }, info) => {
+test("detalhe do CAIC mostra aviso e onde as turmas funcionam, sem a observação do cadastro @caic", async ({ page }, info) => {
   const detalhe = await abrirDetalhe(page, CAIC);
   await expect(detalhe.getByText(SELO, { exact: true })).toBeVisible();
-  await expect(detalhe.getByText("Observação", { exact: true })).toBeVisible();
-  await expect(detalhe.getByText("O atendimento está sendo feito no CMEI Lucineia")).toBeVisible();
+  await expect(detalhe.getByText("Observação", { exact: true })).toHaveCount(0);
+  await expect(detalhe.getByText("O atendimento está sendo feito no CMEI Lucineia")).toHaveCount(0);
   await expect(detalhe.getByText("Turmas funcionando em")).toBeVisible();
   for (const sede of [
     "CMEI Lucineia Cristiani Marcelo do Amaral Carvalho",

@@ -1,6 +1,4 @@
-import { useEffect } from "react";
 import { X, Download, Smartphone } from "lucide-react";
-import { conviteInstalarVisivel } from "@/lib/camadas";
 import { Button } from "@/components/ui/button";
 import { usePWAInstallPrompt } from "@/hooks/usePWAInstallPrompt";
 import { IOSInstallBanner } from "./IOSInstallBanner";
@@ -16,12 +14,6 @@ export function InstallPromptBanner() {
   } = usePWAInstallPrompt();
 
   const mostrarIOS = isIOS && showIOSBanner;
-  // Enquanto o convite está na tela, o selo da campanha espera.
-  const visivel = mostrarIOS || canInstall;
-  useEffect(() => {
-    conviteInstalarVisivel.definir(visivel);
-    return () => conviteInstalarVisivel.definir(false);
-  }, [visivel]);
 
   // Show iOS banner for iOS devices
   if (mostrarIOS) {
@@ -42,7 +34,7 @@ export function InstallPromptBanner() {
   };
 
   return (
-    <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] md:bottom-8 left-4 right-4 z-50 bg-card rounded-xl shadow-floating p-4 md:left-20 md:max-w-sm animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] md:bottom-8 left-4 right-4 z-50 bg-card rounded-xl shadow-floating p-4 md:left-20 md:max-w-sm animate-in slide-in-from-bottom-4 duration-300">
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
           <Smartphone className="w-5 h-5 text-primary" />

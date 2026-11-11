@@ -92,8 +92,10 @@ function posicaoDoBalao(alvo: string, r: DOMRect | null, largura: number): CSSPr
   const vh = window.innerHeight;
   if (!r) return { left: (vw - largura) / 2, top: vh / 3 };
   const limitar = (x: number) => Math.max(MARGEM, Math.min(x, vw - largura - MARGEM));
-  // O mapa ocupa a tela: o balão fica dentro dele, embaixo.
-  if (alvo === "area-mapa") return { left: limitar(r.left + MARGEM), bottom: vh - r.bottom + MARGEM };
+  // O mapa ocupa a tela: o balão fica dentro dele, embaixo. No celular o mapa (100vh) passa
+  // da área visível, escondido sob a barra do navegador: o balão se apoia no que se vê.
+  if (alvo === "area-mapa")
+    return { left: limitar(r.left + MARGEM), bottom: Math.max(0, vh - r.bottom) + MARGEM };
   // Barra lateral do computador: o balão abre ao lado.
   if (vw >= 768 && r.left < 64) return { left: r.right + MARGEM, top: r.top };
   if (r.top + r.height / 2 < vh / 2) return { left: limitar(r.left), top: r.bottom + MARGEM };

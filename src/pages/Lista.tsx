@@ -258,7 +258,7 @@ const Lista = () => {
               </div>
             ) : (
               <div 
-                className="divide-y divide-border pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:pb-0"
+                className="divide-y divide-border pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0"
                 data-testid="lista-escolas"
                 style={{ 
                   width: '100%',

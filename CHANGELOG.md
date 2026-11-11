@@ -4,6 +4,22 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [2.5.1] - 2026-11-11 - Ajustes de interface e correções de bugs
+
+### Alterado
+
+- A barra de navegação inferior desceu para perto da borda da tela, deixando mais espaço para o mapa.
+
+### Removido
+
+- O selo do processo aberto que ficava sobre o mapa, acima da barra de navegação. O aviso de abertura continua aparecendo uma vez, e o filtro "Só escolas com vagas" segue nos Filtros.
+- A "Observação" no detalhe da escola, que trazia anotações internas do cadastro da Secretaria. No CAIC, o selo "Prédio desativado" e a lista de onde as turmas funcionam continuam aparecendo.
+
+### Corrigido
+
+- No celular, a etapa do tour que explica as cores das escolas aparecia cortada no pé da tela.
+- No celular, a busca de escolas se identifica como campo de busca, para o teclado não abrir a barra de senha, cartão e endereço ao digitar. O botão Enter do teclado passa a mostrar uma lupa.
+
 ## [2.5.0] - 2026-11-11 - Campanhas via banco de dados e painel. Dados da 1a Remoção
 
 ### Adicionado

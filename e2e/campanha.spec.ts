@@ -104,7 +104,7 @@ test.describe("nos Favoritos", () => {
   });
 });
 
-// --- Mapa: aviso de abertura e selo ---
+// --- Mapa: aviso de abertura ---
 
 const aviso = (page: Page) => page.getByRole("dialog");
 const selo = (page: Page) => page.getByRole("button", { name: /Remoção 2027 · 1ª fase/ });
@@ -130,11 +130,13 @@ test.describe("no mapa", () => {
     await expect(aviso(page)).toHaveCount(0);
 
     await page.reload();
-    await expect(selo(page)).toBeVisible();
+    await expect(page.getByRole("button", { name: "Filtros" })).toBeVisible();
+    await page.waitForTimeout(500);
     await expect(aviso(page)).toHaveCount(0);
+    await expect(selo(page)).toHaveCount(0);
   });
 
-  test("sem app instalado, o convite para instalar vem depois do aviso e antes do selo @campanha", async ({ page }) => {
+  test("sem app instalado, o convite para instalar vem depois do aviso @campanha", async ({ page }) => {
     await interceptarSupabase(page);
     await interceptarCampanha(page);
     await page.goto("/");
@@ -145,51 +147,30 @@ test.describe("no mapa", () => {
 
     await aviso(page).getByRole("button", { name: "Agora não" }).click();
     await expect(convite(page)).toBeVisible();
-    await expect(selo(page)).toHaveCount(0);
     await page.screenshot({ path: "test-results/campanha-convite.png" });
 
     await page.getByRole("button", { name: "Fechar convite" }).click();
     await expect(convite(page)).toHaveCount(0);
-    await expect(selo(page)).toBeVisible();
+    await expect(selo(page)).toHaveCount(0);
   });
 
-  test("com app instalado não há convite: o selo aparece direto @campanha", async ({ page }) => {
+  test("com app instalado não há convite @campanha", async ({ page }) => {
     await interceptarSupabase(page);
     await interceptarCampanha(page);
     await comAppInstalado(page);
     await avisoJaVisto(page);
     await page.goto("/");
     await oferecerInstalacao(page);
-    await expect(selo(page)).toBeVisible();
+    await expect(page.getByRole("button", { name: "Filtros" })).toBeVisible();
     await page.waitForTimeout(500);
     await expect(convite(page)).toHaveCount(0);
-    await expect(selo(page)).toBeVisible();
-  });
-
-  test("tocar no selo reabre o aviso sem mexer nos filtros @campanha", async ({ page }) => {
-    await interceptarSupabase(page);
-    await interceptarCampanha(page);
-    await avisoJaVisto(page);
-    await page.goto("/");
-
-    await expect(selo(page)).toContainText("até 13/11");
-    await page.screenshot({ path: "test-results/campanha-selo.png" });
-    await expect(aviso(page)).toHaveCount(0);
-    await selo(page).click();
-    await expect(aviso(page)).toBeVisible();
-
-    await aviso(page).getByRole("button", { name: "Agora não" }).click();
-    await expect(aviso(page)).toHaveCount(0);
-    await expect(page.getByText(/Exibindo \d+ escolas? filtradas?/)).toHaveCount(0);
   });
 
   test("'Ver escolas com vagas' abre os Filtros com 'Só escolas com vagas' ligado @campanha", async ({ page }) => {
     await interceptarSupabase(page);
     await interceptarCampanha(page);
-    await avisoJaVisto(page);
     await page.goto("/");
 
-    await selo(page).click();
     await aviso(page).getByRole("button", { name: "Ver escolas com vagas" }).click();
 
     const interruptor = page.getByRole("switch", { name: /Só escolas com vagas/ });

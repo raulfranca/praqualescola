@@ -174,7 +174,7 @@ export function PrioritiesList({
         </div>
       </div>;
   }
-  return <div className="flex-1 overflow-y-auto p-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:pb-4">
+  return <div className="flex-1 overflow-y-auto p-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-4">
       <div className="max-w-2xl mx-auto">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={favorites} strategy={verticalListSortingStrategy}>

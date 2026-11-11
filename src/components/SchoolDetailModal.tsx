@@ -1,5 +1,5 @@
 import { School } from "@/types/school";
-import { Star, MapPin, Phone, Building2, Car, Clock, School2, LogIn, Navigation, Info } from "lucide-react";
+import { Star, MapPin, Phone, Building2, Car, Clock, School2, LogIn, Navigation } from "lucide-react";
 import { SeloDesativado } from "@/components/SeloDesativado";
 import { Badge } from "@/components/ui/badge";
 import { HomeLocation } from "@/hooks/useHomeLocation";
@@ -67,15 +67,6 @@ export function SchoolDetailModal({
 
   // Content shared between mobile drawer and desktop dialog
   const content = school ? <div className="space-y-3 sm:space-y-4">
-      {/* Observação do cadastro */}
-      {school.note && <div className="flex items-start gap-2">
-          <Info className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm font-medium text-muted-foreground">Observação</p>
-            <p className="text-sm text-foreground mt-1">{school.note}</p>
-          </div>
-        </div>}
-
       {/* Prédios onde funcionam turmas desta escola */}
       {sedes.length > 0 && <div className="flex items-start gap-2">
           <School2 className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />

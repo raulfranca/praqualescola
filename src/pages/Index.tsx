@@ -5,7 +5,6 @@ import { MapView } from "@/components/MapView";
 import { HomeLocationInput } from "@/components/HomeLocationInput";
 import { SchoolDetailModal } from "@/components/SchoolDetailModal";
 import { CampaignBanner } from "@/components/CampaignBanner";
-import { SeloCampanha } from "@/components/SeloCampanha";
 import { FilterDrawer, SchoolLevel, ManagementType, FilterMetric } from "@/components/FilterDrawer";
 import { IOSInstallBanner } from "@/components/IOSInstallBanner";
 import { FilterToast } from "@/components/FilterToast";
@@ -262,13 +261,12 @@ const Index = () => {
 
       {!loading && (
         <>
-          {/* Aviso de vagas abertas: abre sozinho uma vez, ou pelo selo */}
+          {/* Aviso de vagas abertas: abre sozinho uma vez */}
           <CampaignBanner
             aberto={avisoAberto}
             onFechar={() => setAvisoAberto(false)}
             onShowVacancies={handleShowVacanciesFromBanner}
           />
-          <SeloCampanha onAbrir={() => setAvisoAberto(true)} />
 
           {/* Floating Search Bar and Action Chips */}
           <div className="absolute top-4 left-4 right-4 md:left-20 z-50 flex flex-col md:flex-row gap-3 md:items-start">
@@ -375,7 +373,6 @@ const Index = () => {
 
       {/* Filter Toast - Shows active filter count */}
       <FilterToast
-        acimaDoSelo={!loading && hasCampaign}
         schoolCount={filteredSchools.length}
         hasActiveFilters={
           selectedLevels.length < 3 || 

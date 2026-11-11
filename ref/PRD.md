@@ -75,12 +75,12 @@ O endereço de casa sai do aparelho só para o servidor do app, que calcula as d
 - **"Campanha" é termo interno:** nunca aparece em texto que o professor vê (nem em leitor de tela). Na tela fica o nome do processo e palavras como "vagas" e "aberta até". No painel `/admin` pode aparecer.
 - Uma campanha está **no ar** quando está dentro das datas **e** ligada **e** não arquivada. Se duas estão no ar ao mesmo tempo, vale a que começou primeiro (o painel avisa). Fora de campanha, o app funciona sem vagas.
 - **Carga:** o agente monta a campanha e as vagas a partir do documento da Secretaria (`db/campanhas/README.md`); ela nasce desligada. **Painel `/admin`, aba Campanhas:** edita nome, descrição, início e fim (horário de Brasília) e o interruptor; arquiva só campanha encerrada ("Arquivadas" recolhida, com desarquivar); mostra as vagas só para leitura. Pôr no ar não depende de publicar o app.
-- **Com campanha no ar:** marcadores do mapa mostram o número de vagas; um selo acima da barra de navegação reabre o aviso de abertura; filtro "Só escolas com vagas" (3.4); ordenação por vagas (3.5); vagas no detalhe (3.8); em Favoritos, quantas prioridades têm vaga nesta fase. "Sem vagas" aparece em cinza, não em vermelho.
-- **Ordem na abertura:** tour de primeira visita → aviso de abertura da campanha (com ou sem app instalado; dispensado, não volta para aquela campanha) → convite para instalar (só sem app instalado) → selo. Enquanto o convite está na tela, o selo fica escondido; fechado o convite, o selo aparece.
+- **Com campanha no ar:** marcadores do mapa mostram o número de vagas; filtro "Só escolas com vagas" (3.4); ordenação por vagas (3.5); vagas no detalhe (3.8); em Favoritos, quantas prioridades têm vaga nesta fase. "Sem vagas" aparece em cinza, não em vermelho.
+- **Ordem na abertura:** tour de primeira visita → aviso de abertura da campanha (com ou sem app instalado; dispensado, não volta para aquela campanha) → convite para instalar (só sem app instalado).
 
 ### 3.8 Detalhe da escola
 
-- Dados completos, etiquetas de nível, observação (quando houver), vagas (em campanha), distância e tempo (se calculados), botão de favoritar.
+- Dados completos, etiquetas de nível, vagas (em campanha), distância e tempo (se calculados), botão de favoritar.
 - **"Como Chegar?"**: no celular abre o seletor de apps de navegação (Maps, Waze, Uber...) pelas coordenadas; no computador abre o Google Maps.
 
 ### 3.9 PWA, atualização e manutenção

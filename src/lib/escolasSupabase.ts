@@ -100,7 +100,6 @@ export function montarEscolas(escolas: LinhaEscola[], turmas: LinhaTurma[]): Sch
       ano4: 0,
       ano5: 0,
       active: e.ativa,
-      note: e.observacao ?? undefined,
     };
 
     const hostedAt: string[] = [];

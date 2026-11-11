@@ -26,8 +26,6 @@ export interface School {
   durationInMinutes?: number;
   /** Escola em funcionamento no cadastro da SME (o CAIC está inativo). */
   active?: boolean;
-  /** Observação do cadastro da SME. */
-  note?: string;
   /** Códigos INEP dos prédios onde funcionam turmas desta escola, além do próprio. */
   hostedAt?: string[];
 }

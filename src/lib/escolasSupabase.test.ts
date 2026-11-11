@@ -69,7 +69,6 @@ describe("montarEscolas", () => {
       polo: "Castolira",
       phone: "",
       active: false,
-      note: "Prédio desativado.",
     });
     expect(typeof caic.lat).toBe("number");
     expect(caic.extension).toBeUndefined();

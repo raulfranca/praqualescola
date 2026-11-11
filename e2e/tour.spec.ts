@@ -30,6 +30,24 @@ test("primeira visita percorre as etapas e o tour não volta @tour", async ({ pa
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
+test("no celular, com o mapa passando da área visível, a etapa das cores aparece inteira @tour", async ({ page }) => {
+  // No Chrome do celular, 100vh é maior que a área visível (a barra do navegador cobre o fim do mapa).
+  await page.addInitScript(() => {
+    document.addEventListener("DOMContentLoaded", () => {
+      const estilo = document.createElement("style");
+      estilo.textContent = ".h-screen { height: 1000px !important; }";
+      document.head.append(estilo);
+    });
+  });
+  await page.goto("/");
+  const balao = page.getByRole("dialog");
+  await balao.getByRole("button", { name: "Próximo" }).click();
+  await expect(balao.getByRole("heading", { name: TITULOS[1] })).toBeVisible();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: "test-results/tour-celular-cores.png" });
+  await expect(balao).toBeInViewport({ ratio: 1 });
+});
+
 test("voltar retorna à etapa anterior @tour", async ({ page }) => {
   await page.goto("/");
   const balao = page.getByRole("dialog");
