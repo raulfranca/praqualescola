@@ -55,8 +55,8 @@ O endereço de casa sai do aparelho só para o servidor do app, que calcula as d
 
 - Nível: creche, pré-escola, fundamental.
 - Gestão: prefeitura ou terceirizada.
-- Distância máxima ou tempo máximo (escolhe-se a métrica), com histograma da distribuição. Só aparece depois de calcular distâncias.
-- "Só com vagas", quando há campanha ativa (seção 3.7).
+- Distância máxima ou tempo máximo (escolhe-se a métrica), com histograma da distribuição (barras dentro do limite destacadas) e quantas escolas ficam dentro do limite. Só aparece depois de calcular distâncias.
+- "Só escolas com vagas", num cartão com o nome do processo e quantas escolas têm vaga, quando há campanha no ar (seção 3.7).
 - Os filtros valem para mapa e lista e duram a sessão do navegador; uma sessão nova volta ao padrão (tudo marcado, sem limite de distância). Um aviso discreto indica quando há filtro ativo.
 
 ### 3.5 Lista (`/lista`)
@@ -71,10 +71,12 @@ O endereço de casa sai do aparelho só para o servidor do app, que calcula as d
 
 ### 3.7 Campanhas
 
-- Campanhas (ex.: "Remoção 2025 – 2ª Fase", "Vagas para Sede 2026") têm início, fim e mensagem de banner.
-- Durante a campanha, aparece o banner, só para quem abre o app instalado e nunca por cima do tour de primeira visita. Fora de campanha, o app funciona sem vagas.
-- **Vagas estão sem fonte:** saíram com a planilha Google e ainda não existem no cadastro oficial. Uma tabela de vagas no Supabase será feita num plano à parte, antes da próxima campanha.
-- Se duas campanhas se sobrepõem, vale a primeira da lista.
+- Campanhas (ex.: "Remoção 2027 · 1ª fase") ficam no banco, com nome, descrição, início, fim, interruptor "ligada" e as vagas de cada escola (código INEP). Só número **positivo** é vaga; zero ou negativo é "sem vaga".
+- **"Campanha" é termo interno:** nunca aparece em texto que o professor vê (nem em leitor de tela). Na tela fica o nome do processo e palavras como "vagas" e "aberta até". No painel `/admin` pode aparecer.
+- Uma campanha está **no ar** quando está dentro das datas **e** ligada **e** não arquivada. Se duas estão no ar ao mesmo tempo, vale a que começou primeiro (o painel avisa). Fora de campanha, o app funciona sem vagas.
+- **Carga:** o agente monta a campanha e as vagas a partir do documento da Secretaria (`db/campanhas/README.md`); ela nasce desligada. **Painel `/admin`, aba Campanhas:** edita nome, descrição, início e fim (horário de Brasília) e o interruptor; arquiva só campanha encerrada ("Arquivadas" recolhida, com desarquivar); mostra as vagas só para leitura. Pôr no ar não depende de publicar o app.
+- **Com campanha no ar:** marcadores do mapa mostram o número de vagas; um selo acima da barra de navegação reabre o aviso de abertura; filtro "Só escolas com vagas" (3.4); ordenação por vagas (3.5); vagas no detalhe (3.8); em Favoritos, quantas prioridades têm vaga nesta fase. "Sem vagas" aparece em cinza, não em vermelho.
+- **Ordem na abertura:** tour de primeira visita → aviso de abertura da campanha (com ou sem app instalado; dispensado, não volta para aquela campanha) → convite para instalar (só sem app instalado) → selo. Enquanto o convite está na tela, o selo fica escondido; fechado o convite, o selo aparece.
 
 ### 3.8 Detalhe da escola
 
@@ -83,7 +85,7 @@ O endereço de casa sai do aparelho só para o servidor do app, que calcula as d
 
 ### 3.9 PWA, atualização e manutenção
 
-- Instalável (Android, Windows; no iOS, um banner ensina a adicionar à tela inicial). O convite para instalar só aparece depois que o tour de primeira visita foi fechado.
+- Instalável (Android, Windows; no iOS, um banner ensina a adicionar à tela inicial). O convite para instalar só aparece depois que o tour de primeira visita e o aviso de campanha foram fechados.
 - Quando sai versão nova, quem abre o app instalado vê um aviso com título e subtítulo próprios daquela versão (`public/version.json`) e botão para atualizar. No navegador o aviso não aparece: a versão nova entra quando todas as abas do app são fechadas e ele é aberto de novo.
 - **Modo manutenção**: ligado no painel da Vercel (Edge Config), sem publicar código. Com ele ligado, o app mostra só a página de manutenção com título e mensagem configurados. Se a consulta falhar, o app abre normalmente.
 
@@ -96,7 +98,7 @@ O endereço de casa sai do aparelho só para o servidor do app, que calcula as d
 - Na primeira vez que o aparelho abre a tela do mapa, um tour de sete etapas apresenta o app, todo sobre o mapa. Abre com a coruja e uma frase sobre o que é o app ("um mapa com todas as escolas municipais de Pindamonhangaba e informações atualizadas sobre vagas para remoção e atribuição"); depois ilumina um ponto por vez: cores dos marcadores (creche, pré-escola, fundamental), busca, Minha Casa, Filtros, Lista e Favoritos (favoritar pela estrela e arrastar para montar as prioridades).
 - O tour só aponta e explica: não abre telas nem preenche nada. Tem "Próximo", "Voltar" e "Pular".
 - Aparece **uma vez por aparelho**. Concluir, pular ou fechar (tecla Esc) grava que foi visto, e ele não volta.
-- Enquanto o tour não foi fechado, nenhum outro aviso aparece (instalar, campanha, nova versão).
+- Enquanto o tour não foi fechado, nenhum outro aviso aparece (instalar, campanha, nova versão). Ordem dos avisos depois dele: seção 3.7.
 
 ## 4. Roadmap — ideias em análise
 

@@ -7,7 +7,7 @@ import { distanciaSalva } from "@/hooks/useSchoolDistances";
 import { formatarDistancia, formatarDuracao } from "@/lib/distanceCalculator";
 import { SeloAproximado } from "@/components/SeloAproximado";
 import { getSchoolLevelTags } from "@/lib/schoolTags";
-import { useCampaign } from "@/hooks/useCampaign";
+import { useCampaign } from "@/contexts/CampaignContext";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -36,10 +36,7 @@ export function SchoolDetailModal({
   // Distância já calculada para a casa atual (lista/mapa); o detalhe nunca chama o Google.
   const distanceInfo = homeLocation && school ? distanciaSalva(school.id) : null;
   const isMobile = useIsMobile();
-  const {
-    isActive: isCampaignActive,
-    config: campaign
-  } = useCampaign();
+  const { campanha } = useCampaign();
   const handleGetDirections = () => {
     if (!school?.lat || !school?.lng) return;
     
@@ -95,17 +92,17 @@ export function SchoolDetailModal({
         </div>}
 
       {/* Campaign Section */}
-      {isCampaignActive && <div className="flex items-start gap-2">
+      {campanha && <div className="flex items-start gap-2">
           <LogIn className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-muted-foreground">{campaign.title}</p>
+            <p className="text-sm font-medium text-muted-foreground">{campanha.nome}</p>
             <div className="mt-1">
               {school.vacancies && school.vacancies > 0 ? (
                 <Badge className="bg-sucesso-bg text-sucesso-fg border-0 px-2.5 py-0.5 font-semibold">
                   {school.vacancies === 1 ? "1 vaga" : `${school.vacancies} vagas`}
                 </Badge>
               ) : (
-                <Badge className="bg-erro-bg text-erro-fg border-0 px-2.5 py-0.5 font-semibold">
+                <Badge className="bg-muted text-muted-foreground border-0 px-2.5 py-0.5 font-semibold">
                   Sem vagas
                 </Badge>
               )}

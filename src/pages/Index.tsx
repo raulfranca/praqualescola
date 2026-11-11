@@ -5,6 +5,7 @@ import { MapView } from "@/components/MapView";
 import { HomeLocationInput } from "@/components/HomeLocationInput";
 import { SchoolDetailModal } from "@/components/SchoolDetailModal";
 import { CampaignBanner } from "@/components/CampaignBanner";
+import { SeloCampanha } from "@/components/SeloCampanha";
 import { FilterDrawer, SchoolLevel, ManagementType, FilterMetric } from "@/components/FilterDrawer";
 import { IOSInstallBanner } from "@/components/IOSInstallBanner";
 import { FilterToast } from "@/components/FilterToast";
@@ -14,6 +15,8 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
 import { useSchoolDistances } from "@/hooks/useSchoolDistances";
 import { useFilters } from "@/contexts/FilterContext";
+import { useCampaign } from "@/contexts/CampaignContext";
+import { filtroVagasAtivo, temVaga } from "@/lib/campanha";
 import { usePWAInstallPrompt } from "@/hooks/usePWAInstallPrompt";
 import { School } from "@/types/school";
 
@@ -23,7 +26,8 @@ const Index = () => {
   const [shouldCenterMap, setShouldCenterMap] = useState(false);
   const [showHomeInput, setShowHomeInput] = useState(false);
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
-  
+  const [avisoAberto, setAvisoAberto] = useState(false);
+
   // Use shared filter context
   const {
     selectedLevels,
@@ -41,6 +45,7 @@ const Index = () => {
   } = useFilters();
   
   const { schools, loading } = useSchoolsData();
+  const { isActive: hasCampaign } = useCampaign();
   const { favorites, toggleFavorite } = useFavorites();
   const { homeLocation, setHome, clearHome, hasHome } = useHomeLocation();
   const { isIOS, showIOSBanner, dismissIOSBanner } = usePWAInstallPrompt();
@@ -184,14 +189,12 @@ const Index = () => {
     });
 
     // Apply campaign vacancy filter
-    if (showOnlyVacancies) {
-      filtered = filtered.filter((school) => {
-        return school.vacancies && school.vacancies > 0;
-      });
+    if (filtroVagasAtivo(showOnlyVacancies, hasCampaign)) {
+      filtered = filtered.filter(temVaga);
     }
 
     return filtered;
-  }, [schoolsWithDistances, selectedLevels, selectedManagement, showOnlyVacancies]);
+  }, [schoolsWithDistances, selectedLevels, selectedManagement, showOnlyVacancies, hasCampaign]);
 
   const filteredSchools = useMemo(() => {
     let filtered = schoolsMatchingCriteria;
@@ -247,7 +250,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background overflow-hidden pb-16 md:pb-0 md:ml-16">
+    <div className="flex flex-col h-screen bg-background overflow-hidden md:ml-16">
       {loading && (
         <div className="flex items-center justify-center flex-1">
           <div className="text-center">
@@ -259,8 +262,13 @@ const Index = () => {
 
       {!loading && (
         <>
-          {/* Campaign Banner */}
-          <CampaignBanner onShowVacancies={handleShowVacanciesFromBanner} />
+          {/* Aviso de vagas abertas: abre sozinho uma vez, ou pelo selo */}
+          <CampaignBanner
+            aberto={avisoAberto}
+            onFechar={() => setAvisoAberto(false)}
+            onShowVacancies={handleShowVacanciesFromBanner}
+          />
+          <SeloCampanha onAbrir={() => setAvisoAberto(true)} />
 
           {/* Floating Search Bar and Action Chips */}
           <div className="absolute top-4 left-4 right-4 md:left-20 z-50 flex flex-col md:flex-row gap-3 md:items-start">
@@ -286,7 +294,7 @@ const Index = () => {
           </div>
 
           {/* Map View - Full Screen */}
-          <div className="relative flex-1 w-full h-full" data-tour="mapa">
+          <div className="relative flex-1 w-full h-full" data-tour="area-mapa">
             <MapView
               schools={filteredSchools}
               favorites={favorites}
@@ -366,7 +374,8 @@ const Index = () => {
       />
 
       {/* Filter Toast - Shows active filter count */}
-      <FilterToast 
+      <FilterToast
+        acimaDoSelo={!loading && hasCampaign}
         schoolCount={filteredSchools.length}
         hasActiveFilters={
           selectedLevels.length < 3 || 

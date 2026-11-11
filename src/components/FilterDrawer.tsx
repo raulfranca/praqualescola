@@ -6,8 +6,9 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { DistanceHistogram } from "@/components/DistanceHistogram";
-import { useCampaign } from "@/hooks/useCampaign";
+import { useCampaign } from "@/contexts/CampaignContext";
 import { trackEvent } from "@/lib/analytics";
+import coruja from "../../design-system/assets/coruja.svg";
 import {
   Drawer,
   DrawerClose,
@@ -90,7 +91,7 @@ export function FilterDrawer({
   showOnlyVacancies = false,
   onVacanciesChange,
 }: FilterDrawerProps) {
-  const { isActive, config } = useCampaign();
+  const { campanha } = useCampaign();
   // Local state for smooth slider dragging (visual only)
   const [localDistance, setLocalDistance] = useState(selectedDistance);
   const [localDuration, setLocalDuration] = useState(selectedDuration);
@@ -207,20 +208,22 @@ export function FilterDrawer({
         <div className="flex-1 overflow-y-auto px-6 py-6">
           <div className="space-y-6">
             {/* Campaign Filter Toggle (only visible when campaign is active) */}
-            {isActive && onVacanciesChange && (
-              <div className="space-y-4 pb-6 border-b">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-semibold">{config.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Mostrar apenas escolas com vagas disponíveis
-                    </p>
-                  </div>
-                  <Switch
-                    checked={showOnlyVacancies}
-                    onCheckedChange={onVacanciesChange}
-                  />
-                </div>
+            {campanha && onVacanciesChange && (
+              <div className="grid grid-cols-[40px_minmax(0,1fr)_52px] items-center gap-2.5 rounded-xl bg-info-bg py-3.5 pl-2.5 pr-3.5 text-info-fg">
+                <img src={coruja} alt="" aria-hidden="true" className="h-10 w-10" />
+                <label htmlFor="so-vagas" className="flex min-w-0 flex-col gap-0.5 cursor-pointer">
+                  <strong className="text-[15px] font-semibold text-foreground">Só escolas com vagas</strong>
+                  <span className="text-[13px]">
+                    {campanha.nome} · {campanha.escolas_com_vaga}{" "}
+                    {campanha.escolas_com_vaga === 1 ? "escola" : "escolas"}
+                  </span>
+                </label>
+                <Switch
+                  id="so-vagas"
+                  checked={showOnlyVacancies}
+                  onCheckedChange={onVacanciesChange}
+                  className="h-8 w-[52px] [&>span]:h-6 [&>span]:w-6 [&>span]:data-[state=checked]:translate-x-5"
+                />
               </div>
             )}
 
@@ -277,46 +280,49 @@ export function FilterDrawer({
             </div>
 
             {hasHomeLocation && (onDistanceChange || onDurationChange) && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between -ml-0.5">
-                  <ToggleGroup
-                    type="single"
-                    value={filterMetric}
-                    onValueChange={(value) => {
-                      if (value) onMetricChange?.(value as FilterMetric);
-                    }}
-                    className="inline-flex bg-muted p-0.5 rounded-lg gap-0.5"
-                  >
+              <div className="space-y-3">
+                <ToggleGroup
+                  type="single"
+                  value={filterMetric}
+                  onValueChange={(value) => {
+                    if (value) onMetricChange?.(value as FilterMetric);
+                  }}
+                  className="grid w-full grid-cols-2 gap-0 rounded-lg bg-secondary p-1"
+                >
+                  {(["distance", "time"] as const).map((m) => (
                     <ToggleGroupItem
-                      value="distance"
-                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-primary data-[state=on]:shadow-ambient data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
+                      key={m}
+                      value={m}
+                      className="h-[38px] rounded-md text-sm transition-all data-[state=on]:bg-card data-[state=on]:font-semibold data-[state=on]:text-primary data-[state=on]:shadow-ambient data-[state=off]:bg-transparent data-[state=off]:font-medium data-[state=off]:text-muted-foreground"
                     >
-                      Distância
+                      {m === "distance" ? "Distância" : "Tempo"}
                     </ToggleGroupItem>
-                    <ToggleGroupItem
-                      value="time"
-                      className="rounded-md px-5 py-2 text-lg font-semibold transition-all data-[state=on]:bg-background data-[state=on]:text-primary data-[state=on]:shadow-ambient data-[state=off]:text-muted-foreground data-[state=off]:bg-transparent"
-                    >
-                      Tempo
-                    </ToggleGroupItem>
-                  </ToggleGroup>
-                  
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {filterMetric === "distance" 
-                      ? `Até ${localDistance.toFixed(1)} km`
-                      : `Até ${formatDuration(localDuration)}`
-                    }
+                  ))}
+                </ToggleGroup>
+
+                <div className="flex items-baseline justify-between text-[13px]" data-testid="limite-distancia">
+                  <span className="font-semibold">
+                    {filterMetric === "distance" ? `Até ${localDistance.toFixed(1)} km` : `Até ${formatDuration(localDuration)}`}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {(() => {
+                      const n =
+                        filterMetric === "distance"
+                          ? schoolDistances.filter((d) => d <= localDistance).length
+                          : schoolDurations.filter((d) => d <= localDuration).length;
+                      return `${n} ${n === 1 ? "escola" : "escolas"}`;
+                    })()}
                   </span>
                 </div>
-                
-                <div className="px-6 md:px-2">
+
+                <div>
                   {filterMetric === "distance" && schoolDistances.length > 0 && (
                     <DistanceHistogram
                       distances={schoolDistances}
                       minDistance={minDistance}
                       maxDistance={maxDistance}
                       globalMax={globalHistogramMax}
-                      metric="distance"
+                      selected={localDistance}
                     />
                   )}
                   {filterMetric === "time" && schoolDurations.length > 0 && (
@@ -325,7 +331,7 @@ export function FilterDrawer({
                       minDistance={minDuration}
                       maxDistance={maxDuration}
                       globalMax={globalHistogramMax}
-                      metric="time"
+                      selected={localDuration}
                     />
                   )}
                   

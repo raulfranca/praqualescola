@@ -4,6 +4,7 @@ import { School } from "@/types/school";
 import { HomeLocation } from "@/hooks/useHomeLocation";
 import { trackEvent } from "@/lib/analytics";
 import { mapColors } from "@/lib/mapColors";
+import { montarIconeEscola, tamanhoMarcador } from "@/lib/marcadorEscola";
 import corujaBranca from "../../design-system/assets/coruja-branca.svg?raw";
 
 // Alfinete "Minha Casa": tinta azul-noite com a coruja branca na cabeça (design-system/README.md)
@@ -128,7 +129,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     const padding = {
       top: isMobile ? 60 : 80,    // Space for search bar
       right: isMobile ? 40 : 60,
-      bottom: isMobile ? 60 : 80, // Space for bottom nav on mobile
+      bottom: isMobile ? 150 : 80, // Barra flutuante, selo e faixa do Google no celular
       left: isMobile ? 40 : 60
     };
 
@@ -216,273 +217,22 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     return { hasCreche, hasPre, hasFundamental };
   };
 
-  // Create custom marker icons with color coding (circles)
+  // Ícone do marcador (SVG montado em src/lib/marcadorEscola.ts); `vacancies` só existe com campanha no ar
   const createMarkerIcon = (school: School, isFavorite: boolean) => {
-    if (!isLoaded) return undefined;
-    
     const { hasCreche, hasPre, hasFundamental } = getSchoolCategory(school);
-    const categories = [hasCreche, hasPre, hasFundamental].filter(Boolean).length;
-    
-    // Cores do design system (design-system/tokens.css, via src/lib/mapColors.ts)
-    const crecheColor = mapColors["nivel-creche"];
-    const preColor = mapColors["nivel-pre"];
-    const fundamentalColor = mapColors["nivel-fundamental"];
-    const primaryColor = mapColors.primary;
-    const outline = mapColors["marcador-contorno"];
-    const favoriteRing = mapColors["marcador-favorito"];
-    // Sombra azul-noite (--on-surface), nunca preta
-    const shadowFilter = `<filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="${mapColors["on-surface"]}" flood-opacity="0.35"/>
-            </filter>`;
-    // Estrela do favorito: anel âmbar por fora do contorno branco
-    const starRing = (path: string) => `
-              <path d="${path}" fill="none" stroke="${favoriteRing}" stroke-width="5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
-              <path d="${path}" fill="none" stroke="${outline}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
-    
-    // Dynamic size based on zoom level - smaller at city view, larger at street view
-    // Streets with arrows typically appear at zoom 17+
-    const baseSize = currentZoom < 16 ? 
-      Math.max(18, 10 + (currentZoom * 0.8)) : // Slightly larger at city/neighborhood level
-      Math.max(24, 14 + (currentZoom * 1.5)); // Grow faster at street level
-    const size = baseSize;
-    const radius = size / 2;
-    
-    // Increase canvas size to prevent shadow clipping
-    const canvasSize = size + 16; // Extra space for shadow blur
-    const offset = 8; // Center the circle in the larger canvas
-    
-    if (isFavorite) {
-      // Star for favorites with color coding and amber ring
-      const starSize = size * 1.8; // Significantly larger than circles (80% bigger)
-      const starCanvasSize = starSize + 24; // Extra space for glow
-      const starOffset = 12;
-      const starScale = starSize / 24; // Scale factor to make star actually bigger
-      
-      // Star path (centered at 12,12 in a 24x24 viewbox, we'll scale it)
-      const starPath = "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
-      
-      // Single category - solid fill
-      if (categories === 1) {
-        let fillColor = primaryColor;
-        if (hasCreche) fillColor = crecheColor;
-        else if (hasPre) fillColor = preColor;
-        else if (hasFundamental) fillColor = fundamentalColor;
-        
-        const svg = `
-          <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              ${shadowFilter}
-            </defs>
-            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#shadow)">
-              <path d="${starPath}" fill="${fillColor}"/>${starRing(starPath)}
-            </g>
-          </svg>
-        `;
-        
-        return {
-          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-          scaledSize: new google.maps.Size(starCanvasSize, starCanvasSize),
-          anchor: new google.maps.Point(starCanvasSize / 2, starCanvasSize / 2),
-        };
-      }
-      
-      // Two categories - split fill (left/right)
-      if (categories === 2) {
-        let leftColor = crecheColor;
-        let rightColor = fundamentalColor;
-        
-        if (hasCreche && hasPre) {
-          leftColor = crecheColor;
-          rightColor = preColor;
-        } else if (hasCreche && hasFundamental) {
-          leftColor = crecheColor;
-          rightColor = fundamentalColor;
-        } else if (hasPre && hasFundamental) {
-          leftColor = preColor;
-          rightColor = fundamentalColor;
-        }
-        
-        const svg = `
-          <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              ${shadowFilter}
-              <clipPath id="leftHalf">
-                <rect x="0" y="0" width="12" height="24"/>
-              </clipPath>
-              <clipPath id="rightHalf">
-                <rect x="12" y="0" width="12" height="24"/>
-              </clipPath>
-            </defs>
-            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#shadow)">
-              <path d="${starPath}" fill="${leftColor}" clip-path="url(#leftHalf)"/>
-              <path d="${starPath}" fill="${rightColor}" clip-path="url(#rightHalf)"/>${starRing(starPath)}
-            </g>
-          </svg>
-        `;
-        
-        return {
-          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-          scaledSize: new google.maps.Size(starCanvasSize, starCanvasSize),
-          anchor: new google.maps.Point(starCanvasSize / 2, starCanvasSize / 2),
-        };
-      }
-      
-      // Three categories - tri-split fill (left/center/right)
-      if (categories === 3) {
-        const svg = `
-          <svg width="${starCanvasSize}" height="${starCanvasSize}" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              ${shadowFilter}
-              <clipPath id="leftThird">
-                <rect x="0" y="0" width="8" height="24"/>
-              </clipPath>
-              <clipPath id="centerThird">
-                <rect x="8" y="0" width="8" height="24"/>
-              </clipPath>
-              <clipPath id="rightThird">
-                <rect x="16" y="0" width="8" height="24"/>
-              </clipPath>
-            </defs>
-            <g transform="translate(${starOffset}, ${starOffset}) scale(${starScale})" filter="url(#shadow)">
-              <path d="${starPath}" fill="${crecheColor}" clip-path="url(#leftThird)"/>
-              <path d="${starPath}" fill="${preColor}" clip-path="url(#centerThird)"/>
-              <path d="${starPath}" fill="${fundamentalColor}" clip-path="url(#rightThird)"/>${starRing(starPath)}
-            </g>
-          </svg>
-        `;
-        
-        return {
-          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-          scaledSize: new google.maps.Size(starCanvasSize, starCanvasSize),
-          anchor: new google.maps.Point(starCanvasSize / 2, starCanvasSize / 2),
-        };
-      }
-    }
-    
-    // Single category - solid color circle
-    if (categories === 1) {
-      let color = primaryColor;
-      if (hasCreche) color = crecheColor;
-      else if (hasPre) color = preColor;
-      else if (hasFundamental) color = fundamentalColor;
-      
-      const svg = `
-        <svg width="${canvasSize}" height="${canvasSize}" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            ${shadowFilter}
-          </defs>
-          <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
-                  fill="${color}" stroke="${outline}" stroke-width="2" 
-                  filter="url(#shadow)"/>
-        </svg>
-      `;
-      
-      return {
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-        scaledSize: new google.maps.Size(canvasSize, canvasSize),
-        anchor: new google.maps.Point(radius + offset, radius + offset),
-      };
-    }
-    
-    // Two categories - split circle (vertical half)
-    if (categories === 2) {
-      let leftColor = crecheColor;
-      let rightColor = fundamentalColor;
-      
-      if (hasCreche && hasPre) {
-        leftColor = crecheColor;
-        rightColor = preColor;
-      } else if (hasCreche && hasFundamental) {
-        leftColor = crecheColor;
-        rightColor = fundamentalColor;
-      } else if (hasPre && hasFundamental) {
-        leftColor = preColor;
-        rightColor = fundamentalColor;
-      }
-      
-      const svg = `
-        <svg width="${canvasSize}" height="${canvasSize}" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            ${shadowFilter}
-            <clipPath id="leftHalf">
-              <rect x="${offset}" y="${offset}" width="${radius}" height="${size}"/>
-            </clipPath>
-            <clipPath id="rightHalf">
-              <rect x="${radius + offset}" y="${offset}" width="${radius}" height="${size}"/>
-            </clipPath>
-          </defs>
-          <g filter="url(#shadow)">
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
-                    fill="${leftColor}" clip-path="url(#leftHalf)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
-                    fill="${rightColor}" clip-path="url(#rightHalf)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
-                    fill="none" stroke="${outline}" stroke-width="2"/>
-          </g>
-        </svg>
-      `;
-      
-      return {
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-        scaledSize: new google.maps.Size(canvasSize, canvasSize),
-        anchor: new google.maps.Point(radius + offset, radius + offset),
-      };
-    }
-    
-    // Three categories - tri-split circle (vertical thirds)
-    if (categories === 3) {
-      const svg = `
-        <svg width="${canvasSize}" height="${canvasSize}" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            ${shadowFilter}
-            <clipPath id="leftThird">
-              <rect x="${offset}" y="${offset}" width="${size / 3}" height="${size}"/>
-            </clipPath>
-            <clipPath id="middleThird">
-              <rect x="${size / 3 + offset}" y="${offset}" width="${size / 3}" height="${size}"/>
-            </clipPath>
-            <clipPath id="rightThird">
-              <rect x="${(size / 3) * 2 + offset}" y="${offset}" width="${size / 3}" height="${size}"/>
-            </clipPath>
-          </defs>
-          <g filter="url(#shadow)">
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
-                    fill="${crecheColor}" clip-path="url(#leftThird)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
-                    fill="${preColor}" clip-path="url(#middleThird)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
-                    fill="${fundamentalColor}" clip-path="url(#rightThird)"/>
-            <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
-                    fill="none" stroke="${outline}" stroke-width="2"/>
-          </g>
-        </svg>
-      `;
-      
-      return {
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-        scaledSize: new google.maps.Size(canvasSize, canvasSize),
-        anchor: new google.maps.Point(radius + offset, radius + offset),
-      };
-    }
-    
-    // Fallback - solid primary color circle
-    const svg = `
-      <svg width="${canvasSize}" height="${canvasSize}" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.4"/>
-          </filter>
-        </defs>
-        <circle cx="${radius + offset}" cy="${radius + offset}" r="${radius - 2}" 
-                fill="${primaryColor}" stroke="${outline}" stroke-width="2" 
-                filter="url(#shadow)"/>
-      </svg>
-    `;
-    
+    const icone = montarIconeEscola({
+      niveis: { creche: hasCreche, pre: hasPre, fundamental: hasFundamental },
+      favorito: isFavorite,
+      zoom: currentZoom,
+      vagas: school.vacancies,
+    });
     return {
-      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-      scaledSize: new google.maps.Size(canvasSize, canvasSize),
-      anchor: new google.maps.Point(radius + offset, radius + offset),
+      icon: {
+        url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(icone.svg),
+        scaledSize: new google.maps.Size(icone.tamanho, icone.tamanho),
+        anchor: new google.maps.Point(icone.centro, icone.centro),
+      },
+      centro: icone.centro,
     };
   };
 
@@ -522,19 +272,16 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
             const latitudeZIndex = Math.round((90 + school.lat) * 1000);
             const finalZIndex = isFavorite ? latitudeZIndex + 100000 : latitudeZIndex;
             
-            // Dynamic size calculation matching createMarkerIcon logic
-            const baseSize = currentZoom < 16 ? 
-              Math.max(18, 10 + (currentZoom * 0.8)) : 
-              Math.max(24, 14 + (currentZoom * 1.5));
+            const baseSize = tamanhoMarcador(currentZoom);
             const markerSize = isFavorite ? baseSize * 1.8 : baseSize;
             const clickRadius = (markerSize / 2) + 4; // Add small safety margin
-            const centerOffset = (markerSize + 16) / 2; // Match canvas offset from createMarkerIcon
-            
+            const { icon, centro: centerOffset } = createMarkerIcon(school, isFavorite);
+
             return (
               <Marker
                 key={school.id}
                 position={{ lat: school.lat, lng: school.lng }}
-                icon={createMarkerIcon(school, isFavorite)}
+                icon={icon}
                 onClick={() => onMarkerClick(school)}
                 title={school.name}
                 zIndex={finalZIndex}

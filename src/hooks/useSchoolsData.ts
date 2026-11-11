@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { School } from "@/types/school";
+import { useCampaign } from "@/contexts/CampaignContext";
+import { aplicarVagas } from "@/lib/campanha";
 import { buscarDadosEscolas, montarEscolas } from "@/lib/escolasSupabase";
 import { toast } from "sonner";
 
@@ -40,5 +42,9 @@ export function useSchoolsData() {
     fetchSchools();
   }, []);
 
-  return { schools, loading, error };
+  // Vagas vêm da campanha no ar; sem campanha, nenhuma escola tem `vacancies`.
+  const { campanha } = useCampaign();
+  const comVagas = useMemo(() => aplicarVagas(schools, campanha), [schools, campanha]);
+
+  return { schools: comVagas, loading, error };
 }

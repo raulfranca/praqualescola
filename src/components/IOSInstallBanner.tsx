@@ -7,7 +7,7 @@ interface IOSInstallBannerProps {
 
 export function IOSInstallBanner({ onDismiss }: IOSInstallBannerProps) {
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50 bg-card rounded-xl shadow-floating p-4 md:left-20 md:max-w-sm">
+    <div className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] md:bottom-8 left-4 right-4 z-50 bg-card rounded-xl shadow-floating p-4 md:left-20 md:max-w-sm">
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
           <Share className="w-5 h-5 text-primary" />

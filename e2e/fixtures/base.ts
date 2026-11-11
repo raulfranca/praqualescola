@@ -9,7 +9,9 @@ import { expect, test as base } from "@playwright/test";
 const GOOGLE = /^https?:\/\/([a-z0-9-]+\.)*(googleapis\.com|gstatic\.com)\//i;
 const API_SERVIDOR = /^https?:\/\/[^/]+\/api\/(distancias|admin)(\/|\?|$)/i;
 const CODIGO_DO_MAPA = /^https:\/\/maps\.googleapis\.com\/(maps\/api\/js\?|maps-api-v3\/api\/js\/)/i;
-const PAGO = /routes\.googleapis\.com|places\.googleapis\.com|distancematrix|\/maps\/api\/place\//i;
+// O app sempre pede a campanha no ar ao abrir: sem interceptação no teste, a resposta é "nenhuma".
+const API_CAMPANHA = /^https?:\/\/[^/]+\/api\/campanha(\?|$)/i;
+const PAGO =/routes\.googleapis\.com|places\.googleapis\.com|distancematrix|\/maps\/api\/place\//i;
 
 export const MENSAGEM_TRAVA = "Trava da cota do Google: o teste tentou chamar um serviço pago";
 
@@ -41,6 +43,9 @@ export const test = base.extend<{ travaGoogle: void; tourVisto: boolean; semTour
         bloquear(rota.request().url());
         return rota.abort("blockedbyclient");
       });
+      await context.route(API_CAMPANHA, (rota) =>
+        rota.fulfill({ contentType: "application/json", body: JSON.stringify({ campanha: null }) }),
+      );
       await use();
       expect(reprovadas, MENSAGEM_TRAVA).toEqual([]);
     },

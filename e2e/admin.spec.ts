@@ -25,12 +25,52 @@ function painel(modoForcado = false) {
   };
 }
 
+function campanha(extra: Record<string, unknown> = {}) {
+  return {
+    id: "c1",
+    nome: "Remoção 2027 · 1ª fase",
+    descricao: "",
+    inicio: "2026-11-12T09:00:00Z",
+    fim: "2026-11-13T10:00:00Z",
+    ligada: false,
+    arquivada: false,
+    fonte: "Vagas_Iniciais_para_Remocao_06_11_26.pdf",
+    atualizada_em: "2026-11-11T12:00:00Z",
+    escolas_na_lista: 66,
+    escolas_com_vaga: 29,
+    total_vagas: 44,
+    maiores: [{ nome_na_fonte: "EMEF Exemplo", codigo_inep: "111", vagas: 4 }],
+    estado: "desligada",
+    ...extra,
+  };
+}
+
+/** Estado das campanhas simuladas: muda conforme os POSTs, como o servidor faria. */
+function simularCampanhas(inicial: ReturnType<typeof campanha>[]) {
+  let lista = inicial;
+  return (corpo: Record<string, unknown> | undefined) => {
+    if (corpo?.acao === "editar") {
+      if (Date.parse(corpo.fim as string) <= Date.parse(corpo.inicio as string)) {
+        return { status: 400, corpo: { erro: "O fim precisa ser depois do início." } };
+      }
+      lista = lista.map((c) =>
+        c.id === corpo.id ? { ...c, ...corpo, estado: corpo.ligada ? "no_ar" : "desligada" } : c,
+      ) as typeof lista;
+    }
+    if (corpo?.acao === "arquivar") {
+      lista = lista.map((c) => (c.id === corpo.id ? { ...c, arquivada: corpo.arquivada as boolean } : c));
+    }
+    return { status: 200, corpo: { campanhas: lista, agora: "2026-11-12T12:00:00Z" } };
+  };
+}
+
 const json = (route: Route, corpo: unknown, status = 200) =>
   route.fulfill({ status, contentType: "application/json", body: JSON.stringify(corpo) });
 
 /** Simula as três APIs do painel. Senha certa: "certa". Devolve os corpos POST recebidos. */
-async function interceptarAdmin(page: Page) {
+async function interceptarAdmin(page: Page, campanhas = [campanha()]) {
   const posts: { url: string; corpo: unknown }[] = [];
+  const responderCampanhas = simularCampanhas(campanhas);
   await page.route("**/api/admin/**", async (route) => {
     const req = route.request();
     const url = new URL(req.url()).pathname;
@@ -54,14 +94,18 @@ async function interceptarAdmin(page: Page) {
         resumo: RESUMO,
       });
     }
+    if (url.endsWith("/campanhas")) {
+      const r = responderCampanhas(corpo as Record<string, unknown> | undefined);
+      return json(route, r.corpo, r.status);
+    }
     return route.abort();
   });
   return posts;
 }
 
-async function abrirAdmin(page: Page) {
+async function abrirAdmin(page: Page, campanhas?: ReturnType<typeof campanha>[]) {
   await interceptarSupabase(page);
-  const posts = await interceptarAdmin(page);
+  const posts = await interceptarAdmin(page, campanhas);
   await page.goto("/");
   const busca = page.getByPlaceholder("Buscar escola por nome, endereço ou bairro...");
   await busca.fill("/admin");
@@ -127,6 +171,86 @@ test("conferir com o Google mostra os números devolvidos @admin", async ({ page
   await expect(dialogo).toContainText("1.204 vezes");
   await expect(dialogo).toContainText("310 buscas");
   await expect(dialogo.getByRole("button", { name: "Ajustar contador para 6.566" })).toBeVisible();
+});
+
+async function abrirCampanhas(page: Page, campanhas?: ReturnType<typeof campanha>[]) {
+  const { busca, posts } = await abrirAdmin(page, campanhas);
+  await busca.press("Enter");
+  await entrar(page, "certa");
+  const dialogo = page.getByRole("dialog", { name: "Painel" });
+  await dialogo.getByRole("tab", { name: "Campanhas" }).click();
+  return { dialogo, posts };
+}
+
+test("ligar a campanha envia a edição e a etiqueta vira No ar @admin", async ({ page }) => {
+  const { dialogo, posts } = await abrirCampanhas(page);
+  await expect(dialogo.getByRole("heading", { name: "Remoção 2027 · 1ª fase" })).toBeVisible();
+  await expect(dialogo.getByTestId("estado-campanha")).toHaveText("Desligada");
+  await expect(dialogo).toContainText("12/11, 6h");
+  await expect(dialogo).toContainText("29 de 66");
+
+  await dialogo.getByRole("switch", { name: "Campanha ligada" }).click();
+  await expect(dialogo.getByTestId("estado-campanha")).toHaveText("No ar");
+  expect(posts).toContainEqual({
+    url: "/api/admin/campanhas",
+    corpo: {
+      acao: "editar",
+      id: "c1",
+      nome: "Remoção 2027 · 1ª fase",
+      descricao: "",
+      inicio: "2026-11-12T09:00:00Z",
+      fim: "2026-11-13T10:00:00Z",
+      ligada: true,
+    },
+  });
+});
+
+test("fim antes do início mostra erro e não salva @admin", async ({ page }) => {
+  const { dialogo, posts } = await abrirCampanhas(page);
+  await dialogo.getByRole("button", { name: "Editar" }).click();
+  const form = dialogo.getByRole("form", { name: "Editar campanha" });
+  await expect(form.getByLabel("Início")).toHaveValue("2026-11-12T06:00");
+  await form.getByLabel("Fim").fill("2026-11-11T08:00");
+  await form.getByRole("button", { name: "Salvar" }).click();
+  await expect(form.getByRole("alert")).toHaveText("O fim precisa ser depois do início.");
+  expect(posts.filter((p) => p.url === "/api/admin/campanhas")).toHaveLength(0);
+});
+
+test("editar o nome salva com as datas em Brasília e volta à lista @admin", async ({ page }) => {
+  const { dialogo, posts } = await abrirCampanhas(page);
+  await dialogo.getByRole("button", { name: "Editar" }).click();
+  const form = dialogo.getByRole("form", { name: "Editar campanha" });
+  await form.getByLabel("Nome").fill("Remoção 2027 · fase 1");
+  await form.getByRole("button", { name: "Salvar" }).click();
+  await expect(dialogo.getByRole("heading", { name: "Remoção 2027 · fase 1" })).toBeVisible();
+  expect(posts).toContainEqual({
+    url: "/api/admin/campanhas",
+    corpo: expect.objectContaining({
+      acao: "editar",
+      nome: "Remoção 2027 · fase 1",
+      inicio: "2026-11-12T06:00:00-03:00",
+      fim: "2026-11-13T07:00:00-03:00",
+    }),
+  });
+});
+
+test("campanha encerrada pode ser arquivada e desarquivada @admin", async ({ page }) => {
+  const { dialogo } = await abrirCampanhas(page, [campanha({ estado: "encerrada" })]);
+  await expect(dialogo.getByTestId("estado-campanha")).toHaveText("Encerrada");
+  await dialogo.getByRole("button", { name: "Arquivar" }).click();
+  await expect(dialogo.getByRole("heading", { name: "Remoção 2027 · 1ª fase" })).toHaveCount(0);
+  await dialogo.getByText("Arquivadas (1)").click();
+  await dialogo.getByRole("button", { name: "Desarquivar Remoção 2027 · 1ª fase" }).click();
+  await expect(dialogo.getByRole("heading", { name: "Remoção 2027 · 1ª fase" })).toBeVisible();
+  await expect(dialogo.getByText(/Arquivadas/)).toHaveCount(0);
+});
+
+test("duas campanhas no ar mostram o aviso @admin", async ({ page }) => {
+  const { dialogo } = await abrirCampanhas(page, [
+    campanha({ estado: "no_ar", ligada: true }),
+    campanha({ id: "c2", nome: "Atribuição 2027", estado: "no_ar", ligada: true }),
+  ]);
+  await expect(dialogo.getByRole("status")).toContainText("O aplicativo mostra a que começou primeiro.");
 });
 
 test("/dev não faz mais nada @admin", async ({ page }) => {

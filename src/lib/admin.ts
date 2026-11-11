@@ -94,5 +94,49 @@ export const definirModoForcado = (modoForcado: boolean) =>
 
 export const conferirGoogle = () => chamar<ConferenciaGoogle>("/api/admin/google");
 
+/** Espelha `CampanhaAdmin` de `api/_lib/campanhas.ts` (`src/` não importa de `api/`). */
+export type EstadoCampanha = "no_ar" | "agendada" | "desligada" | "encerrada";
+
+export interface CampanhaAdmin {
+  id: string;
+  nome: string;
+  descricao: string;
+  inicio: string;
+  fim: string;
+  ligada: boolean;
+  arquivada: boolean;
+  fonte: string | null;
+  atualizada_em: string;
+  escolas_na_lista: number;
+  escolas_com_vaga: number;
+  total_vagas: number;
+  maiores: { nome_na_fonte: string; codigo_inep: string; vagas: number }[];
+  estado: EstadoCampanha;
+}
+
+export interface ListaCampanhas {
+  campanhas: CampanhaAdmin[];
+  agora: string;
+}
+
+export interface EdicaoCampanha {
+  id: string;
+  nome: string;
+  descricao: string;
+  inicio: string;
+  fim: string;
+  ligada: boolean;
+}
+
+const CAMPANHAS = "/api/admin/campanhas";
+
+export const lerCampanhas = () => chamar<ListaCampanhas>(CAMPANHAS);
+
+export const editarCampanha = (edicao: EdicaoCampanha) =>
+  chamar<ListaCampanhas>(CAMPANHAS, { method: "POST", body: JSON.stringify({ acao: "editar", ...edicao }) });
+
+export const arquivarCampanha = (id: string, arquivada: boolean) =>
+  chamar<ListaCampanhas>(CAMPANHAS, { method: "POST", body: JSON.stringify({ acao: "arquivar", id, arquivada }) });
+
 export const calibrarContador = () =>
   chamar<ConferenciaGoogle>("/api/admin/google", { method: "POST", body: JSON.stringify({ calibrar: true }) });

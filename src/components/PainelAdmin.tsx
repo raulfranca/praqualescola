@@ -1,8 +1,18 @@
-import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+import { Campanhas } from "@/components/admin/Campanhas";
+import {
+  BOTAO_PRINCIPAL,
+  BOTAO_SECUNDARIO,
+  Cartao,
+  EYEBROW,
+  Erro,
+  InterruptorGrande,
+  Linha,
+  numero,
+} from "@/components/admin/pecas";
 import { cn } from "@/lib/utils";
 import {
   ErroAdmin,
@@ -18,10 +28,6 @@ import {
 } from "@/lib/admin";
 import type { EstadoCota } from "@/lib/cota";
 import coruja from "../../design-system/assets/coruja.svg";
-
-const EYEBROW = "font-label text-xs font-medium uppercase tracking-wider";
-const BOTAO_PRINCIPAL = "h-11 w-full bg-gradient-primary hover:bg-primary-strong text-primary-foreground font-semibold";
-const BOTAO_SECUNDARIO = "h-11 w-full bg-secondary text-primary hover:bg-secondary/80 font-semibold";
 
 const MESES = [
   "janeiro", "fevereiro", "março", "abril", "maio", "junho",
@@ -48,29 +54,6 @@ const ESTADOS: Record<EstadoCota, { nome: string; texto: string; caixa: string; 
     marcador: "bg-erro-fg",
   },
 };
-
-const numero = (n: number) => n.toLocaleString("pt-BR");
-
-function Linha({ rotulo, valor, destaque }: { rotulo: string; valor: ReactNode; destaque?: boolean }) {
-  return (
-    <div className="flex items-baseline justify-between gap-4">
-      <span className={destaque ? "font-medium text-sucesso-fg" : "text-muted-foreground"}>{rotulo}</span>
-      <span className={cn("font-semibold", destaque && "text-sucesso-fg")}>{valor}</span>
-    </div>
-  );
-}
-
-function Cartao({ children, className }: { children: ReactNode; className?: string }) {
-  return <section className={cn("flex flex-col gap-4 rounded-xl bg-card p-5 shadow-ambient", className)}>{children}</section>;
-}
-
-function Erro({ children }: { children: ReactNode }) {
-  return (
-    <p role="alert" className="w-full rounded-lg bg-erro-bg p-3 text-sm text-erro-fg">
-      {children}
-    </p>
-  );
-}
 
 /** Pedido de senha. A senha é conferida no servidor. */
 function Senha({ onEntrar, onVoltar }: { onEntrar: () => void; onVoltar: () => void }) {
@@ -227,12 +210,7 @@ function ConferirGoogle({ unidades, onCalibrado }: { unidades: number; onCalibra
   );
 }
 
-function ConteudoPainel({ painel, onPainel, onFechar, onSair }: {
-  painel: Painel;
-  onPainel: (p: Painel) => void;
-  onFechar: () => void;
-  onSair: () => void;
-}) {
+function AbaCota({ painel, onPainel, onSair }: { painel: Painel; onPainel: (p: Painel) => void; onSair: () => void }) {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const { resumo, estado, escolas } = painel;
@@ -262,23 +240,7 @@ function ConteudoPainel({ painel, onPainel, onFechar, onSair }: {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-4 p-4 pb-8">
-      <header className="flex items-center justify-between gap-3 py-2">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary">
-            <img src={coruja} alt="" aria-hidden="true" className="h-[30px] w-[30px]" />
-          </div>
-          <div className="flex flex-col">
-            <span className={cn(EYEBROW, "text-muted-foreground")}>Administração</span>
-            <DialogTitle className="text-xl font-semibold leading-tight">Painel</DialogTitle>
-          </div>
-        </div>
-        <Button variant="ghost" onClick={onFechar} className="h-11 px-3 font-semibold text-primary">
-          Fechar
-        </Button>
-      </header>
-      <DialogDescription className="sr-only">Consumo da cota do Google e controles do modo aproximado.</DialogDescription>
-
+    <>
       <section className={cn("flex flex-col gap-2 rounded-xl p-5", visual.caixa)} aria-live="polite">
         <span className={cn(EYEBROW, "font-semibold")}>Cota do Google · agora</span>
         <span data-testid="estado-cota" className="text-4xl font-bold leading-tight tracking-tight">
@@ -318,13 +280,7 @@ function ConteudoPainel({ painel, onPainel, onFechar, onSair }: {
             Para de chamar o Google agora. Distâncias novas viram estimativa.
           </span>
         </div>
-        <Switch
-          id="modo-forcado"
-          checked={forcado}
-          disabled={salvando}
-          onCheckedChange={alternarModo}
-          className="h-8 w-[52px] [&>span]:h-6 [&>span]:w-6 [&>span]:data-[state=checked]:translate-x-5"
-        />
+        <InterruptorGrande id="modo-forcado" checked={forcado} disabled={salvando} onCheckedChange={alternarModo} />
       </Cartao>
       {erro && <Erro>{erro}</Erro>}
 
@@ -334,6 +290,64 @@ function ConteudoPainel({ painel, onPainel, onFechar, onSair }: {
         <span className={cn(EYEBROW, "text-muted-foreground")}>Em breve</span>
         <span className="text-sm text-muted-foreground">Uso do aplicativo: visitas, endereços definidos, escolas mais vistas.</span>
       </section>
+    </>
+  );
+}
+
+const ABAS = [
+  { id: "cota", nome: "Cota do Google" },
+  { id: "campanhas", nome: "Campanhas" },
+] as const;
+
+function ConteudoPainel({ painel, onPainel, onFechar, onSair }: {
+  painel: Painel;
+  onPainel: (p: Painel) => void;
+  onFechar: () => void;
+  onSair: () => void;
+}) {
+  const [aba, setAba] = useState<(typeof ABAS)[number]["id"]>("cota");
+
+  return (
+    <div className="mx-auto flex w-full max-w-lg flex-col gap-4 p-4 pb-8">
+      <header className="flex items-center justify-between gap-3 py-2">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary">
+            <img src={coruja} alt="" aria-hidden="true" className="h-[30px] w-[30px]" />
+          </div>
+          <div className="flex flex-col">
+            <span className={cn(EYEBROW, "text-muted-foreground")}>Administração</span>
+            <DialogTitle className="text-xl font-semibold leading-tight">Painel</DialogTitle>
+          </div>
+        </div>
+        <Button variant="ghost" onClick={onFechar} className="h-11 px-3 font-semibold text-primary">
+          Fechar
+        </Button>
+      </header>
+      <DialogDescription className="sr-only">Cota do Google e campanhas de remoção e atribuição.</DialogDescription>
+
+      <div role="tablist" aria-label="Seções do painel" className="flex gap-2">
+        {ABAS.map((a) => (
+          <button
+            key={a.id}
+            type="button"
+            role="tab"
+            id={`aba-${a.id}`}
+            aria-selected={aba === a.id}
+            aria-controls={`painel-${a.id}`}
+            onClick={() => setAba(a.id)}
+            className={cn(
+              "h-10 rounded-full px-4 text-sm font-semibold transition-colors",
+              aba === a.id ? "bg-secondary text-primary" : "bg-card text-muted-foreground shadow-ambient hover:text-foreground",
+            )}
+          >
+            {a.nome}
+          </button>
+        ))}
+      </div>
+
+      <div role="tabpanel" id={`painel-${aba}`} aria-labelledby={`aba-${aba}`} className="flex flex-col gap-4">
+        {aba === "cota" ? <AbaCota painel={painel} onPainel={onPainel} onSair={onSair} /> : <Campanhas onSair={onSair} />}
+      </div>
 
       <Button variant="ghost" onClick={onSair} className="h-11 font-semibold text-primary">
         Sair do painel

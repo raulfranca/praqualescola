@@ -21,18 +21,20 @@ SPA (aplicação de página única) em React, empacotada como PWA, sem back-end 
 ```
 api/maintenance.ts     Função de borda da Vercel: lê o Edge Config (modo manutenção)
 api/distancias.ts      Função de borda: distâncias pela Routes API, com cache e cota (núcleo em api/_lib/)
-api/admin/             Painel: login (senha → token HMAC de 8 h), painel (resumo, modo forçado), google (Cloud Monitoring, calibrar)
+api/campanha.ts        Campanha no ar com as vagas (GET público, cache de 60 s na borda; falha → {campanha:null})
+api/admin/             Painel: login (senha → token HMAC de 8 h), painel (resumo, modo forçado), google (Cloud Monitoring, calibrar), campanhas (listar, editar, arquivar)
 api/_lib/              Núcleo testável das funções (arquivo solto em api/ vira função na Vercel)
 db/migrations/         SQL do schema praqualescola, aplicado à mão no Supabase "Dados" (não é pasta supabase/)
+db/campanhas/          Carga de cada campanha (CSV + SQL) e o passo a passo (README.md); PDFs de origem em ref/documentos/<ano>/
 public/version.json    Título e subtítulo do aviso de nova versão
 src/main.tsx           Consulta /api/maintenance antes de montar o app; inicia o GA
 src/App.tsx            Providers, LoadScript do Google Maps, rotas
 src/pages/             Index (mapa), Lista, Favoritos, NotFound
 src/components/        Componentes do app; ui/ = shadcn (só os usados)
-src/contexts/          FilterContext (filtros compartilhados, em sessionStorage)
-src/hooks/             Dados (useSchoolsData), casa, distâncias, favoritos, campanha, PWA
-src/lib/               Lógica pura: escolasSupabase, recomeco, distanceCalculator, cota, schoolTags, utils
-src/config/            campaign_config.ts (campanhas)
+src/contexts/          FilterContext (filtros, em sessionStorage), CampaignContext (campanha no ar, useCampaign)
+src/hooks/             Dados (useSchoolsData), casa, distâncias, favoritos, PWA
+src/lib/               Lógica pura: escolasSupabase, recomeco, distanceCalculator, cota, campanha, camadas, marcadorEscola, schoolTags, utils
+src/components/admin/  Aba Campanhas do painel e peças comuns do painel
 e2e/                   Testes de navegador (Playwright)
 ```
 
@@ -42,14 +44,16 @@ e2e/                   Testes de navegador (Playwright)
   - `id` = `codigo_inep` (texto). É a chave de favoritos e distâncias.
   - Turmas do **maior `ano_letivo` presente**, contadas pela escola responsável (`codigo_inep`); multisseriada é quebrada pelo `nome_turma` ("Pré I/Pré II", "2º/3º ano") e conta em cada nível.
   - `active`, `note` (observação) e `hostedAt` (códigos INEP dos prédios onde funcionam turmas com `codigo_inep_local` ≠ responsável — hoje só o CAIC).
-  - `useSchoolsData` chama os dois. Vagas de campanha não têm fonte: `vacancies` fica `undefined` até existir tabela própria (e `extension`, o antigo ramal, fica sempre `undefined`, sem leitor).
+  - `useSchoolsData` chama os dois e aplica as vagas da campanha no ar (`aplicarVagas`): `vacancies` só existe com campanha no ar (`extension`, o antigo ramal, fica sempre `undefined`, sem leitor).
   - **Limite de linhas:** as turmas vêm num único GET (839 em 2027); o PostgREST corta em 1000 por padrão. Item na agenda de manutenção.
 - **Cota do Google (escrita do app):** tudo que o app grava no banco fica no schema **`praqualescola`** (não exposto na API REST; RLS sem políticas): `celulas` e `distancias` (cache compartilhado por célula de ~200 m), `uso_mensal` (unidades, idas ao Google, acertos de cache), `config` (modo forçado, calibração) e `limites` (contadores por hash de IP). O acesso é só pelas funções **`public.pqe_*`** (`security definer`, `EXECUTE` só para `service_role`), chamadas pelas funções de `api/` com `SUPABASE_SECRET_KEY` via `/rest/v1/rpc/pqe_*` (só header `apikey`). Nome novo no banco leva `praqualescola` ou `pqe_`. Migrations em `db/migrations/`, aplicadas pelo dono no Supabase. Estados da cota e grade de células em `src/lib/cota.ts` (Normal < 8.000 unidades; Economia reaproveita célula vizinha; Aproximado a partir de 9.500 ou forçado: só cache e linha reta × 1,3).
-- **No aparelho (`localStorage`):** `school-favorites` (códigos INEP em ordem de prioridade), `home-location`, `school-distances` (distâncias atuais; cada escola com `aproximado` quando é estimativa em linha reta), `cachedDistances_<lat>_<lng>` (cache por endereço, 5 casas decimais), `enderecos-do-dia` (`{ data, quantidade }`: limite de 3 endereços novos por dia no aparelho, vira à meia-noite local; voltar a um endereço já no cache não conta), `app-version-seen`, `school-data-version`, `tour-visto`. A antiga `addressSetDate` não é mais escrita.
+- **Campanhas e vagas** (`db/migrations/20261111_pqe_campanhas.sql`): `praqualescola.campanhas` (id texto, nome, descrição, início/fim `timestamptz`, `ligada`, `arquivada`) e `praqualescola.campanha_vagas` (campanha, `codigo_inep`, `vagas` cru; só positivo é vaga). Funções: `pqe_campanha_no_ar()` (datas **e** ligada **e** não arquivada; com duas, a de início mais cedo; devolve as vagas), `pqe_campanhas_admin()`, `pqe_campanha_atualizar(...)`, `pqe_campanha_arquivar(id, arquivada)` (só depois do fim; mensagens de erro em português, mostradas pelo painel). No app: `CampaignContext` faz uma busca a `/api/campanha` por abertura (erro → sem campanha); tipos e regras em `src/lib/campanha.ts` (espelho de `api/_lib/campanhas.ts`, porque `src/` não importa de `api/`). Datas do painel em horário de Brasília (`…-03:00`). Carga de campanha nova: `db/campanhas/README.md`.
+- **No aparelho (`localStorage`):** `school-favorites` (códigos INEP em ordem de prioridade), `home-location`, `school-distances` (distâncias atuais; cada escola com `aproximado` quando é estimativa em linha reta), `cachedDistances_<lat>_<lng>` (cache por endereço, 5 casas decimais), `enderecos-do-dia` (`{ data, quantidade }`: limite de 3 endereços novos por dia no aparelho, vira à meia-noite local; voltar a um endereço já no cache não conta), `app-version-seen`, `school-data-version`, `tour-visto`, `dismissed_campaign_<id>`. A antiga `addressSetDate` não é mais escrita.
   - **Distâncias:** só `useSchoolDistances` calcula (pela função; sem ela, `estimativaAproximada` local). Detalhe da escola e prioridades leem o que está salvo (`distanciaSalva`), sem chamar nada. Distâncias aproximadas salvas são pedidas de novo uma vez por sessão (`sessionStorage` `distancias-reais-repedidas`).
   - **Cache de distâncias completado:** ao reutilizar um endereço, `useSchoolDistances` calcula só as escolas que faltam no cache (`escolasSemDistancia`) e grava nas duas chaves; escola nova no cadastro não fica de fora do filtro de distância.
   - **Recomeço único (troca planilha → Supabase, 2026-11):** `src/lib/recomeco.ts` (`recomecarAparelho`), chamado em `main.tsx` fora da manutenção, apaga favoritos, casa, distâncias e `addressSetDate` uma vez e grava `school-data-version = supabase`. Sem aviso na tela. Remoção do código prevista na agenda de manutenção.
-  - **Tour de primeira visita:** `src/components/Tour.tsx`, montado na tela do mapa, ilumina os elementos marcados com `data-tour="<alvo>"` (a barra inferior e a lateral levam o mesmo alvo; vale o visível); etapa sem alvo, como a abertura, fica no centro da tela. `src/lib/tour.ts` guarda `tour-visto` e avisa quem depende dele: enquanto o tour está pendente, o convite para instalar, o banner de campanha e o aviso de nova versão não aparecem. Os dois últimos só aparecem com o app instalado (`appInstalado` em `usePWAInstallPrompt.ts`).
+  - **Tour de primeira visita:** `src/components/Tour.tsx`, montado na tela do mapa, ilumina os elementos marcados com `data-tour="<alvo>"` (a barra inferior e a lateral levam o mesmo alvo; vale o visível); etapa sem alvo, como a abertura, fica no centro da tela. `src/lib/tour.ts` guarda `tour-visto` e avisa quem depende dele: enquanto o tour está pendente, o convite para instalar, o aviso de campanha e o aviso de nova versão não aparecem. O de nova versão só aparece com o app instalado (`appInstalado` em `usePWAInstallPrompt.ts`).
+  - **Ordem das camadas na abertura:** `src/lib/camadas.ts` tem sinais (`useSyncExternalStore`) entre componentes: `avisoCampanhaAberto` (o convite para instalar espera o aviso de campanha fechar) e `conviteInstalarVisivel` (o `SeloCampanha` some enquanto o convite está na tela). Aviso dispensado: `localStorage` `dismissed_campaign_<id>`.
 - **Na sessão (`sessionStorage`):** `escola-filters-session`.
 
 ## 5. Infraestrutura e ambientes
@@ -70,7 +74,7 @@ Como rodar: `node .claude/scripts/portao.mjs`. Comandos em `.claude/loop.json`.
 
 - **Unidade (Vitest):** `src/**/*.test.ts` e `api/**/*.test.ts`, ambiente `node`. Cobrem a lógica pura de `src/lib/` e o núcleo das funções em `api/_lib/` (banco e Google simulados).
 - **Navegador (Playwright):** `e2e/`, servidor próprio na porta 8090. O servidor de teste usa chave do Google fictícia: o script do mapa carrega (o app espera por ele), mas o mapa não abre e nada gasta cota. Os testes não dependem do mapa. **Nunca tocam o Supabase real:** o servidor sobe com `VITE_SUPABASE_URL` fictícia e cada teste intercepta a API com `page.route` (`interceptarSupabase` em `e2e/fixtures/escolas.ts`, com um recorte de escolas e turmas reais); `marcarMigrado` evita o recomeço onde ele não é o assunto. Os testes começam com o tour de primeira visita já visto (fixture em `e2e/fixtures/base.ts`); a spec do tour desliga isso com `test.use({ tourVisto: false })`.
-- **Trava da cota do Google:** toda spec importa `test`/`expect` de `e2e/fixtures/base.ts`. Uma fixture automática deixa passar só os arquivos de código do mapa e bloqueia o resto de `*.googleapis.com`/`*.gstatic.com` e `/api/distancias`/`/api/admin`; chamada a serviço pago (distâncias, rotas, Places) ou a `/api/` sem `page.route` no próprio teste reprova o teste.
+- **Trava da cota do Google:** toda spec importa `test`/`expect` de `e2e/fixtures/base.ts`. Uma fixture automática deixa passar só os arquivos de código do mapa e bloqueia o resto de `*.googleapis.com`/`*.gstatic.com` e `/api/distancias`/`/api/admin`; chamada a serviço pago (distâncias, rotas, Places) ou a `/api/` sem `page.route` no próprio teste reprova o teste. `/api/campanha` sem interceptação responde `{campanha:null}`; para testar com campanha no ar, `e2e/fixtures/campanha.ts`.
 
 ## 7. Convenções e padrões
 
@@ -79,7 +83,7 @@ Como rodar: `node .claude/scripts/portao.mjs`. Comandos em `.claude/loop.json`.
 - Textos de interface em português; muitos comentários e logs de console herdados estão em inglês.
 - **Logs:** `console.log`/`console.debug` servem só para depuração local; o build de produção os remove (`esbuild.pure` em `vite.config.ts`). `console.warn`/`console.error` vão para produção — use-os para o que precisa ser visto lá.
 - **Segurança das dependências:** `npm audit` deve ficar sem alertas *high*/*critical*. Os *moderate* restantes estão em ferramentas de build/lint (não chegam ao navegador) ou registrados em `.github/maintenance.yml`.
-- Nova campanha: acrescentar em `src/config/campaign_config.ts`. **Antes, as vagas precisam de fonte** (tabela no Supabase, plano à parte): sem ela a campanha só mostra o banner.
+- Nova campanha: o agente carrega no banco pelo passo a passo de `db/campanhas/README.md` (nasce desligada); o dono liga pelo painel `/admin`. Sem publicar o app. "Campanha" nunca aparece em texto que o professor vê.
 - Nova versão publicada: atualizar `public/version.json` (`version`, `title`, `subtitle`) junto com o `CHANGELOG.md`.
 
 ## 8. Estado de implementação

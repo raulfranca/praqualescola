@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { tourPendente, useTourPendente } from "@/lib/tour";
+import { avisoCampanhaAberto } from "@/lib/camadas";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -33,8 +34,10 @@ export function usePWAInstallPrompt() {
 
   // Check if app is already installed
   const checkIfInstalled = appInstalado;
-  // O convite para instalar só aparece depois do tour de primeira visita.
+  // O convite para instalar só aparece depois do tour de primeira visita e do aviso de abertura da campanha.
   const tourEmAndamento = useTourPendente();
+  const avisoAberto = avisoCampanhaAberto.useValor();
+  const esperando = tourEmAndamento || avisoAberto;
 
   // Fetch current version from version.json
   const fetchCurrentVersion = useCallback(async (): Promise<string | null> => {
@@ -138,6 +141,8 @@ export function usePWAInstallPrompt() {
       if (shouldShow && !tourPendente()) {
         // Small delay to let the app fully load
         setTimeout(async () => {
+          // Aviso da campanha na tela: o convite (banner) aparece quando ele fechar.
+          if (avisoCampanhaAberto.ler()) return;
           try {
             await promptEvent.prompt();
             const result = await promptEvent.userChoice;
@@ -188,10 +193,10 @@ export function usePWAInstallPrompt() {
   }, [checkIfInstalled, shouldShowPrompt, fetchCurrentVersion]);
 
   return {
-    canInstall: !!deferredPrompt && !isInstalled && !tourEmAndamento,
+    canInstall: !!deferredPrompt && !isInstalled && !esperando,
     isInstalled,
     isIOS,
-    showIOSBanner: showIOSBanner && !tourEmAndamento,
+    showIOSBanner: showIOSBanner && !esperando,
     triggerInstallPrompt,
     dismissIOSBanner,
     dismissInstallBanner,

@@ -4,11 +4,27 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [Unreleased]
+## [2.5.0] - 2026-11-11 - Campanhas via banco de dados e painel. Dados da 1a Remoção
+
+### Adicionado
+
+- Vagas de remoção e atribuição direto do banco de dados: cada processo (como a "Remoção 2027 · 1ª fase", com as vagas do documento da Secretaria de 06/11/2026) fica guardado com suas datas e as vagas de cada escola. Pôr no ar ou tirar do ar não exige nova versão do app.
+- Com um processo aberto, o mapa mostra o número de vagas em cada escola, um aviso de abertura apresenta o processo (quantas escolas têm vaga, total de vagas e até quando fica aberto) e um selo acima da barra de navegação permite reabrir esse aviso.
+- Nos Favoritos, um resumo diz quantas das suas prioridades têm vaga na fase aberta.
+- Área do administrador: nova aba Campanhas, para editar nome, descrição e datas, ligar e desligar, arquivar processos encerrados e conferir as vagas carregadas. Avisa quando dois processos estão no ar ao mesmo tempo.
 
 ### Alterado
 
 - O tour de primeira visita abre com uma apresentação do app: a coruja e uma frase sobre o que ele é, antes de mostrar as funções.
+- A barra de navegação inferior agora flutua sobre o mapa, com cantos arredondados, e o mapa ocupa a tela inteira.
+- Filtros: o filtro de vagas virou um cartão com o nome do processo e quantas escolas têm vaga; o gráfico de distância/tempo destaca as escolas dentro do limite escolhido e mostra quantas são.
+- "Sem vagas" aparece em cinza, e não mais em vermelho.
+- Ordem dos avisos ao abrir o app: primeiro o tour (na primeira visita), depois o aviso do processo aberto, depois o convite para instalar e, por fim, o selo. O aviso do processo agora aparece também para quem usa o app pelo navegador, sem instalar.
+
+### Corrigido
+
+- No computador, o tour apontava para o lugar errado no passo do mapa.
+- O convite para instalar ficava parcialmente escondido atrás da barra de navegação.
 
 ## [2.4.0] - 2026-11-11 - Tour de primeira visita
 

@@ -11,7 +11,8 @@ import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
 import { useSchoolDistances } from "@/hooks/useSchoolDistances";
-import { useCampaign } from "@/hooks/useCampaign";
+import { useCampaign } from "@/contexts/CampaignContext";
+import { filtroVagasAtivo, temVaga } from "@/lib/campanha";
 import { useFilters } from "@/contexts/FilterContext";
 import { School } from "@/types/school";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -139,11 +140,11 @@ const Lista = () => {
       });
       return matchesLevel && matchesManagement;
     });
-    if (showOnlyVacancies) {
-      filtered = filtered.filter((school) => school.vacancies && school.vacancies > 0);
+    if (filtroVagasAtivo(showOnlyVacancies, hasCampaign)) {
+      filtered = filtered.filter(temVaga);
     }
     return filtered;
-  }, [schoolsWithDistances, selectedLevels, selectedManagement, showOnlyVacancies]);
+  }, [schoolsWithDistances, selectedLevels, selectedManagement, showOnlyVacancies, hasCampaign]);
 
   const filteredSchools = useMemo(() => {
     let filtered = schoolsMatchingCriteria;
@@ -176,7 +177,8 @@ const Lista = () => {
   const sortedSchools = useMemo(() => {
     const schoolsToSort = [...filteredSchools];
     
-    switch (sortBy) {
+    // "Número de vagas" sem campanha volta à ordem alfabética.
+    switch (sortBy === "vacancies" && !hasCampaign ? "alphabetical" : sortBy) {
       case "alphabetical":
         return schoolsToSort.sort((a, b) => 
           a.name.toLowerCase().localeCompare(b.name.toLowerCase(), 'pt-BR')
@@ -198,7 +200,7 @@ const Lista = () => {
       default:
         return schoolsToSort;
     }
-  }, [filteredSchools, sortBy, hasDistances]);
+  }, [filteredSchools, sortBy, hasDistances, hasCampaign]);
 
   const handleShowVacanciesFromBanner = () => {
     setShowOnlyVacancies(true);
@@ -206,7 +208,7 @@ const Lista = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background overflow-hidden pb-16 md:pb-0 md:ml-16">
+    <div className="flex flex-col h-screen bg-background overflow-hidden md:ml-16">
       {loading && (
         <div className="flex items-center justify-center flex-1">
           <div className="text-center">
@@ -256,7 +258,8 @@ const Lista = () => {
               </div>
             ) : (
               <div 
-                className="divide-y divide-border"
+                className="divide-y divide-border pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:pb-0"
+                data-testid="lista-escolas"
                 style={{ 
                   width: '100%',
                   maxWidth: '100%',

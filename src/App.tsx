@@ -10,6 +10,7 @@ import { InstallPromptBanner } from "@/components/InstallPromptBanner";
 import { BottomNav } from "@/components/BottomNav";
 import { SideNav } from "@/components/SideNav";
 import { FilterProvider } from "@/contexts/FilterContext";
+import { CampaignProvider } from "@/contexts/CampaignContext";
 import Index from "./pages/Index";
 import Lista from "./pages/Lista";
 import Favoritos from "./pages/Favoritos";
@@ -39,6 +40,7 @@ const App = () => (
         />
         <UpdatePrompt />
         <InstallPromptBanner />
+        <CampaignProvider>
         <FilterProvider>
           <BrowserRouter>
             <SideNav />
@@ -52,6 +54,7 @@ const App = () => (
             <BottomNav />
           </BrowserRouter>
         </FilterProvider>
+        </CampaignProvider>
       </TooltipProvider>
       <Analytics />
     </LoadScript>

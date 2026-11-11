@@ -48,6 +48,26 @@ export async function lerEscolas(
     .filter((e) => Number.isFinite(e.lat) && Number.isFinite(e.lng) && e.lat !== 0 && e.lng !== 0);
 }
 
+/** Falha de uma função `pqe_*`. `mensagemBanco` só vem de `raise exception` (código P0001):
+ *  são as mensagens em português escritas nas próprias funções, seguras para mostrar no painel. */
+export class ErroRpc extends Error {
+  constructor(
+    message: string,
+    readonly mensagemBanco?: string,
+  ) {
+    super(message);
+  }
+}
+
+async function mensagemDoBanco(resposta: Response): Promise<string | undefined> {
+  try {
+    const corpo = (await resposta.json()) as { code?: string; message?: string };
+    return corpo?.code === "P0001" && typeof corpo.message === "string" ? corpo.message : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Chama uma função `pqe_*` com a chave secreta. */
 export function criarRpc(url: string, chaveSecreta: string, fetchFn: typeof fetch = fetch) {
   return async function rpc<T>(nome: string, args: Record<string, unknown> = {}): Promise<T> {
@@ -56,7 +76,9 @@ export function criarRpc(url: string, chaveSecreta: string, fetchFn: typeof fetc
       headers: { apikey: chaveSecreta, "Content-Type": "application/json" },
       body: JSON.stringify(args),
     });
-    if (!resposta.ok) throw new Error(`${nome} falhou (erro ${resposta.status})`);
+    if (!resposta.ok) {
+      throw new ErroRpc(`${nome} falhou (erro ${resposta.status})`, await mensagemDoBanco(resposta));
+    }
     const texto = await resposta.text();
     return (texto ? JSON.parse(texto) : null) as T;
   };

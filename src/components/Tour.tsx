@@ -24,7 +24,7 @@ const ETAPAS: Etapa[] = [
       "Um mapa com todas as escolas municipais de Pindamonhangaba e informações atualizadas sobre vagas de remoção e atribuição.",
   },
   {
-    alvo: "mapa",
+    alvo: "area-mapa",
     titulo: "As cores mostram as turmas",
     texto: (
       <>
@@ -93,7 +93,7 @@ function posicaoDoBalao(alvo: string, r: DOMRect | null, largura: number): CSSPr
   if (!r) return { left: (vw - largura) / 2, top: vh / 3 };
   const limitar = (x: number) => Math.max(MARGEM, Math.min(x, vw - largura - MARGEM));
   // O mapa ocupa a tela: o balão fica dentro dele, embaixo.
-  if (alvo === "mapa") return { left: limitar(r.left + MARGEM), bottom: vh - r.bottom + MARGEM };
+  if (alvo === "area-mapa") return { left: limitar(r.left + MARGEM), bottom: vh - r.bottom + MARGEM };
   // Barra lateral do computador: o balão abre ao lado.
   if (vw >= 768 && r.left < 64) return { left: r.right + MARGEM, top: r.top };
   if (r.top + r.height / 2 < vh / 2) return { left: limitar(r.left), top: r.bottom + MARGEM };
@@ -128,7 +128,7 @@ export function Tour() {
   if (!pendente) return null;
 
   const largura = Math.min(360, window.innerWidth - 2 * MARGEM);
-  const folga = etapa.alvo === "mapa" ? 0 : 6;
+  const folga = etapa.alvo === "area-mapa" ? 0 : 6;
   const posicao = etapa.alvo
     ? posicaoDoBalao(etapa.alvo, retangulo, largura)
     : { left: (window.innerWidth - largura) / 2, top: "50%", translate: "0 -50%" };

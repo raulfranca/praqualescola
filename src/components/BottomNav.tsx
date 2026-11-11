@@ -28,7 +28,7 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card shadow-floating md:hidden">
+    <nav className="fixed bottom-[calc(1.75rem+env(safe-area-inset-bottom))] left-3 right-3 z-50 bg-card shadow-floating rounded-2xl md:hidden">
       <div className="flex justify-around items-center h-16 px-2">
         {items.map((item) => (
           <button

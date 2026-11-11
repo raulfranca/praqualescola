@@ -4,9 +4,10 @@ import { SchoolDetailModal } from "@/components/SchoolDetailModal";
 import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
-import { useCampaign } from "@/hooks/useCampaign";
+import { useCampaign } from "@/contexts/CampaignContext";
 import { School } from "@/types/school";
-import { Megaphone, X } from "lucide-react";
+import { fimCurto, temVaga } from "@/lib/campanha";
+import coruja from "../../design-system/assets/coruja.svg";
 import { trackPageView } from "@/lib/analytics";
 const Favoritos = () => {
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
@@ -23,25 +24,39 @@ const Favoritos = () => {
   const {
     homeLocation
   } = useHomeLocation();
-  const {
-    isActive: isCampaignActive,
-    config: campaign
-  } = useCampaign();
+  const { campanha } = useCampaign();
+  const favoritas = schools.filter((s) => favorites.includes(s.id));
+  const comVaga = favoritas.filter(temVaga).length;
 
   // Track page view
   useEffect(() => {
     trackPageView('/favoritos', 'Favoritos - Lista de Prioridades');
   }, []);
 
-  return <div className="flex flex-col h-screen bg-background overflow-hidden pb-16 md:pb-0 md:ml-16">
-      {isCampaignActive && (
-        <div className="sticky top-0 z-50 bg-info-bg px-4 py-3">
-          <div className="flex items-center justify-center gap-2">
-            <Megaphone className="w-4 h-4 text-info-fg flex-shrink-0" />
-            <p className="text-sm text-info-fg text-center truncate whitespace-nowrap overflow-hidden">
-              {campaign.bannerMessage}
-            </p>
-          </div>
+  return <div className="flex flex-col h-screen bg-background overflow-hidden md:ml-16">
+      {campanha && !loading && (
+        <div
+          data-testid="resumo-campanha"
+          className="mx-4 mt-4 flex items-center gap-2.5 rounded-xl bg-info-bg py-3 pl-2 pr-3.5 text-info-fg md:mx-auto md:w-full md:max-w-2xl"
+        >
+          <img src={coruja} alt="" aria-hidden="true" className="h-[34px] w-[34px] flex-none" />
+          <p className="flex min-w-0 flex-col text-[13px] leading-snug">
+            <strong className="text-sm font-semibold">{campanha.nome}</strong>
+            {favoritas.length === 1 ? (
+              <span>
+                Sua prioridade <strong>{comVaga ? "tem vaga" : "não tem vaga"}</strong> nesta fase.
+              </span>
+            ) : favoritas.length > 1 ? (
+              <span>
+                <strong>
+                  {comVaga} das suas {favoritas.length}
+                </strong>{" "}
+                prioridades têm vaga nesta fase.
+              </span>
+            ) : (
+              <span>Aberta até {fimCurto(campanha.fim)}.</span>
+            )}
+          </p>
         </div>
       )}
 

@@ -11,4 +11,5 @@ export const mapColors = {
   "marcador-favorito": "#f0b429",
   "marcador-contorno": "#ffffff",
   "on-surface": "#0f1d36",
+  "sucesso-fg": "#1f6f52", // selo de vagas no marcador
 };

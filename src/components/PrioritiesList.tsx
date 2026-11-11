@@ -7,7 +7,7 @@ import { SeloAproximado } from "@/components/SeloAproximado";
 import { Badge } from "@/components/ui/badge";
 import { SeloDesativado } from "@/components/SeloDesativado";
 import { getSchoolLevelTags } from "@/lib/schoolTags";
-import { useCampaign } from "@/hooks/useCampaign";
+import { useCampaign } from "@/contexts/CampaignContext";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -79,7 +79,7 @@ function SortableSchoolItem({
                   {school.vacancies === 1 ? "1 vaga" : `${school.vacancies} vagas`}
                 </Badge>
               ) : (
-                <Badge className="bg-erro-bg text-erro-fg border-0 px-2.5 py-0.5 text-xs font-semibold">
+                <Badge className="bg-muted text-muted-foreground border-0 px-2.5 py-0.5 text-xs font-semibold">
                   Sem vagas
                 </Badge>
               )}
@@ -174,7 +174,7 @@ export function PrioritiesList({
         </div>
       </div>;
   }
-  return <div className="flex-1 overflow-y-auto p-4">
+  return <div className="flex-1 overflow-y-auto p-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:pb-4">
       <div className="max-w-2xl mx-auto">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={favorites} strategy={verticalListSortingStrategy}>

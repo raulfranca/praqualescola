@@ -1,7 +1,7 @@
 import { Star, MapPin, Clock } from "lucide-react";
 import { School } from "@/types/school";
 import { getSchoolLevelTags } from "@/lib/schoolTags";
-import { useCampaign } from "@/hooks/useCampaign";
+import { useCampaign } from "@/contexts/CampaignContext";
 import { cn } from "@/lib/utils";
 import { SeloDesativado } from "@/components/SeloDesativado";
 import { SeloAproximado } from "@/components/SeloAproximado";
@@ -22,7 +22,7 @@ export function SchoolListCard({
   onClick,
   hasHomeLocation,
 }: SchoolListCardProps) {
-  const { isActive, config } = useCampaign();
+  const { campanha } = useCampaign();
   const levelTags = getSchoolLevelTags(school);
 
   const handleStarClick = (e: React.MouseEvent) => {
@@ -50,15 +50,15 @@ export function SchoolListCard({
           {school.type} {school.name}
         </h3>
 
-        {isActive && (
+        {campanha && (
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-xs text-muted-foreground" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>
-              {config.title}
+              {campanha.nome}
             </span>
             <span
               className={cn(
                 "text-xs font-medium px-1.5 py-0.5 rounded flex-shrink-0",
-                school.vacancies && school.vacancies > 0 ? "bg-sucesso-bg text-sucesso-fg" : "bg-erro-bg text-erro-fg"
+                school.vacancies && school.vacancies > 0 ? "bg-sucesso-bg text-sucesso-fg" : "bg-muted text-muted-foreground"
               )}
             >
               {school.vacancies && school.vacancies > 0

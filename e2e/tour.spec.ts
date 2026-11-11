@@ -5,7 +5,7 @@ import { ESCOLAS, interceptarSupabase } from "./fixtures/escolas";
 test.use({ tourVisto: false, viewport: { width: 390, height: 844 } });
 test.beforeEach(({ page }) => interceptarSupabase(page));
 
-const TITULOS = ["Pra Qual Escola?", "As cores mostram as turmas", "Busque uma escola", "Minha Casa", "Filtros", "Lista", "Favoritos"];
+const TITULOS = ["Pra Qual Escola Eu Vou?", "As cores mostram as turmas", "Busque uma escola", "Minha Casa", "Filtros", "Lista", "Favoritos"];
 
 test("primeira visita percorre as etapas e o tour não volta @tour", async ({ page }) => {
   await page.goto("/");
@@ -48,6 +48,29 @@ test("pular fecha o tour para sempre @tour", async ({ page }) => {
   await expect(page.getByPlaceholder(/Buscar escola/)).toBeVisible();
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
+
+for (const tela of [
+  { width: 1280, height: 800 },
+  { width: 1366, height: 657 },
+  { width: 1920, height: 969 },
+]) {
+  test(`no computador (${tela.width}×${tela.height}) todos os cards aparecem inteiros na tela @tour`, async ({ page }) => {
+    await page.setViewportSize(tela);
+    await page.goto("/");
+    const balao = page.getByRole("dialog");
+    await expect(balao.getByRole("heading", { name: TITULOS[0] })).toBeVisible();
+    await page.waitForTimeout(400); // fim da animação de entrada
+    await page.screenshot({ path: `test-results/tour-computador-${tela.width}.png` });
+    await expect(balao).toBeInViewport({ ratio: 1 });
+    for (let i = 1; i < TITULOS.length; i++) {
+      await balao.getByRole("button", { name: "Próximo" }).click();
+      await expect(balao.getByRole("heading", { name: TITULOS[i] })).toBeVisible();
+      await page.waitForTimeout(400);
+      await page.screenshot({ path: `test-results/tour-computador-${tela.width}-${i + 1}.png` });
+      await expect(balao, TITULOS[i]).toBeInViewport({ ratio: 1 });
+    }
+  });
+}
 
 test("no computador o tour aponta para a barra lateral @tour", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
