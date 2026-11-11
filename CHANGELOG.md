@@ -4,6 +4,12 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [Unreleased]
+
+### Alterado
+
+- Prévia do link no WhatsApp e redes sociais: título "Pra Qual Escola Eu Vou?" e uma frase curta sobre o app.
+
 ## [2.5.0] - 2026-11-11 - Campanhas via banco de dados e painel. Dados da 1a Remoção
 
 ### Adicionado
