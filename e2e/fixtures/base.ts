@@ -13,7 +13,17 @@ const PAGO = /routes\.googleapis\.com|places\.googleapis\.com|distancematrix|\/m
 
 export const MENSAGEM_TRAVA = "Trava da cota do Google: o teste tentou chamar um serviço pago";
 
-export const test = base.extend<{ travaGoogle: void }>({
+export const test = base.extend<{ travaGoogle: void; tourVisto: boolean; semTour: void }>({
+  // O tour de primeira visita cobre a tela do mapa. Por padrão o teste começa com ele já visto;
+  // a spec do tour desliga com `test.use({ tourVisto: false })`.
+  tourVisto: [true, { option: true }],
+  semTour: [
+    async ({ context, tourVisto }, use) => {
+      if (tourVisto) await context.addInitScript(() => localStorage.setItem("tour-visto", "1"));
+      await use();
+    },
+    { auto: true },
+  ],
   travaGoogle: [
     async ({ context }, use) => {
       const reprovadas: string[] = [];

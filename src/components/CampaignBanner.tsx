@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useCampaign } from "@/hooks/useCampaign";
+import { appInstalado } from "@/hooks/usePWAInstallPrompt";
+import { useTourPendente } from "@/lib/tour";
 import { Button } from "@/components/ui/button";
 import coruja from "../../design-system/assets/coruja.svg";
 
@@ -10,6 +12,7 @@ interface CampaignBannerProps {
 export function CampaignBanner({ onShowVacancies }: CampaignBannerProps) {
   const { isActive, config } = useCampaign();
   const [isDismissed, setIsDismissed] = useState(false);
+  const tourEmAndamento = useTourPendente();
 
   useEffect(() => {
     // Check if this campaign has been dismissed
@@ -29,7 +32,8 @@ export function CampaignBanner({ onShowVacancies }: CampaignBannerProps) {
     onShowVacancies(); // Execute the filter action
   };
 
-  if (!isActive || isDismissed) return null;
+  // Só para quem já instalou o app, e nunca por cima do tour de primeira visita.
+  if (!isActive || isDismissed || tourEmAndamento || !appInstalado()) return null;
 
   return (
     <div className="absolute top-44 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-md md:max-w-lg">

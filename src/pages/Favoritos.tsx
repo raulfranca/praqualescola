@@ -10,7 +10,6 @@ import { Megaphone, X } from "lucide-react";
 import { trackPageView } from "@/lib/analytics";
 const Favoritos = () => {
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
-  const [tipDismissed, setTipDismissed] = useState(false);
   
   const {
     schools,
@@ -29,21 +28,11 @@ const Favoritos = () => {
     config: campaign
   } = useCampaign();
 
-  // Check if tip was dismissed
-  useEffect(() => {
-    const dismissed = localStorage.getItem("favoritosTipDismissed");
-    setTipDismissed(dismissed === "true");
-  }, []);
-
   // Track page view
   useEffect(() => {
     trackPageView('/favoritos', 'Favoritos - Lista de Prioridades');
   }, []);
 
-  const handleDismissTip = () => {
-    localStorage.setItem("favoritosTipDismissed", "true");
-    setTipDismissed(true);
-  };
   return <div className="flex flex-col h-screen bg-background overflow-hidden pb-16 md:pb-0 md:ml-16">
       {isCampaignActive && (
         <div className="sticky top-0 z-50 bg-info-bg px-4 py-3">
@@ -72,8 +61,6 @@ const Favoritos = () => {
             onRemoveFavorite={toggleFavorite} 
             homeLocation={homeLocation} 
             onSchoolClick={setSelectedSchool}
-            tipDismissed={tipDismissed}
-            onDismissTip={handleDismissTip}
           />
         </>
       )}

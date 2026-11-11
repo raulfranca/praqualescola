@@ -34,6 +34,7 @@ export function SideNav() {
           <button
             key={item.path}
             onClick={() => navigate(item.path)}
+            data-tour={item.label.toLowerCase()}
             className={cn(
               "flex flex-col items-center justify-center gap-1 px-0.5 py-3 rounded-lg transition-colors w-16",
               item.isActive

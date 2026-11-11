@@ -48,8 +48,9 @@ export function ActionChips({
     // padding dão espaço à sombra (margem de baixo com ! porque o space-y da Lista a sobrescreveria); o espaço extra não captura cliques (o mapa por baixo continua clicável).
     <div className="flex items-center gap-1.5 w-[calc(100%+2rem)] md:w-auto overflow-x-auto no-scrollbar -mx-4 px-4 pt-1 !-mb-9 pb-10 pointer-events-none [&>*]:pointer-events-auto">
       <Button 
-        onClick={onHomeClick} 
-        size="sm" 
+        onClick={onHomeClick}
+        data-tour="casa"
+        size="sm"
         className={cn(
           "rounded-full shadow-floating h-8 px-3 gap-1.5 shrink-0 transition-all",
           hasHome 
@@ -120,6 +121,7 @@ export function ActionChips({
 
       <Button 
         onClick={onFilterClick}
+        data-tour="filtros"
         size="sm"
         className={cn(
           "rounded-full shadow-floating h-8 px-3 gap-1.5 shrink-0 transition-all",

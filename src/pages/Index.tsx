@@ -8,6 +8,7 @@ import { CampaignBanner } from "@/components/CampaignBanner";
 import { FilterDrawer, SchoolLevel, ManagementType, FilterMetric } from "@/components/FilterDrawer";
 import { IOSInstallBanner } from "@/components/IOSInstallBanner";
 import { FilterToast } from "@/components/FilterToast";
+import { Tour } from "@/components/Tour";
 import { useSchoolsData } from "@/hooks/useSchoolsData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useHomeLocation } from "@/hooks/useHomeLocation";
@@ -285,7 +286,7 @@ const Index = () => {
           </div>
 
           {/* Map View - Full Screen */}
-          <div className="relative flex-1 w-full h-full">
+          <div className="relative flex-1 w-full h-full" data-tour="mapa">
             <MapView
               schools={filteredSchools}
               favorites={favorites}
@@ -297,6 +298,8 @@ const Index = () => {
               isActive={true}
             />
           </div>
+
+          <Tour />
         </>
       )}
 

@@ -29,7 +29,7 @@ O endereço de casa sai do aparelho só para o servidor do app, que calcula as d
 - As turmas contam para a **escola responsável**. Turma multisseriada conta em cada nível que atende.
 - Escola **inativa** (hoje, o CAIC, de prédio desativado) continua aparecendo, com o selo "Prédio desativado". No detalhe, ela mostra onde as turmas dela funcionam, com link que abre o detalhe da escola-sede.
 - Falha ao carregar mostra aviso de erro; cadastro vazio mostra "Nenhuma escola encontrada".
-- **Recomeço de 2026:** na troca da planilha Google para o cadastro oficial, o app apagou uma única vez, em cada aparelho, os dados ligados às escolas (favoritos, endereço de casa, distâncias e a data da última troca de endereço). Quem tinha algum desses dados vê uma vez um aviso explicando que precisa defini-los de novo.
+- **Recomeço de 2026:** na troca da planilha Google para o cadastro oficial, o app apagou uma única vez, em cada aparelho, os dados ligados às escolas (favoritos, endereço de casa, distâncias e a data da última troca de endereço). Não há aviso sobre isso: o tour de primeira visita (seção 3.11) apresenta o app a todos.
 
 ### 3.2 Mapa (`/`)
 
@@ -72,7 +72,7 @@ O endereço de casa sai do aparelho só para o servidor do app, que calcula as d
 ### 3.7 Campanhas
 
 - Campanhas (ex.: "Remoção 2025 – 2ª Fase", "Vagas para Sede 2026") têm início, fim e mensagem de banner.
-- Durante a campanha, aparece o banner. Fora de campanha, o app funciona sem vagas.
+- Durante a campanha, aparece o banner, só para quem abre o app instalado e nunca por cima do tour de primeira visita. Fora de campanha, o app funciona sem vagas.
 - **Vagas estão sem fonte:** saíram com a planilha Google e ainda não existem no cadastro oficial. Uma tabela de vagas no Supabase será feita num plano à parte, antes da próxima campanha.
 - Se duas campanhas se sobrepõem, vale a primeira da lista.
 
@@ -83,14 +83,21 @@ O endereço de casa sai do aparelho só para o servidor do app, que calcula as d
 
 ### 3.9 PWA, atualização e manutenção
 
-- Instalável (Android, Windows; no iOS, um banner ensina a adicionar à tela inicial).
-- Quando sai versão nova, aparece um aviso com título e subtítulo próprios daquela versão (`public/version.json`) e botão para atualizar.
+- Instalável (Android, Windows; no iOS, um banner ensina a adicionar à tela inicial). O convite para instalar só aparece depois que o tour de primeira visita foi fechado.
+- Quando sai versão nova, quem abre o app instalado vê um aviso com título e subtítulo próprios daquela versão (`public/version.json`) e botão para atualizar. No navegador o aviso não aparece: a versão nova entra quando todas as abas do app são fechadas e ele é aberto de novo.
 - **Modo manutenção**: ligado no painel da Vercel (Edge Config), sem publicar código. Com ele ligado, o app mostra só a página de manutenção com título e mensagem configurados. Se a consulta falhar, o app abre normalmente.
 
 ### 3.10 Medição de uso
 
 - Google Analytics 4 (IP anonimizado) registra busca, visualização de escola, favoritar, reordenar, pedir rota e aplicar filtros. Vercel Analytics mede visitas.
 
+### 3.11 Tour de primeira visita
+
+- Na primeira vez que o aparelho abre a tela do mapa, um tour de seis etapas apresenta o app, todo sobre o mapa, iluminando um ponto por vez: cores dos marcadores (creche, pré-escola, fundamental), busca, Minha Casa, Filtros, Lista e Favoritos (favoritar pela estrela e arrastar para montar as prioridades).
+- O tour só aponta e explica: não abre telas nem preenche nada. Tem "Próximo", "Voltar" e "Pular".
+- Aparece **uma vez por aparelho**. Concluir, pular ou fechar (tecla Esc) grava que foi visto, e ele não volta.
+- Enquanto o tour não foi fechado, nenhum outro aviso aparece (instalar, campanha, nova versão).
+
 ## 4. Roadmap — ideias em análise
 
-Nada registrado ainda.
+- **Atualização silenciosa:** trocar o aviso de nova versão por uma atualização automática em segundo plano, sem recarregar a tela enquanto a pessoa digita. Resolveria também o navegador, onde hoje o aviso não aparece.

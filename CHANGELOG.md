@@ -4,6 +4,22 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [2.4.0] - 2026-11-11 - Tour de primeira visita
+
+### Adicionado
+
+- Tour de primeira visita: ao abrir o mapa pela primeira vez, o app apresenta em seis passos curtos as cores dos ícones (creche, pré-escola e fundamental), a busca, a Minha Casa, os filtros, a lista e os favoritos. Aparece uma única vez em cada aparelho; quem pular ou fechar não vê de novo.
+
+### Alterado
+
+- O convite para instalar o aplicativo só aparece depois que o tour é fechado.
+- O banner de campanha e o aviso de nova versão agora aparecem só para quem já instalou o aplicativo.
+
+### Removido
+
+- O aviso "O app foi atualizado", que explicava o recomeço dos favoritos e do endereço. O tour passa a apresentar o app.
+- A dica de arrastar na tela de Favoritos. A explicação agora está no tour.
+
 ## [2.3.0] - 2026-11-10 - Controle da cota gratuita do Google Maps
 
 ### Adicionado

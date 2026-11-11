@@ -15,10 +15,10 @@ items:
     acao: Ligar as future flags da v6, atualizar para react-router 7, rodar o portão --final; hoje o app só navega para caminhos fixos, então o risco é baixo.
 
   - id: remover-recomeco-aparelho
-    titulo: Remover o recomeço do aparelho (src/lib/recomeco.ts) e o aviso AvisoRecomeco
+    titulo: Remover o recomeço do aparelho (src/lib/recomeco.ts)
     due: 2027-06-30
     alert_days: 30
-    acao: Até lá quase todo aparelho já passou pelo recomeço da troca planilha → Supabase. Apagar recomeco.ts (+ teste), AvisoRecomeco.tsx, a chamada em main.tsx e marcarMigrado/cenários do e2e; a marca school-data-version pode ficar gravada nos aparelhos. Atualizar DOC §4 e PRD §3.1.
+    acao: Até lá quase todo aparelho já passou pelo recomeço da troca planilha → Supabase. Apagar recomeco.ts (+ teste), a chamada em main.tsx e marcarMigrado/cenários do e2e; a marca school-data-version pode ficar gravada nos aparelhos. Atualizar DOC §4 e PRD §3.1.
 
   - id: revisar-cota-google
     titulo: Revisar preços e cota grátis da Routes API do Google (Compute Route Matrix)

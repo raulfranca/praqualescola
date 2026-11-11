@@ -84,7 +84,7 @@ export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdo
 
   return (
     <div className="relative w-full md:w-96" ref={dropdownRef}>
-      <div className="relative">
+      <div className="relative" data-tour="busca">
         <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 z-10 text-muted-foreground`} strokeWidth={1.75} />
         <Input
           ref={inputRef}

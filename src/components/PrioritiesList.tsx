@@ -19,8 +19,6 @@ interface PrioritiesListProps {
   onRemoveFavorite: (schoolId: string) => void;
   homeLocation: HomeLocation | null;
   onSchoolClick: (school: School) => void;
-  tipDismissed: boolean;
-  onDismissTip: () => void;
 }
 function SortableSchoolItem({
   school,
@@ -132,9 +130,7 @@ export function PrioritiesList({
   onReorder,
   onRemoveFavorite,
   homeLocation,
-  onSchoolClick,
-  tipDismissed,
-  onDismissTip
+  onSchoolClick
 }: PrioritiesListProps) {
   const {
     isActive: isCampaignActive
@@ -180,22 +176,6 @@ export function PrioritiesList({
   }
   return <div className="flex-1 overflow-y-auto p-4">
       <div className="max-w-2xl mx-auto">
-        {!tipDismissed && (
-          <div className="mb-4 p-4 bg-secondary rounded-xl relative">
-            <button
-              onClick={onDismissTip}
-              className="absolute top-3 right-3 p-1 hover:bg-primary/10 rounded-full transition-colors"
-              aria-label="Fechar dica"
-            >
-              <X className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <p className="text-sm text-muted-foreground pr-6">
-              <strong className="text-foreground">Dica:</strong> Arraste as escolas para organizá-las em ordem de prioridade. 
-              Suas preferências são salvas automaticamente neste dispositivo.
-            </p>
-          </div>
-        )}
-
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={favorites} strategy={verticalListSortingStrategy}>
             <div className="space-y-3">

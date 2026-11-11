@@ -60,8 +60,8 @@ async function init() {
     // Initialize Google Analytics 4
     initGA();
     // Antes do render: os hooks leem favoritos, casa e distâncias do localStorage no estado inicial.
-    const recomecou = recomecarAparelho(localStorage);
-    root.render(<App recomecou={recomecou} />);
+    recomecarAparelho(localStorage);
+    root.render(<App />);
   }
 }
 

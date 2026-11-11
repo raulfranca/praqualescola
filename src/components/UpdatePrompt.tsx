@@ -1,12 +1,16 @@
 import { useVersionedUpdatePrompt } from "@/hooks/useVersionedUpdatePrompt";
+import { appInstalado } from "@/hooks/usePWAInstallPrompt";
+import { useTourPendente } from "@/lib/tour";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, X } from "lucide-react";
 
 export function UpdatePrompt() {
   const { showUpdatePrompt, handleUpdate, handleDismiss, title, subtitle } =
     useVersionedUpdatePrompt();
+  const tourEmAndamento = useTourPendente();
 
-  if (!showUpdatePrompt) return null;
+  // Só para quem já instalou o app, e nunca por cima do tour de primeira visita.
+  if (!showUpdatePrompt || tourEmAndamento || !appInstalado()) return null;
 
   return (
     <div className="fixed bottom-20 left-4 right-4 z-50 md:bottom-4 md:left-auto md:right-4 md:max-w-md">

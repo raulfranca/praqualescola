@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { tourPendente, useTourPendente } from "@/lib/tour";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -13,6 +14,13 @@ interface VersionInfo {
 
 const INSTALL_PROMPT_VERSION_KEY = "pwa-install-prompt-version";
 
+/** O app está aberto como aplicativo instalado (não numa aba do navegador). */
+export function appInstalado(): boolean {
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+  const isIOSStandalone = (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+  return isStandalone || isIOSStandalone;
+}
+
 /**
  * Hook to handle PWA install prompt with version-based triggering
  * Shows native browser install prompt when app version changes
@@ -24,11 +32,9 @@ export function usePWAInstallPrompt() {
   const [showIOSBanner, setShowIOSBanner] = useState(false);
 
   // Check if app is already installed
-  const checkIfInstalled = useCallback(() => {
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
-    const isIOSStandalone = (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-    return isStandalone || isIOSStandalone;
-  }, []);
+  const checkIfInstalled = appInstalado;
+  // O convite para instalar só aparece depois do tour de primeira visita.
+  const tourEmAndamento = useTourPendente();
 
   // Fetch current version from version.json
   const fetchCurrentVersion = useCallback(async (): Promise<string | null> => {
@@ -128,7 +134,8 @@ export function usePWAInstallPrompt() {
 
       // Check if we should show the prompt based on version
       const shouldShow = await shouldShowPrompt();
-      if (shouldShow) {
+      // Durante o tour, só guarda o evento: o banner de instalar aparece quando o tour fechar.
+      if (shouldShow && !tourPendente()) {
         // Small delay to let the app fully load
         setTimeout(async () => {
           try {
@@ -181,10 +188,10 @@ export function usePWAInstallPrompt() {
   }, [checkIfInstalled, shouldShowPrompt, fetchCurrentVersion]);
 
   return {
-    canInstall: !!deferredPrompt && !isInstalled,
+    canInstall: !!deferredPrompt && !isInstalled && !tourEmAndamento,
     isInstalled,
     isIOS,
-    showIOSBanner,
+    showIOSBanner: showIOSBanner && !tourEmAndamento,
     triggerInstallPrompt,
     dismissIOSBanner,
     dismissInstallBanner,
