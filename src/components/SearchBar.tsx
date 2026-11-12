@@ -35,7 +35,8 @@ export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdo
       setAdminAberto(true);
     } else if (ehComandoRemocao) {
       e.preventDefault();
-      window.location.assign("/remocao/");
+      onChange("");
+      window.open("/remocao/", "_blank", "noopener");
     }
   }, [ehComandoAdmin, ehComandoRemocao, onChange]);
 
