@@ -94,15 +94,16 @@ test('pedido gravado fora das vagas', () => {
   assert.equal(r.pedido.dentro, false);
 });
 
-test('oportunidades excluem a escola do pedido e escolas cheias', () => {
+test('oportunidades excluem a escola do pedido e escolas sem vaga, e incluem as de chance zero', () => {
   const r = N.analisar(base({ campo: 'A' }));
-  assert.deepEqual(r.oportunidades.map(o => o.codigo), ['C']);
+  // C: 1º de 1 · B: 2º de 1 (chance zero) · D: 0 vagas, fora
+  assert.deepEqual(r.oportunidades.map(o => [o.codigo, o.zero]), [['C', false], ['B', true]]);
 });
 
 test('sem pedido, oportunidades ordenadas por folga', () => {
   const r = N.analisar(base({ campo: '', semEu: true }));
-  // A: 2 vagas, 1 na frente → 2º (folga 0, justo) · C: 1º de 1 (folga 0)
-  assert.deepEqual(r.oportunidades.map(o => [o.codigo, o.posicao, o.justo]), [['A', 2, true], ['C', 1, true]]);
+  // A: 2 vagas, 1 na frente → 2º (folga 0, justo) · C: 1º de 1 (folga 0) · B: 2º de 1 (zero, por último)
+  assert.deepEqual(r.oportunidades.map(o => [o.codigo, o.posicao, o.justo, o.zero]), [['A', 2, true, false], ['C', 1, true, false], ['B', 2, false, true]]);
 });
 
 test('folga maior vem primeiro', () => {
@@ -140,7 +141,7 @@ test('inconsistente quando aparece em duas listas', () => {
 test('homônimo com outra classificação conta como concorrente', () => {
   const r = N.analisar(base({ campo: '', semEu: true, extraEm: { C2: [{ nome: 'RAUL TESTE', classificacao: 100 }] } }));
   assert.equal(r.pedido.estado, 'nenhum');
-  assert.ok(!r.oportunidades.some(o => o.codigo === 'C2'));
+  assert.ok(r.oportunidades.some(o => o.codigo === 'C2' && o.zero));
 });
 
 test('empate de classificação não conta como na frente', () => {

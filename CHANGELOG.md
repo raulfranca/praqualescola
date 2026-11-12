@@ -4,6 +4,13 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [2.6.2] - 2026-11-12 - Assistente de remoção - melhorias
+
+### Alterado
+
+- Assistente de Remoção: enquanto analisa, o painel mostra o andamento em percentual ("Analisando as escolas… 45%"), em vez de "16 de 20 escolas", que fazia parecer que só algumas escolas eram analisadas.
+- Assistente de Remoção: a lista "Escolas com possibilidade" passou a se chamar "Escolas com vaga" e mostra todas as escolas com vaga para remoção, inclusive aquelas em que o professor não entraria, com a etiqueta vermelha "Zero" e a posição (por exemplo, "3º lugar em 2 vagas"). Essas ficam no fim da lista. A linha que avisava "Saiu da lista desde…" passou a dizer "Perdeu a chance desde…".
+
 ## [2.6.1] - 2026-11-12 - Assistente de remoção - melhorias
 
 ### Adicionado

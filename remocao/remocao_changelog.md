@@ -5,6 +5,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versioname
 ## [Não publicado]
 
 ### Alterado
+- Progresso da leitura em percentual ("Analisando as escolas… 45%") em vez de "X de N escolas".
+- A lista passa a se chamar "Escolas com vaga" e mostra todas as escolas com vaga para remoção, inclusive as sem chance, com etiqueta vermelha "Zero" (posição > vagas). A linha de comparação vira "Perdeu a chance desde HHhMM".
 - Favorito fora da APUS abre o login numa nova aba (`window.open`), sem sair da página atual. Se o navegador bloquear a aba, cai no comportamento antigo (leva ao login na mesma aba).
 - Página de passo a passo: trecho "Na remoção, passo a passo" com prints do painel real (dados de exemplo) sobre um esboço da página da APUS, em `public/remocao/prints/`.
 

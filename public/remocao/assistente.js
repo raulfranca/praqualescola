@@ -129,7 +129,7 @@
       if (lista.some(function (i) { return ehOProfessor(i, professor); })) gravadoEm.push(registro);
       if (!listaConfiavel) { falhas.push(e.nome); listasFalhas++; return; }
       if (e.vagas === null) { falhas.push(e.nome); return; }
-      if (e.vagas > 0 && posicao <= e.vagas) candidatas.push(registro);
+      if (e.vagas > 0) candidatas.push(registro);
     });
 
     var porCodigo = {};
@@ -159,7 +159,7 @@
     var codigoPedido = pedido.escola ? pedido.escola.codigo : null;
     var oportunidades = candidatas
       .filter(function (c) { return c.codigo !== codigoPedido; })
-      .map(function (c) { return { codigo: c.codigo, nome: c.nome, vagas: c.vagas, posicao: c.posicao, justo: c.posicao === c.vagas }; })
+      .map(function (c) { return { codigo: c.codigo, nome: c.nome, vagas: c.vagas, posicao: c.posicao, justo: c.posicao === c.vagas, zero: c.posicao > c.vagas }; })
       .sort(function (a, b) {
         var fa = a.vagas - a.posicao, fb = b.vagas - b.posicao;
         return fb - fa || a.nome.localeCompare(b.nome, 'pt-BR');
@@ -174,7 +174,7 @@
     var antes = {};
     (anterior.oportunidades || []).forEach(function (o) { antes[o.codigo] = o.nome; });
     var agora = {};
-    resultado.oportunidades.forEach(function (o) {
+    comChance(resultado).forEach(function (o) {
       agora[o.codigo] = true;
       if (!antes[o.codigo]) novas.add(o.codigo);
     });
@@ -190,8 +190,13 @@
     return {
       hora: meta.hora,
       pedido: resultado.pedido.escola ? { codigo: resultado.pedido.escola.codigo, posicao: resultado.pedido.posicao } : null,
-      oportunidades: resultado.oportunidades.map(function (o) { return { codigo: o.codigo, nome: o.nome }; })
+      oportunidades: comChance(resultado).map(function (o) { return { codigo: o.codigo, nome: o.nome }; })
     };
+  }
+
+  // A comparação com a leitura anterior acompanha só as escolas com chance.
+  function comChance(resultado) {
+    return resultado.oportunidades.filter(function (o) { return !o.zero; });
   }
 
   function esperarMs(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
@@ -510,10 +515,10 @@
       frag.appendChild(faixa('aviso', 'Não consegui ler ' + (r.falhas.length === 1 ? '1 escola' : r.falhas.length + ' escolas') + '. Clique em atualizar.'));
     }
     frag.appendChild(r.oportunidades.length
-      ? cabecalhoComColuna('Escolas com possibilidade · ' + r.oportunidades.length, 'Chance')
-      : criar('div', 'eyebrow', 'Escolas com possibilidade · 0'));
+      ? cabecalhoComColuna('Escolas com vaga · ' + r.oportunidades.length, 'Chance')
+      : criar('div', 'eyebrow', 'Escolas com vaga · 0'));
     if (!r.oportunidades.length) {
-      frag.appendChild(criar('div', 'vazio', 'Nenhuma escola com vaga para a sua classificação agora.'));
+      frag.appendChild(criar('div', 'vazio', 'Nenhuma outra escola com vaga para remoção agora.'));
     } else {
       var lista = criar('div', 'lista');
       r.oportunidades.forEach(function (o) {
@@ -523,13 +528,13 @@
         info.appendChild(n);
         info.appendChild(criar('div', 'd', o.posicao + 'º lugar em ' + vagas(o.vagas)));
         item.appendChild(info);
-        item.appendChild(o.justo ? etiqueta('aviso', 'Menor') : etiqueta('ok', 'Maior'));
+        item.appendChild(o.zero ? etiqueta('erro', 'Zero') : o.justo ? etiqueta('aviso', 'Menor') : etiqueta('ok', 'Maior'));
         lista.appendChild(item);
       });
       frag.appendChild(lista);
     }
     if (c.sairam && c.sairam.length && c.horaAnterior) {
-      frag.appendChild(criar('div', 'saiu', 'Saiu da lista desde ' + c.horaAnterior + ': ' + c.sairam.join(', ')));
+      frag.appendChild(criar('div', 'saiu', 'Perdeu a chance desde ' + c.horaAnterior + ': ' + c.sairam.join(', ')));
     }
     return frag;
   }
@@ -537,10 +542,11 @@
   function conteudoLendo(estado) {
     var caixa = criar('div', 'lendo');
     var total = estado.total || 0;
-    caixa.appendChild(criar('div', null, total ? 'Analisando ' + estado.feitos + ' de ' + total + ' escolas…' : 'Lendo a lista de escolas…'));
+    var pct = total ? Math.round(100 * estado.feitos / total) : 0;
+    caixa.appendChild(criar('div', null, 'Analisando as escolas… ' + pct + '%'));
     var barra = criar('div', 'progresso');
     var i = document.createElement('i');
-    i.style.width = (total ? Math.max(4, Math.round(100 * estado.feitos / total)) : 4) + '%';
+    i.style.width = Math.max(4, pct) + '%';
     barra.appendChild(i);
     caixa.appendChild(barra);
     return caixa;

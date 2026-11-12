@@ -29,7 +29,7 @@ classificação dele basta**, considerando os pedidos feitos até aquele momento
 1. Abra `https://praqualescola.vercel.app/remocao/` e arraste o botão **Assistente de Remoção**
    para a barra de favoritos (`Ctrl` + `Shift` + `B` se ela estiver escondida). Só uma vez.
 2. Entre na APUS, abra a remoção e clique no favorito. O painel abre no canto superior direito e lê
-   as escolas na hora (≈ 30 a 60 s, mostrando "Lendo X de N escolas").
+   as escolas na hora (≈ 30 a 60 s, mostrando "Analisando as escolas… X%").
 3. Para ler de novo, use o botão de atualizar do painel. O painel compara com a leitura anterior.
 
 Fora da APUS, o favorito abre o login (`https://educ.apus.info/professor/pinda`) numa nova aba e
@@ -143,12 +143,12 @@ servidor que devolva a classificação). Vagas, inscritos e concorrentes vêm se
 
 * Classificação menor = melhor; empate não conta como "na frente".
 * "É o professor" = nome igual (maiúsculas, espaços colapsados) **e** classificação igual.
-* Posição na escola = concorrentes na frente + 1. Entra se posição ≤ vagas; **"Justo"** se posição = vagas.
-* Escola com vagas ≤ 0 nunca é oportunidade. Escola com vaga e 0 inscritos: 1º lugar, sem chamada.
+* Posição na escola = concorrentes na frente + 1. Chance **Maior** se posição < vagas, **Menor** se posição = vagas, **Zero** se posição > vagas.
+* Escola com vagas ≤ 0 não aparece na lista. Escola com vaga e 0 inscritos: 1º lugar, sem chamada.
 * Escola com leitura falha ou número ilegível **nunca** vira oportunidade: entra em "Não consegui ler N escolas".
 * Estado do pedido: aparece em 1 lista → `gravado` (ou `trocar`, se o campo da tela mostra outra
   escola); em nenhuma → `nenhum` (campo vazio) ou `nao-gravado` (campo preenchido); em 2+ → `inconsistente`.
-* A escola do pedido gravado não se repete em "Escolas com possibilidade". Ordem: maior folga, depois nome.
+* A escola do pedido gravado não se repete em "Escolas com vaga". Ordem: maior folga, depois nome (as de chance Zero ficam no fim). A comparação com a leitura anterior ("Perdeu a chance desde") considera só as escolas com chance.
 
 ### 3.2. Chamadas ao servidor
 

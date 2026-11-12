@@ -21,8 +21,8 @@
 <script src="/remocao/assistente.js"></script>
 <script>
   var A = window.AssistenteRemocaoTeste;
-  function op(codigo, nome, vagas, posicao) { return { codigo: codigo, nome: nome, vagas: vagas, posicao: posicao, justo: posicao === vagas }; }
-  var OPS = [op('1', 'EM Vila Esperança', 3, 2), op('2', 'EMEI Monteiro Lobato', 1, 1), op('3', 'EM Parque das Águas', 2, 2)];
+  function op(codigo, nome, vagas, posicao) { return { codigo: codigo, nome: nome, vagas: vagas, posicao: posicao, justo: posicao === vagas, zero: posicao > vagas }; }
+  var OPS = [op('1', 'EM Vila Esperança', 3, 2), op('2', 'EMEI Monteiro Lobato', 1, 1), op('3', 'EM Parque das Águas', 2, 2), op('4', 'EM Jardim Imperial', 2, 3)];
   function pronto(pedido, extra) {
     extra = extra || {};
     return {

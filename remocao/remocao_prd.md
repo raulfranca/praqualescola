@@ -24,8 +24,8 @@ pedido, e "Reiniciar" não o cancela.
 | # | Requisito |
 |---|---|
 | RF1 | Mostrar o **estado do pedido** da fase: sem pedido; escola selecionada mas não gravada ("Clique em Finalizar para valer"); gravado, com posição e se está dentro das vagas; selecionou outra escola mas o gravado é outro ("Clique em Finalizar para trocar"); leitura inconsistente. |
-| RF2 | Listar **"Escolas com possibilidade"**: escolas com vaga em que a classificação do professor basta agora, com posição ("2º lugar em 3 vagas") e chance Maior / Menor (Menor quando posição = vagas). Maior folga primeiro. |
-| RF3 | Mostrar **o que mudou** desde a leitura anterior do mesmo professor, período e fase: linha "Saiu da lista desde HHhMM". |
+| RF2 | Listar **"Escolas com vaga"**: todas as escolas com vaga para remoção (vagas > 0), com posição ("2º lugar em 3 vagas") e chance Maior / Menor (posição = vagas) / Zero (posição > vagas). Maior folga primeiro. |
+| RF3 | Mostrar **o que mudou** desde a leitura anterior do mesmo professor, período e fase: linha "Perdeu a chance desde HHhMM". |
 | RF4 | Ler tudo do servidor a cada atualização: vagas, interessados e classificação. Nada de uma fase vale na outra. |
 | RF5 | Atualizar só quando o professor abre o painel ou clica em atualizar. Nunca automaticamente. |
 | RF6 | Escola que não pôde ser lida **nunca** aparece como oportunidade; o painel avisa "Não consegui ler N escolas". |
