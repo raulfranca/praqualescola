@@ -4,6 +4,12 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [2.6.3] - 2026-11-12 - Atalho /remocao
+
+### Adicionado
+
+- Digitar "/remocao" na barra de busca e apertar Enter leva direto à página do Assistente de Remoção.
+
 ## [2.6.2] - 2026-11-12 - Assistente de remoção - melhorias
 
 ### Alterado

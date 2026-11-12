@@ -21,19 +21,26 @@ export function SearchBar({ value, onChange, schools, onSelectSchool, showDropdo
   const [adminAberto, setAdminAberto] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const ehComandoAdmin = value.trim().toLowerCase() === "/admin";
+  const comando = value.trim().toLowerCase();
+  const ehComandoAdmin = comando === "/admin";
+  const ehComandoRemocao = comando === "/remocao" || comando === "/remoção";
 
-  // "/admin" + Enter abre o painel do administrador (pede senha)
+  // "/admin" + Enter abre o painel do administrador (pede senha);
+  // "/remocao" + Enter leva ao assistente de remoção
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && ehComandoAdmin) {
+    if (e.key !== "Enter") return;
+    if (ehComandoAdmin) {
       e.preventDefault();
       onChange("");
       setAdminAberto(true);
+    } else if (ehComandoRemocao) {
+      e.preventDefault();
+      window.location.assign("/remocao/");
     }
-  }, [ehComandoAdmin, onChange]);
+  }, [ehComandoAdmin, ehComandoRemocao, onChange]);
 
-  // Filter schools based on search query (hide suggestions for /admin command)
-  const filteredSchools = value.trim() && !ehComandoAdmin
+  // Filter schools based on search query (hide suggestions for comandos)
+  const filteredSchools = value.trim() && !ehComandoAdmin && !ehComandoRemocao
     ? schools.filter((school) => {
         const query = removeAccents(value.toLowerCase());
         return (
