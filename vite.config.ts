@@ -23,6 +23,13 @@ function paginaRemocao(): Plugin {
     name: "pagina-remocao",
     configureServer: (servidor) => {
       servidor.middlewares.use(middleware);
+      // assistente.js é script comum, fora do grafo de módulos: o Vite não recarrega sozinho.
+      // Ao salvar, recarrega a página de estados do painel.
+      servidor.watcher.on("change", (arquivo) => {
+        if (path.resolve(arquivo) === path.resolve(__dirname, "public/remocao/assistente.js")) {
+          servidor.ws.send({ type: "full-reload", path: "/remocao/tests/painel.html" });
+        }
+      });
     },
     configurePreviewServer: (servidor) => {
       servidor.middlewares.use(middleware);

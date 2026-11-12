@@ -4,6 +4,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versioname
 
 ## [Não publicado]
 
+### Alterado
+- Favorito fora da APUS abre o login numa nova aba (`window.open`), sem sair da página atual. Se o navegador bloquear a aba, cai no comportamento antigo (leva ao login na mesma aba).
+- Página de passo a passo: trecho "Na remoção, passo a passo" com prints do painel real (dados de exemplo) sobre um esboço da página da APUS, em `public/remocao/prints/`.
+
 ## [0.2.0] — 2026-11-12
 
 Reescrita completa. A v1 (`Assistente de Remoção.txt`, userscript do TamperMonkey, `@version 2.0`) fica como histórico.

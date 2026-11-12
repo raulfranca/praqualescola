@@ -375,11 +375,11 @@
     '.icone:focus-visible,.botao:focus-visible{outline:2px solid var(--primary);outline-offset:2px}',
     '.corpo{padding:12px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}',
     '.eyebrow{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);padding:4px 2px 0}',
+    '.eyebrow.com-coluna{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding-right:12px}',
     '.pedido{background:var(--card);border-radius:8px;padding:10px 12px;box-shadow:inset 3px 0 0 var(--faixa,var(--primary))}',
     '.pedido .linha{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}',
     '.pedido .escola{font-weight:600;font-size:13.5px;line-height:1.3}',
     '.pedido .texto{font-size:12.5px;color:var(--ink2);margin-top:3px}',
-    '.pedido .antes{color:var(--faixa)}',
     '.pedido .dica{font-size:12.5px;font-weight:600;color:var(--faixa);margin-top:6px}',
     '.lista{display:flex;flex-direction:column;gap:6px}',
     '.item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--card);border-radius:8px}',
@@ -440,9 +440,9 @@
   }
 
   // Bloco "Seu pedido" — uma linha por estado (spec §4, decisão 2).
-  function blocoPedido(pedido, comparacao) {
+  function blocoPedido(pedido) {
     var cores = { ok: 'var(--ok-fg)', erro: 'var(--erro-fg)', aviso: 'var(--aviso-fg)', info: 'var(--info-fg)' };
-    var tipo, rotulo, escola, texto, dica, antes = null;
+    var tipo, rotulo, escola, texto, dica;
     var nomeCampo = pedido.escolaCampo ? (pedido.escolaCampo.nome || 'outra escola') : '';
     switch (pedido.estado) {
       case 'gravado':
@@ -454,20 +454,19 @@
           break;
         }
         tipo = pedido.dentro ? 'ok' : 'erro';
-        rotulo = pedido.dentro ? 'Dentro' : 'Fora';
-        texto = pedido.vagas > 0 ? 'Você é o ' + pedido.posicao + 'º para ' + vagas(pedido.vagas) : 'Você é o ' + pedido.posicao + 'º, mas a escola está sem vaga';
-        if (comparacao && comparacao.posicaoAntes && comparacao.posicaoAntes !== pedido.posicao) antes = 'antes era ' + comparacao.posicaoAntes + 'º';
-        dica = pedido.dentro ? null : 'Veja abaixo onde você entra.';
+        rotulo = pedido.dentro ? 'Entra' : 'Não Entra';
+        texto = pedido.vagas > 0 ? 'Você é o ' + pedido.posicao + 'º lugar em ' + vagas(pedido.vagas) : 'Você é o ' + pedido.posicao + 'º, mas a escola está sem vaga';
+        dica = pedido.dentro ? null : 'Você não conseguirá esta vaga. Considere as opções abaixo.';
         break;
       case 'nao-gravado':
-        tipo = 'aviso'; rotulo = 'Não gravado'; escola = nomeCampo;
-        texto = 'Você selecionou esta escola, mas o pedido ainda não vale.';
-        dica = 'Clique em Finalizar para valer.';
+        tipo = 'aviso'; rotulo = 'Não enviado'; escola = nomeCampo;
+        texto = 'Você selecionou esta escola, mas ainda não enviou para a APUS.';
+        dica = 'Clique em Finalizar (abaixo, esquerda) para enviar.';
         break;
       case 'trocar':
-        tipo = 'aviso'; rotulo = 'Não gravado'; escola = nomeCampo;
-        texto = 'Você selecionou esta escola, mas o pedido gravado é ' + pedido.escola.nome + '.';
-        dica = 'Clique em Finalizar para trocar.';
+        tipo = 'aviso'; rotulo = 'Não enviado'; escola = nomeCampo;
+        texto = 'IMPORTANTE: A sua escola selecionada para remoção ainda é ' + pedido.escola.nome + '.';
+        dica = 'Clique em Finalizar (abaixo, esquerda) para trocar.';
         break;
       case 'nao-confirmado':
         tipo = 'aviso'; rotulo = 'Confira'; escola = 'Pedido não confirmado';
@@ -480,8 +479,8 @@
         dica = 'Clique em atualizar.';
         break;
       default:
-        tipo = 'info'; rotulo = 'Sem pedido'; escola = 'Nenhuma escola';
-        texto = 'Você não tem pedido valendo nesta fase.';
+        tipo = 'info'; rotulo = 'Não escolhido'; escola = 'Nenhuma escola';
+        texto = 'Você ainda não selecionou nenhuma escola para a remoção.';
         dica = 'Escolha uma escola e clique em Finalizar.';
     }
     var caixa = criar('div', 'pedido');
@@ -490,22 +489,29 @@
     linha.appendChild(criar('div', 'escola', escola));
     linha.appendChild(etiqueta(tipo, rotulo));
     caixa.appendChild(linha);
-    var t = criar('div', 'texto', texto);
-    if (antes) { t.appendChild(document.createTextNode(' · ')); t.appendChild(criar('span', 'antes', antes)); }
-    caixa.appendChild(t);
+    caixa.appendChild(criar('div', 'texto', texto));
     if (dica) caixa.appendChild(criar('div', 'dica', dica));
     return caixa;
+  }
+
+  function cabecalhoComColuna(texto, coluna) {
+    var cab = criar('div', 'eyebrow com-coluna');
+    cab.appendChild(criar('span', null, texto));
+    cab.appendChild(criar('span', null, coluna));
+    return cab;
   }
 
   function conteudoPronto(estado) {
     var r = estado.resultado, c = estado.comparacao || { novas: new Set(), sairam: [] };
     var frag = document.createDocumentFragment();
-    frag.appendChild(criar('div', 'eyebrow', estado.fase ? 'Seu pedido na ' + estado.fase + 'ª fase' : 'Seu pedido'));
-    frag.appendChild(blocoPedido(r.pedido, c));
+    frag.appendChild(cabecalhoComColuna(estado.fase ? 'Escola escolhida na ' + estado.fase + 'ª fase' : 'Seu pedido', 'Situação'));
+    frag.appendChild(blocoPedido(r.pedido));
     if (r.falhas.length) {
       frag.appendChild(faixa('aviso', 'Não consegui ler ' + (r.falhas.length === 1 ? '1 escola' : r.falhas.length + ' escolas') + '. Clique em atualizar.'));
     }
-    frag.appendChild(criar('div', 'eyebrow', 'Onde você entra · ' + r.oportunidades.length));
+    frag.appendChild(r.oportunidades.length
+      ? cabecalhoComColuna('Escolas com possibilidade · ' + r.oportunidades.length, 'Chance')
+      : criar('div', 'eyebrow', 'Escolas com possibilidade · 0'));
     if (!r.oportunidades.length) {
       frag.appendChild(criar('div', 'vazio', 'Nenhuma escola com vaga para a sua classificação agora.'));
     } else {
@@ -514,11 +520,10 @@
         var item = criar('div', 'item');
         var info = criar('div', 'info');
         var n = criar('div', 'n', o.nome);
-        if (c.novas && c.novas.has(o.codigo)) n.appendChild(etiqueta('info', 'Nova'));
         info.appendChild(n);
-        info.appendChild(criar('div', 'd', o.posicao + 'º de ' + vagas(o.vagas)));
+        info.appendChild(criar('div', 'd', o.posicao + 'º lugar em ' + vagas(o.vagas)));
         item.appendChild(info);
-        item.appendChild(o.justo ? etiqueta('aviso', 'Justo') : etiqueta('ok', 'Entra'));
+        item.appendChild(o.justo ? etiqueta('aviso', 'Menor') : etiqueta('ok', 'Maior'));
         lista.appendChild(item);
       });
       frag.appendChild(lista);
@@ -532,7 +537,7 @@
   function conteudoLendo(estado) {
     var caixa = criar('div', 'lendo');
     var total = estado.total || 0;
-    caixa.appendChild(criar('div', null, total ? 'Lendo ' + estado.feitos + ' de ' + total + ' escolas…' : 'Lendo a lista de escolas…'));
+    caixa.appendChild(criar('div', null, total ? 'Analisando ' + estado.feitos + ' de ' + total + ' escolas…' : 'Lendo a lista de escolas…'));
     var barra = criar('div', 'progresso');
     var i = document.createElement('i');
     i.style.width = (total ? Math.max(4, Math.round(100 * estado.feitos / total)) : 4) + '%';
@@ -558,9 +563,8 @@
 
   function subtitulo(estado) {
     var partes = [];
-    if (estado.classificacao) partes.push('Classificação ' + estado.classificacao);
-    if (estado.tipo === 'pronto' && estado.hora) partes.push('lido às ' + estado.hora);
-    if (estado.tipo === 'lendo') partes.push('lendo…');
+    if (estado.tipo === 'pronto' && estado.hora) partes.push('atualizado às ' + estado.hora);
+    if (estado.tipo === 'lendo') partes.push('analisando…');
     return partes.join(' · ') || 'Remoção';
   }
 
@@ -600,7 +604,7 @@
     painel.appendChild(cab);
     var corpo = criar('div', 'corpo');
     painel.appendChild(corpo);
-    painel.appendChild(criar('div', 'rodape', 'Só lê a APUS. Não escolhe escola nem envia nada.'));
+    painel.appendChild(criar('div', 'rodape', 'Esta análise não é uma garantia de resultados.'));
     sombra.appendChild(painel);
     return { painel: painel, sub: sub, corpo: corpo, btAtualizar: btAtualizar, callbacks: callbacks };
   }

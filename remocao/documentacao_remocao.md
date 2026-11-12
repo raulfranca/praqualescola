@@ -32,14 +32,20 @@ classificação dele basta**, considerando os pedidos feitos até aquele momento
    as escolas na hora (≈ 30 a 60 s, mostrando "Lendo X de N escolas").
 3. Para ler de novo, use o botão de atualizar do painel. O painel compara com a leitura anterior.
 
-Fora da APUS, o favorito leva ao login (`https://educ.apus.info/professor/pinda`); numa página da
-APUS que não é a remoção, leva à remoção. O favorito não sobrevive à troca de página: quando a
+Fora da APUS, o favorito abre o login (`https://educ.apus.info/professor/pinda`) numa nova aba e
+deixa a página atual como está (se o navegador bloquear a aba, vai ao login na mesma aba); numa
+página da APUS que não é a remoção, leva à remoção na mesma aba. O favorito não sobrevive à troca de página: quando a
 página abrir, é preciso clicar nele de novo (o aviso diz isso).
 
 **Testado em 2026-11-12:** Chromebook gerenciado da Secretaria, com conta de professor: o favorito
 roda e o código de fora carrega na APUS.
 
 O assistente **só lê**: nunca escolhe escola, finaliza, reinicia ou envia pedido.
+
+**Prints da página de passo a passo** (`public/remocao/prints/*.png`): fotografias do painel real,
+renderizado pelo próprio `assistente.js` com dados de exemplo (`Painel._renderEm`), sobre um esboço
+da página da APUS (`remocao/tests/prints.html`). Se o visual do painel mudar, refaça os prints com
+`node remocao/tests/fotografar-prints.mjs`. Os nomes de escola são inventados e não coincidem com escolas da rede.
 
 ---
 
@@ -142,7 +148,7 @@ servidor que devolva a classificação). Vagas, inscritos e concorrentes vêm se
 * Escola com leitura falha ou número ilegível **nunca** vira oportunidade: entra em "Não consegui ler N escolas".
 * Estado do pedido: aparece em 1 lista → `gravado` (ou `trocar`, se o campo da tela mostra outra
   escola); em nenhuma → `nenhum` (campo vazio) ou `nao-gravado` (campo preenchido); em 2+ → `inconsistente`.
-* A escola do pedido gravado não se repete em "Onde você entra". Ordem: maior folga, depois nome.
+* A escola do pedido gravado não se repete em "Escolas com possibilidade". Ordem: maior folga, depois nome.
 
 ### 3.2. Chamadas ao servidor
 
@@ -171,7 +177,8 @@ sozinha leva ≈ 7 s).
 3. Conferir: estado do pedido igual ao real, número de chamadas `info.ajax.php` = escolas com
    inscritos, uma só chamada `server_processing.info.php`, sem chamadas simultâneas, janela
    "Lista de pontuação" nunca aberta.
-4. Visual: com `npm run dev`, `http://localhost:8080/remocao/tests/painel.html`.
+4. Visual: com `npm run dev`, `http://localhost:8080/remocao/tests/painel.html`. A página recarrega
+   sozinha ao salvar `public/remocao/assistente.js` (plugin `paginaRemocao` em `vite.config.ts`).
 
 ---
 

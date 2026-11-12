@@ -86,7 +86,7 @@ Branches permanentes: `dev` (integração) e `main` (produção). Trabalho novo 
 
 **Versões numeradas (`[0.x.y]`) são imutáveis — nunca as edite.** Toda entrada nova vai no bloco `[Unreleased]`, no topo. Um hook bloqueia edição do que já foi lançado. Use as seções `Adicionado`, `Corrigido`, `Alterado`, `Removido`. Ajustes feitos durante a construção de uma feature atualizam o bullet existente.
 
-**Concluir uma tarefa inclui rodar o portão.** Toda mudança que afeta o que aparece ou acontece na tela termina com o fluxo exercitado num navegador real, por um teste e2e que fica no repositório. Relate no fim o que foi exercitado e o que não foi.
+**Concluir uma etapa de `/plano` inclui rodar o portão.** Fora de plano, não rode portão nem e2e (ver *Teste de interface*). Numa etapa, toda mudança que afeta o que aparece ou acontece na tela termina com o fluxo exercitado num navegador real, por um teste e2e que fica no repositório. Relate no fim o que foi exercitado e o que não foi.
 
 ---
 
@@ -108,7 +108,9 @@ Branches permanentes: `dev` (integração) e `main` (produção). Trabalho novo 
 
 ## Teste de interface
 
-Toda mudança que afeta o que aparece ou acontece na tela termina com o fluxo exercitado num navegador real, depois do portão.
+**Só dentro de uma etapa do `/plano`.** Portão e e2e fazem parte da execução de etapas de plano. Mudanças pontuais fora de plano não rodam portão nem e2e: o usuário confere por conta própria.
+
+Numa etapa de plano, toda mudança que afeta o que aparece ou acontece na tela termina com o fluxo exercitado num navegador real, depois do portão.
 
 - **Playwright (`e2e/`):** o cenário vira um teste em arquivo, que fica no repositório como proteção contra regressão. Roda sem janela, com servidor próprio em porta separada, sem encostar no servidor de desenvolvimento do usuário.
 - **Tags:** cada cenário leva `@<funcionalidade>`. Rode só os afetados: `node .claude/scripts/portao.mjs --e2e <tag>`. Leia o resultado e abra só a captura do teste que falhou (`test-results/`).

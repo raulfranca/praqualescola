@@ -24,8 +24,19 @@ function fake(hostname, pathname) {
   return { loc: { hostname, pathname, href: `https://${hostname}${pathname}` }, doc, agora: 123, esperar: fn => fn(), base: 'https://exemplo.test/remocao/', janela: {}, scripts, avisos };
 }
 
-test('fora da APUS vai para o login', () => {
+test('fora da APUS abre o login numa nova aba, sem tirar a pessoa da página', () => {
   const a = fake('www.google.com', '/');
+  const abertas = [];
+  a.janela.open = (url, alvo) => { abertas.push([url, alvo]); return {}; };
+  assert.equal(favorito(a), 'login');
+  assert.deepEqual(abertas, [['https://educ.apus.info/professor/pinda', '_blank']]);
+  assert.equal(a.loc.href, 'https://www.google.com/');
+  assert.match(a.avisos[0].textContent, /nova aba/);
+});
+
+test('fora da APUS, se o navegador bloquear a nova aba, vai para o login nesta mesma', () => {
+  const a = fake('www.google.com', '/');
+  a.janela.open = () => null;
   assert.equal(favorito(a), 'login');
   assert.equal(a.loc.href, 'https://educ.apus.info/professor/pinda');
   assert.match(a.avisos[0].textContent, /login da APUS/);

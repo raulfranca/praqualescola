@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../public/remocao/design-system/tokens.css">
+<style>
+  body { margin: 0; padding: 24px; background: transparent; }
+  #janela { width: 780px; border: 1px solid #c4c7c5; border-radius: 10px; overflow: hidden; background: #fff; color: #1f1f1f; font: 12px/1 var(--font-sans); box-shadow: 0 1px 3px rgba(15,29,54,.12); }
+  svg.i { flex: none; width: 16px; height: 16px; fill: none; stroke: #474747; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .abas { display: flex; align-items: flex-end; gap: 8px; height: 34px; padding: 0 8px; background: #dde3ea; }
+  .aba { display: flex; align-items: center; gap: 8px; width: 210px; height: 28px; padding: 0 10px; border-radius: 8px 8px 0 0; background: #fff; white-space: nowrap; }
+  .aba span { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+  .aba svg.i, .abas > svg.i { width: 12px; height: 12px; }
+  .abas > svg.i { margin-bottom: 8px; }
+  .ferr { display: flex; align-items: center; gap: 14px; height: 40px; padding: 0 12px; }
+  .end { flex: 1; display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 9999px; background: #e9eef6; font-size: 13px; }
+  .end span { flex: 1; }
+  .end svg.i { width: 14px; height: 14px; }
+  .avatar { width: 20px; height: 20px; border-radius: 50%; background: #a8c7fa; }
+  .fav { display: flex; align-items: center; gap: 16px; height: 30px; margin: 0 4px 4px; padding: 0 10px; white-space: nowrap; }
+  .fav span { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 6px; }
+  .fav svg.i { width: 14px; height: 14px; }
+
+  .pagina { position: relative; height: var(--altura, 600px); border-top: 1px solid #e3e3e3; background: #f3f4f6; overflow: hidden; }
+  /* esboço da página da remoção: só a estrutura e os rótulos que o professor reconhece */
+  .apus { width: 380px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; color: #374151; font-size: 12px; }
+  .apus .titulo { font-weight: 700; font-size: 14px; color: #1f2937; }
+  .apus .bloco { background: #fff; border: 1px solid #e5e7eb; border-radius: 4px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .apus .rot { font-weight: 600; color: #4b5563; }
+  .barra { height: 7px; border-radius: 4px; background: #e5e7eb; }
+  .campo { display: flex; align-items: center; height: 30px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 3px; background: #fff; color: #9ca3af; }
+  .campo.cheio { color: #111827; }
+  .botoes { display: flex; gap: 8px; }
+  .bt { display: inline-flex; align-items: center; height: 30px; padding: 0 14px; border-radius: 3px; background: #6b7280; color: #fff; font-weight: 600; }
+  .bt.verde { background: #3f8f5a; }
+  .ok { color: #2f6f46; font-weight: 600; }
+
+  .destaque { position: relative; box-shadow: 0 0 0 3px var(--primary); border-radius: 6px; }
+  .anel { position: absolute; border-radius: 8px; box-shadow: 0 0 0 3px var(--primary); pointer-events: none; }
+  #painel { position: absolute; top: 16px; right: 16px; }
+  .cursor { position: absolute; width: 24px; height: 24px; filter: drop-shadow(0 1px 1px rgba(15,29,54,.35)); }
+</style>
+</head>
+<body>
+<div id="janela">
+  <div class="abas">
+    <div class="aba"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg><span>Remoção</span><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+    <svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+  </div>
+  <div class="ferr">
+    <svg class="i" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+    <svg class="i" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    <svg class="i" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>
+    <div class="end"><svg class="i" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>educ.apus.info/profWeb/atribRemocao/</span></div>
+    <div class="avatar"></div>
+  </div>
+  <div class="fav">
+    <span><svg class="i" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Escola</span>
+    <span><svg class="i" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Formação</span>
+    <span id="favorito"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>Remoção</span>
+  </div>
+  <div class="pagina" id="pagina">
+    <div class="apus" id="apus"></div>
+    <div id="painel"></div>
+  </div>
+</div>
+
+<script>window.ASSISTENTE_REMOCAO_TESTE = true;</script>
+<script src="../../public/remocao/assistente.js"></script>
+<script>
+  var A = window.AssistenteRemocaoTeste;
+  function op(codigo, nome, vagas, posicao) { return { codigo: codigo, nome: nome, vagas: vagas, posicao: posicao, justo: posicao === vagas }; }
+  var SOL = { codigo: '1', nome: 'EM Recanto do Sol' };
+  var PRIMAVERA = { codigo: '4', nome: 'EM Jardim Primavera' };
+  var OPS = [op('1', SOL.nome, 3, 1), op('4', PRIMAVERA.nome, 2, 1), op('2', 'EM Vale Verde', 2, 2), op('3', 'EMEI Bem-te-vi', 1, 1)];
+  var SEM = { horaAnterior: null, posicaoAntes: null, novas: new Set(), sairam: [] };
+  function pronto(pedido, ops, comp, hora) {
+    return { tipo: 'pronto', classificacao: 412, fase: 1, hora: hora || '9h40',
+      resultado: { erro: null, pedido: pedido, oportunidades: ops, falhas: [], lidas: 15 }, comparacao: comp || SEM };
+  }
+  var nada = { estado: 'nenhum', escola: null, escolaCampo: null, posicao: null, vagas: null, dentro: null };
+
+  // Página da remoção, em esboço: aba de escolha (#tabs-3) ou de finalização (#tabs-5).
+  function escolha(escola, destacar) {
+    return '<div class="bloco"><div class="rot">Escolha a escola desejada</div>' +
+      '<div class="campo' + (escola ? ' cheio' : '') + '">' + (escola || 'Selecione…') + '</div></div>' +
+      '<div class="botoes"><span class="bt verde' + (destacar ? ' destaque' : '') + '">Finalizar</span></div>' +
+      '<div class="bloco"><div class="rot">Optar por não escolher nenhuma escola nesta fase</div><div class="barra" style="width:60%"></div></div>';
+  }
+  function finalizado(destacar) {
+    return '<div class="bloco"><div class="ok">Inscrição finalizada com sucesso.</div><div>Protocolo: 0000000</div></div>' +
+      '<div class="botoes"><span class="bt' + (destacar ? ' destaque' : '') + '">Reiniciar</span></div>';
+  }
+  var CABECALHO = '<div class="titulo">Processo de Remoção - 1º FASE</div>' +
+    '<div class="bloco"><div class="rot">Dados do professor</div><div class="barra" style="width:80%"></div><div class="barra" style="width:65%"></div><div class="barra" style="width:72%"></div><div><b>Classificação: 412</b></div></div>';
+
+  var CENAS = {
+    abrir:    { apus: escolha(), painel: { tipo: 'lendo', feitos: 6, total: 15, classificacao: 412, fase: 1 }, favorito: true },
+    onde:     { apus: escolha(), painel: pronto(nada, OPS) },
+    finalizar:{ apus: escolha(SOL.nome, true), painel: pronto({ estado: 'nao-gravado', escola: null, escolaCampo: SOL, posicao: null, vagas: null, dentro: null }, OPS) },
+    conferir: { apus: finalizado(), painel: pronto({ estado: 'gravado', escola: SOL, escolaCampo: SOL, posicao: 1, vagas: 3, dentro: true }, OPS.slice(1), null, '9h52'), anelAtualizar: true },
+    mudou:    { apus: finalizado(true), painel: pronto({ estado: 'gravado', escola: SOL, escolaCampo: SOL, posicao: 4, vagas: 3, dentro: false },
+                [op('4', PRIMAVERA.nome, 2, 2), op('5', 'EM Girassol', 1, 1)],
+                { horaAnterior: '9h52', posicaoAntes: 1, novas: new Set(['5']), sairam: ['EM Vale Verde', 'EMEI Bem-te-vi'] }, '16h05') },
+    trocar:   { apus: escolha(PRIMAVERA.nome, true), painel: pronto({ estado: 'trocar', escola: SOL, escolaCampo: PRIMAVERA, posicao: 4, vagas: 3, dentro: false },
+                [op('4', PRIMAVERA.nome, 2, 2), op('5', 'EM Girassol', 1, 1)], null, '16h05') }
+  };
+  var cena = CENAS[new URLSearchParams(location.search).get('cena')];
+  document.getElementById('apus').innerHTML = CABECALHO + cena.apus;
+  if (cena.favorito) document.getElementById('favorito').classList.add('destaque');
+  A.Painel._renderEm(document.getElementById('painel'), cena.painel);
+  var alt = Math.max(document.getElementById('painel').offsetHeight + 32, document.getElementById('apus').offsetHeight);
+  document.getElementById('pagina').style.setProperty('--altura', alt + 'px');
+  if (cena.anelAtualizar) {
+    var bt = document.getElementById('painel').shadowRoot.querySelector('.atualizar').getBoundingClientRect();
+    var pag = document.getElementById('pagina').getBoundingClientRect();
+    var anel = document.createElement('div');
+    anel.className = 'anel';
+    anel.style.cssText = 'left:' + (bt.left - pag.left - 3) + 'px;top:' + (bt.top - pag.top - 3) + 'px;width:' + (bt.width + 6) + 'px;height:' + (bt.height + 6) + 'px';
+    document.getElementById('pagina').appendChild(anel);
+  }
+</script>
+</body>
+</html>

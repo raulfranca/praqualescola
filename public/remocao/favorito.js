@@ -26,6 +26,10 @@ function favorito(amb) {
   }
 
   if (amb.loc.hostname !== 'educ.apus.info') {
+    if (amb.janela.open && amb.janela.open(LOGIN, '_blank')) {
+      aviso('Abri o login da APUS numa nova aba. Depois de entrar, abra a remoção e clique de novo em Assistente de Remoção.');
+      return 'login';
+    }
     aviso('Levando você para o login da APUS. Depois de entrar, abra a remoção e clique de novo em Assistente de Remoção.');
     amb.esperar(function () { amb.loc.href = LOGIN; }, 1800);
     return 'login';

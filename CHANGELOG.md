@@ -4,6 +4,22 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [2.6.1] - 2026-11-12 - Assistente de remoção - melhorias
+
+### Adicionado
+
+- Página do Assistente de Remoção: novo passo 4 explicando que, ao clicar no favorito, a pessoa vai para o login da APUS, informa o usuário e monta a senha apertando os botões numéricos da tela (0/1, 2/3, 4/5, 6/7, 8/9), com imagem da tela de login. Os passos seguintes foram renumerados, e o passo 5 passou a mostrar um desenho fiel da tela da APUS (com dados fictícios) com o favorito sendo clicado e o painel do assistente começando a ler as escolas.
+- Página do Assistente de Remoção: novo trecho "Na remoção, passo a passo", com imagens do painel por cima da página da remoção mostrando o que fazer em cada momento: ver onde você entra, escolher a escola e clicar em Finalizar, atualizar para conferir, voltar até a fase fechar e trocar de escola se ficar de fora.
+
+### Alterado
+
+- Assistente de Remoção: ao clicar no favorito fora da APUS, o login agora abre numa nova aba, sem tirar a pessoa da página onde estava (por exemplo, o próprio passo a passo).
+- Assistente de Remoção: as listas do painel ganharam títulos de coluna à direita, acima das etiquetas: "Situação" na escola escolhida (Dentro, Fora…) e "Chance" nas demais (Entra, Justo). A lista "Onde você entra" passou a se chamar "Escolas com possibilidade", também na página de ajuda. Nela, as etiquetas de chance passaram a ser "Maior" (sobra folga) e "Menor" (você ocupa a última vaga), a posição aparece como "1º lugar em 2 vagas" e a etiqueta "Nova" deixou de aparecer. Na escola escolhida, o painel deixou de mostrar a posição anterior ("antes era 1º").
+
+- Página do Assistente de Remoção: quem abre pelo celular ou tablet (inclusive iPad) vê apenas um aviso de que precisa abrir num computador ou Chromebook para o assistente funcionar; o passo a passo de instalação fica escondido.
+- Página do Assistente de Remoção: o primeiro passo ganhou uma pequena ilustração do navegador mostrando onde fica a barra de favoritos, logo abaixo da barra de endereço.
+- Página do Assistente de Remoção: a instalação foi dividida em "Veja como se faz" (a animação) e "Agora é a sua vez" (o botão de arrastar); a animação passou a usar a mesma janela realista do Chrome do primeiro passo, com o botão sendo solto na barra de favoritos de verdade, e o favorito passou a se chamar só "Remoção", para caber melhor na barra de favoritos. O botão de arrastar e o da animação passaram a mostrar o ícone de globo, igual ao que o Chrome mostra no favorito depois de instalado.
+
 ## [2.6.0] - 2026-11-12 - Assistente de remoção (separado do app)
 
 ### Adicionado

@@ -8,7 +8,7 @@
   if (!/\/$|\.html$/.test(location.pathname)) location.replace(location.pathname + '/' + location.search + location.hash);
 </script>
 <title>Assistente de Remoção</title>
-<meta name="description" content="Veja em quais escolas a sua classificação basta, e se o seu pedido de remoção está valendo.">
+<meta name="description" content="Analise suas chances de conseguir a remoção.">
 <link rel="icon" href="design-system/assets/icone-app.svg" type="image/svg+xml">
 <link rel="stylesheet" href="design-system/tokens.css">
 <style>
@@ -26,6 +26,7 @@
   .aviso.aviso-amarelo { background: var(--aviso-bg); color: var(--aviso-fg); }
   .aviso.aviso-azul { background: var(--info-bg); color: var(--info-fg); }
   .aviso svg { flex: none; margin-top: 2px; }
+  .celular .lead, .celular .passos, .celular .sobre { display: none; }
 
   ol.passos { list-style: none; padding: 0; margin: 0; counter-reset: passo; display: flex; flex-direction: column; gap: var(--space-3); }
   ol.passos > li { counter-increment: passo; padding: var(--space-5) var(--space-5) var(--space-5) 72px; position: relative; }
@@ -34,35 +35,32 @@
   ol.passos p { margin: 0; color: var(--on-surface-variant); font-size: var(--text-body); }
   kbd { display: inline-block; background: var(--primary-soft); color: var(--primary); border-radius: var(--radius-md); padding: 1px 8px; font: 600 13px var(--font-mono); }
 
-  /* ---------- animação: arrastar até a barra de favoritos ---------- */
-  .demo { margin: var(--space-4) 0 var(--space-2); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface-container-high); box-shadow: inset 0 0 0 1px var(--ghost-border); user-select: none; }
-  .demo-abas { display: flex; gap: 6px; padding: 8px 10px 0; }
-  .demo-aba { width: 120px; height: 22px; border-radius: 8px 8px 0 0; background: var(--surface-container-lowest); }
-  .demo-endereco { background: var(--surface-container-lowest); padding: 6px 10px; }
-  .demo-endereco div { height: 22px; border-radius: 9999px; background: var(--surface-container-low); }
-  .demo-favoritos { position: relative; background: var(--surface-container-lowest); height: 30px; display: flex; align-items: center; gap: 14px; padding: 0 12px; box-shadow: inset 0 -1px 0 var(--ghost-border); }
-  .demo-favoritos .fav { height: 8px; width: 54px; border-radius: 4px; background: var(--surface-container-high); }
-  .demo-novo { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--on-surface); opacity: 0; animation: aparece 5s var(--ease-standard) infinite; }
-  .demo-novo img { width: 14px; height: 14px; }
-  .demo-pagina { position: relative; height: 136px; background: var(--surface); padding: 22px 24px; }
-  .demo-pagina .linha { height: 8px; border-radius: 4px; background: var(--surface-container-high); margin-bottom: 9px; }
-  .demo-botao { position: absolute; left: 24px; top: 82px; display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: var(--radius-md); background: var(--gradient-primary); color: #fff; font-size: 13px; font-weight: 600; }
-  .demo-fantasma { transform-origin: left center; position: absolute; left: 24px; top: 82px; display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: var(--radius-md); background: var(--gradient-primary); color: #fff; font-size: 13px; font-weight: 600; opacity: 0; animation: arrasta 5s var(--ease-standard) infinite; }
-  .demo-cursor { position: absolute; left: 90px; top: 100px; width: 22px; height: 22px; animation: cursor 5s var(--ease-standard) infinite; filter: drop-shadow(0 1px 1px rgba(15,29,54,.3)); }
+  /* ---------- animação do passo 2: a mesma janela do Chrome, com o botão indo até a barra ---------- */
+  /* --gx/--gy (fantasma) e --cx/--cy (cursor) são medidos no script; os valores aqui são o padrão. */
+  .demo { --gx: 210px; --gy: -94px; --cx: 185px; --cy: -94px; }
+  .demo .chrome-favoritos { box-shadow: none; }
+  .demo .chrome-pagina { height: 132px; padding: 18px 24px; }
+  .demo-linha { height: 8px; border-radius: 4px; background: #e3e8ef; margin-bottom: 9px; }
+  .demo-botao, .demo-fantasma { position: absolute; left: 24px; top: 76px; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: var(--radius-md); background: var(--gradient-primary); color: var(--on-primary); font: 600 13px var(--font-sans); }
+  .chrome .demo-botao svg, .chrome .demo-fantasma svg { width: 16px; height: 16px; stroke: currentColor; }
+  .demo-fantasma { transform-origin: left center; opacity: 0; box-shadow: var(--shadow-ambient); animation: arrasta 5s var(--ease-standard) infinite; }
+  .demo-novo { opacity: 0; font-weight: 600; animation: aparece 5s var(--ease-standard) infinite; }
+  .demo-cursor { position: absolute; left: 90px; top: 94px; width: 22px; height: 22px; animation: cursor 5s var(--ease-standard) infinite; filter: drop-shadow(0 1px 1px rgba(15,29,54,.3)); }
+  .chrome .demo-cursor { width: 22px; height: 22px; stroke: #fff; stroke-width: 1.5; }
   @keyframes cursor {
     0%   { transform: translate(40px, 40px); }
     18%  { transform: translate(0, 0); }
     24%  { transform: translate(0, 0) scale(.9); }
-    58%  { transform: translate(124px, -114px) scale(.9); }
-    64%  { transform: translate(124px, -114px) scale(1); }
-    86%  { transform: translate(124px, -114px); }
+    58%  { transform: translate(var(--cx), var(--cy)) scale(.9); }
+    64%  { transform: translate(var(--cx), var(--cy)) scale(1); }
+    86%  { transform: translate(var(--cx), var(--cy)); }
     100% { transform: translate(40px, 40px); }
   }
   @keyframes arrasta {
     0%, 22%  { opacity: 0; transform: translate(0, 0); }
     26%      { opacity: .85; transform: translate(0, 0) scale(.92); }
-    58%      { opacity: .85; transform: translate(124px, -114px) scale(.62); }
-    62%, 100%{ opacity: 0; transform: translate(124px, -114px) scale(.62); }
+    58%      { opacity: .85; transform: translate(var(--gx), var(--gy)) scale(.62); }
+    62%, 100%{ opacity: 0; transform: translate(var(--gx), var(--gy)) scale(.62); }
   }
   @keyframes aparece {
     0%, 60%  { opacity: 0; }
@@ -73,13 +71,50 @@
     .demo-cursor, .demo-fantasma { animation: none; display: none; }
     .demo-novo { animation: none; opacity: 1; }
   }
-  .legenda-demo { font-size: var(--text-label); color: var(--on-surface-faint); margin: 0 0 var(--space-4); }
+  /* ilustração do passo 1: janela do Chrome com a barra de favoritos em destaque */
+  .chrome { margin-top: var(--space-4); border: 1px solid #c4c7c5; border-radius: 10px; overflow: hidden; background: #fff; color: #1f1f1f; font: 12px/1 var(--font-sans); user-select: none; box-shadow: 0 1px 3px rgba(15,29,54,.12); }
+  .chrome svg { flex: none; width: 16px; height: 16px; fill: none; stroke: #474747; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .chrome-abas { display: flex; align-items: flex-end; gap: 8px; height: 34px; padding: 0 8px; background: #dde3ea; }
+  .chrome-aba { display: flex; align-items: center; gap: 8px; width: 200px; height: 28px; padding: 0 10px; border-radius: 8px 8px 0 0; background: #fff; white-space: nowrap; overflow: hidden; }
+  .chrome-aba img { width: 14px; height: 14px; }
+  .chrome-aba span { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+  .chrome-aba svg, .chrome-abas > svg { width: 12px; height: 12px; }
+  .chrome-abas > svg { margin-bottom: 8px; }
+  .chrome-ferramentas { display: flex; align-items: center; gap: 14px; height: 40px; padding: 0 12px; }
+  .chrome-endereco { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 9999px; background: #e9eef6; white-space: nowrap; overflow: hidden; font-size: 13px; }
+  .chrome-endereco span { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+  .chrome-endereco svg { width: 14px; height: 14px; }
+  .chrome-avatar { flex: none; width: 20px; height: 20px; border-radius: 50%; background: #a8c7fa; }
+  .chrome-favoritos { display: flex; align-items: center; gap: 16px; height: 30px; margin: 0 4px 4px; padding: 0 10px; border-radius: 6px; box-shadow: 0 0 0 2px var(--primary); white-space: nowrap; overflow: hidden; }
+  .chrome-favoritos span { display: inline-flex; align-items: center; gap: 6px; }
+  .chrome-favoritos svg { width: 14px; height: 14px; }
+  .chrome-pagina { position: relative; height: 58px; border-top: 1px solid #e3e3e3; background: #f8fafd; }
+  .chrome-rotulo { position: absolute; left: 16px; top: 12px; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 9999px; background: var(--primary); color: var(--on-primary); font: 600 13px var(--font-sans); }
+  .chrome-rotulo svg { stroke: currentColor; width: 14px; height: 14px; }
+  ol.passos p.depois-chrome { margin-top: var(--space-4); }
+
+  /* ---------- prints do uso na remoção ---------- */
+  .print { margin: var(--space-4) 0 0; }
+  .print img { display: block; width: 100%; height: auto; }
+  /* desenho do passo 5: janela do Chrome com a página da APUS (dados fictícios) e o painel do assistente */
+  svg.apus { display: block; width: 100%; height: auto; user-select: none; }
+  svg.apus text { font-family: var(--font-sans); }
+  svg.apus .nav-txt { font-size: 13px; fill: #1f1f1f; }
+  svg.apus .pn-titulo { font-size: 15px; font-weight: 700; fill: #0f1d36; }
+  svg.apus .pn-sub { font-size: 12px; fill: #5b6578; }
+  svg.apus .pn-txt { font-size: 14px; fill: #3d4757; }
+  svg.apus g[font-family] text { font-family: Helvetica, Arial, sans-serif; }
+  ol.passos p.nota { margin-top: var(--space-3); font-size: var(--text-label); color: var(--on-surface-faint); }
+  .uso { margin: var(--space-10) 0 var(--space-4); }
+  .uso h2 { font-size: var(--text-headline); letter-spacing: 0; margin: 0 0 var(--space-1); }
+  .uso p { margin: 0; color: var(--on-surface-variant); font-size: var(--text-body); }
+  .celular .uso { display: none; }
 
   /* ---------- o botão de verdade ---------- */
-  .alvo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--primary-soft); }
+  .alvo { margin-top: var(--space-4); display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--primary-soft); }
   .favorito { display: inline-flex; align-items: center; gap: var(--space-2); height: 44px; padding: 0 var(--space-5); border-radius: var(--radius-md); background: var(--gradient-primary); color: var(--on-primary); font-weight: var(--weight-semibold); text-decoration: none; cursor: grab; box-shadow: var(--shadow-ambient); }
   .favorito:active { cursor: grabbing; }
-  .favorito img { width: 20px; height: 20px; }
+  .favorito svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .alvo .dica { font-size: var(--text-body); color: var(--primary); }
   .dica-clique { display: none; font-size: var(--text-body); color: var(--aviso-fg); background: var(--aviso-bg); border-radius: var(--radius-md); padding: 4px 10px; }
   .dica-clique.mostrar { display: inline-block; }
@@ -102,63 +137,290 @@
   <div class="topo">
     <img src="design-system/assets/icone-app.svg" alt="">
     <div>
-      <p class="eyebrow">Remoção da rede municipal</p>
+      <p class="eyebrow">Pra Qual Escola Eu Vou?</p>
     </div>
   </div>
   <h1>Assistente de Remoção</h1>
-  <p class="lead">Veja em quais escolas a sua classificação basta, e se o seu pedido está valendo. Funciona dentro da página de remoção da APUS, no computador ou no Chromebook.</p>
+  <p class="lead">Siga o passo a passo para instalar o assistente e analise suas chances de conseguir a remoção.</p>
 
   <div class="aviso aviso-amarelo" id="aviso-celular">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-    <div>Use no computador ou no Chromebook. No celular o assistente não funciona bem.</div>
+    <div><b>Abra esta página num computador ou Chromebook.</b> No celular e no tablet o assistente não funciona: ele precisa da barra de favoritos do Chrome do computador.</div>
   </div>
 
   <ol class="passos">
     <li class="surface-card">
-      <h2>Mostre a barra de favoritos</h2>
-      <p>Ela fica logo abaixo da barra de endereço. Se não aparecer, aperte <span style="white-space:nowrap"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd></span>.</p>
+      <h2>Sua barra de favoritos está aparecendo?</h2>
+      <p>Ela fica logo abaixo da barra de endereço.</p>
+      <div class="chrome" aria-hidden="true">
+        <div class="chrome-abas">
+          <div class="chrome-aba"><img src="design-system/assets/icone-app.svg" alt=""><span>Assistente de Remoção</span><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="chrome-ferramentas">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>
+          <div class="chrome-endereco">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+            <span>endereço do site</span>
+            <svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8 6.6 19.7l1.1-6.1L3.2 9.4l6.1-.8z"/></svg>
+          </div>
+          <div class="chrome-avatar"></div>
+          <svg viewBox="0 0 24 24"><path d="M12 5h.01M12 12h.01M12 19h.01" stroke-width="3"/></svg>
+        </div>
+        <div class="chrome-favoritos">
+          <span><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Escola</span>
+          <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>Diário de classe</span>
+          <span><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Formação</span>
+          <span><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Pessoal</span>
+        </div>
+        <div class="chrome-pagina">
+          <span class="chrome-rotulo"><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg>Esta é a barra de favoritos</span>
+        </div>
+      </div>
+      <p class="depois-chrome">Se não aparecer, aperte <span style="white-space:nowrap"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd></span>.</p>
     </li>
 
     <li class="surface-card">
-      <h2>Arraste o botão até a barra de favoritos</h2>
-      <p>Segure o botão azul com o mouse ou o touchpad e solte na barra de favoritos. É só uma vez.</p>
+      <h2>Veja como arrastar o botão para a barra de favoritos</h2>
+      <p>No próximo passo, você vai segurar o botão azul <b>Remoção</b> com o mouse, arrastar até a barra de favoritos e soltar lá, assim:</p>
 
-      <div class="demo" aria-hidden="true">
-        <div class="demo-abas"><div class="demo-aba"></div></div>
-        <div class="demo-endereco"><div></div></div>
-        <div class="demo-favoritos">
-          <div class="fav"></div><div class="fav"></div>
-          <div class="demo-novo"><img src="design-system/assets/icone-app.svg" alt="">Assistente de Remoção</div>
+      <div class="chrome demo" aria-hidden="true">
+        <div class="chrome-abas">
+          <div class="chrome-aba"><img src="design-system/assets/icone-app.svg" alt=""><span>Assistente de Remoção</span><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </div>
-        <div class="demo-pagina">
-          <div class="linha" style="width:45%"></div>
-          <div class="linha" style="width:70%"></div>
-          <div class="linha" style="width:58%"></div>
-          <div class="demo-botao">Assistente de Remoção</div>
-          <div class="demo-fantasma">Assistente de Remoção</div>
-          <svg class="demo-cursor" viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.6L10 19z" fill="#0f1d36" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        <div class="chrome-ferramentas">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>
+          <div class="chrome-endereco">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+            <span>endereço do site</span>
+            <svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8 6.6 19.7l1.1-6.1L3.2 9.4l6.1-.8z"/></svg>
+          </div>
+          <div class="chrome-avatar"></div>
+          <svg viewBox="0 0 24 24"><path d="M12 5h.01M12 12h.01M12 19h.01" stroke-width="3"/></svg>
+        </div>
+        <div class="chrome-favoritos">
+          <span><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Escola</span>
+          <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>Diário de classe</span>
+          <span><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Formação</span>
+          <span class="demo-novo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>Remoção</span>
+        </div>
+        <div class="chrome-pagina">
+          <div class="demo-linha" style="width:45%"></div>
+          <div class="demo-linha" style="width:70%"></div>
+          <div class="demo-linha" style="width:58%"></div>
+          <div class="demo-botao"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>Remoção</div>
+          <div class="demo-fantasma"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>Remoção</div>
+          <svg class="demo-cursor" viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.6L10 19z" fill="#0f1d36" stroke-linejoin="round"/></svg>
         </div>
       </div>
-      <p class="legenda-demo">Animação: o botão vai da página até a barra de favoritos.</p>
+    </li>
+
+    <li class="surface-card">
+      <h2>Agora é a sua vez</h2>
+      <p>Arraste este botão até a barra de favoritos e solte.</p>
 
       <div class="alvo">
-        <a class="favorito" id="favorito" href="#" draggable="true"><img src="design-system/assets/coruja-branca.svg" alt="">Assistente de Remoção</a>
+        <a class="favorito" id="favorito" href="#" draggable="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>Remoção</a>
         <span class="dica">← arraste para a barra de favoritos</span>
         <span class="dica-clique" id="dica-clique">Arraste, não clique.</span>
       </div>
 
       <details>
         <summary>Não consegui arrastar</summary>
-        <p>Crie o favorito à mão: aperte <kbd>Ctrl</kbd> + <kbd>D</kbd>, clique em <b>Mais</b>, troque o nome para <b>Assistente de Remoção</b> e cole o texto abaixo no campo do endereço (URL).</p>
+        <p>Crie o favorito à mão: aperte <kbd>Ctrl</kbd> + <kbd>D</kbd>, clique em <b>Mais</b>, troque o nome para <b>Remoção</b> e cole o texto abaixo no campo do endereço (URL).</p>
         <textarea id="codigo" readonly></textarea>
         <button class="copiar" type="button" id="copiar">Copiar o texto</button>
       </details>
     </li>
 
     <li class="surface-card">
-      <h2>Entre na APUS e clique no favorito</h2>
-      <p>Na página da remoção, clique em <b>Assistente de Remoção</b> na barra de favoritos. O painel abre no canto da tela e lê as escolas na hora. Para ler de novo, use o botão de atualizar do painel.</p>
-      <p style="margin-top:var(--space-2)">Se você clicar fora da remoção, o favorito leva você até lá (ou até o login). Quando a página abrir, clique nele de novo.</p>
+      <h2>Clique no favorito "🌐 Remoção" para entrar na APUS</h2>
+      <p>Clique no item que acabou de adicionar à barra de favoritos: você será levado à página de login da APUS. Informe o seu <b>usuário</b> e a <b>senha</b>. Em vez de digitar a senha, aperte, na tela, os botões com os números.</p>
+      <figure class="print" style="max-width: 390px">
+        <img src="prints/login.png" width="390" height="428" loading="lazy" alt="Login do Portal do Professor da APUS, com os campos Usuário e Senha e o teclado de botões 0/1, 2/3, 4/5, 6/7 e 8/9 para digitar a senha.">
+      </figure>
+    </li>
+
+    <li class="surface-card">
+      <h2>Abra a remoção e clique no favorito de novo</h2>
+      <p>Depois de entrar, abra a página da remoção e clique em <b>Remoção</b> na barra de favoritos. O painel abre no canto da tela e lê as escolas na hora. Leva cerca de um minuto.</p>
+      <figure class="print">
+        <svg class="apus" viewBox="0 0 800 560" role="img" aria-label="Página da remoção na APUS com o favorito Remoção sendo clicado na barra de favoritos e, no canto direito, o painel do assistente lendo 6 de 15 escolas.">
+          <defs>
+            <clipPath id="apus-pagina"><rect x="0" y="104" width="800" height="456"/></clipPath>
+            <clipPath id="apus-janela"><rect width="800" height="560" rx="10"/></clipPath>
+          </defs>
+          <g clip-path="url(#apus-janela)">
+            <rect width="800" height="560" fill="#fff"/>
+
+            <!-- navegador: abas -->
+            <rect width="800" height="34" fill="#dde3ea"/>
+            <path d="M8 34V14a8 8 0 0 1 8-8h176a8 8 0 0 1 8 8v20z" fill="#fff"/>
+            <circle cx="26" cy="20" r="6" fill="none" stroke="#474747" stroke-width="1.6"/>
+            <text x="42" y="25" class="nav-txt">Portal do Professor</text>
+            <path d="M178 16l8 8M186 16l-8 8" stroke="#474747" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M222 20h10M227 15v10" stroke="#474747" stroke-width="1.6" stroke-linecap="round"/>
+            <!-- navegador: barra de endereço -->
+            <g fill="none" stroke="#474747" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M30 54H16M22 48l-6 6 6 6"/>
+              <path d="M44 54h14M52 48l6 6-6 6"/>
+              <path d="M84 49a6 6 0 1 0 2 4.6M86 46v4h-4"/>
+            </g>
+            <rect x="106" y="39" width="654" height="30" rx="15" fill="#e9eef6"/>
+            <rect x="122" y="53" width="10" height="8" rx="2" fill="none" stroke="#474747" stroke-width="1.6"/>
+            <path d="M124 53v-2a3 3 0 0 1 6 0v2" fill="none" stroke="#474747" stroke-width="1.6"/>
+            <text x="142" y="59" class="nav-txt" style="font-size:14px">educ.apus.info/profWeb/atribRemocao/</text>
+            <circle cx="782" cy="54" r="10" fill="#a8c7fa"/>
+            <!-- navegador: barra de favoritos -->
+            <g fill="none" stroke="#474747" stroke-width="1.6" stroke-linejoin="round">
+              <path d="M12 82h5l2 2h6v9H12z"/>
+              <path d="M106 82h5l2 2h6v9h-13z"/>
+            </g>
+            <text x="32" y="93" class="nav-txt">Escola</text>
+            <text x="126" y="93" class="nav-txt">Formação</text>
+            <rect x="198" y="76" width="92" height="26" rx="7" fill="none" stroke="#164292" stroke-width="2.5"/>
+            <g fill="none" stroke="#474747" stroke-width="1.6" stroke-linecap="round">
+              <circle cx="212" cy="89" r="7"/><path d="M205 89h14M212 82a10 10 0 0 1 0 14M212 82a10 10 0 0 0 0 14"/>
+            </g>
+            <text x="226" y="93" class="nav-txt" style="font-weight:600">Remoção</text>
+            <line x1="0" y1="104.5" x2="800" y2="104.5" stroke="#e3e3e3"/>
+
+            <!-- página da APUS (dados fictícios), desenhada na escala 0,8 de uma tela de 1000 px -->
+            <g clip-path="url(#apus-pagina)">
+              <rect y="104" width="800" height="456" fill="#fff"/>
+              <g transform="translate(0 104) scale(.8)" font-family="Helvetica, Arial, sans-serif" fill="#555">
+                <rect width="1000" height="40" fill="#ff9801"/>
+                <g fill="none" stroke="#fff" stroke-width="2.4"><circle cx="623" cy="19" r="5"/></g>
+                <circle cx="623" cy="19" r="8.5" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="3.2 3.4"/>
+                <text x="656" y="24" font-size="12" fill="#fff">Maria Souza Lima</text>
+                <circle cx="778" cy="15" r="3.5" fill="#fff"/><path d="M771 24a7 6 0 0 1 14 0z" fill="#fff"/>
+                <rect x="801" width="199" height="40" fill="#fff" opacity=".12"/>
+                <text x="900" y="24" font-size="12" fill="#fff" text-anchor="middle">Período de 2027</text>
+
+                <text x="8" y="86" font-size="32"><tspan>Processo de Remoção - </tspan><tspan font-style="italic">1º FASE</tspan></text>
+                <text x="9" y="122" font-size="14">1º Fase de <tspan font-weight="700">12/11/2026 06h</tspan> até <tspan font-weight="700">13/11/2026 07h</tspan></text>
+                <text x="9" y="138" font-size="14" font-weight="700" fill="#e00000">Encerra em: 0dias 15h 22m 13s</text>
+
+                <line x1="8" y1="172.5" x2="1000" y2="172.5" stroke="#e5e5e5"/>
+                <g font-size="14">
+                  <text x="11" y="193"><tspan font-weight="700">Matrícula:</tspan> 123456</text>
+                  <text x="11" y="213"><tspan font-weight="700">Cargo:</tspan> PROF ENS INFANTIL I</text>
+                  <text x="11" y="233"><tspan font-weight="700">Escola Sede:</tspan> Escola Exemplo EM</text>
+                  <text x="401" y="193"><tspan font-weight="700">Funcionário:</tspan> Maria Souza</text>
+                  <text x="401" y="213"><tspan font-weight="700">Vínculo:</tspan> Concursos 1998/2003</text>
+                  <text x="401" y="233"><tspan font-weight="700">Classificação:</tspan> 412</text>
+                </g>
+                <line x1="8" y1="244.5" x2="1000" y2="244.5" stroke="#e5e5e5"/>
+
+                <!-- etapas: Informações para Remoção -> Finalizar -->
+                <g>
+                  <circle cx="248" cy="297" r="24" fill="#3b8fd0"/>
+                  <circle cx="248" cy="297" r="24" fill="none" stroke="#7dbbea" stroke-width="2"/>
+                  <g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round">
+                    <path d="M234 292a15 15 0 0 1 25-6"/><path d="M262 302a15 15 0 0 1-25 6"/>
+                  </g>
+                  <path d="M262 278l1 12-12-1z" fill="#fff"/><path d="M234 316l-1-12 12 1z" fill="#fff"/>
+                </g>
+                <text x="248" y="346" font-size="12" font-weight="700" text-anchor="middle" fill="#444">Informações para Remoção</text>
+                <rect x="10" y="350" width="477" height="5" fill="#a8f03c"/>
+                <path d="M523 289h14v-8l22 19-22 19v-8h-14z" fill="#c5eca0"/>
+                <g opacity=".55">
+                  <path d="M762 272l50-6 6 38-50 6z" fill="#8a8a8a"/>
+                  <path d="M762 272l12-1.5 2 9.5-12 1.5zM786 269l12-1.5 2 9.5-12 1.5zM768 290l12-1.5 2 9.5-12 1.5zM792 287l12-1.5 2 9.5-12 1.5z" fill="#fff"/>
+                  <path d="M760 270l8 62" stroke="#777" stroke-width="3" stroke-linecap="round"/>
+                </g>
+                <text x="786" y="346" font-size="12" font-weight="700" text-anchor="middle" fill="#bdbdbd">Finalizar</text>
+                <rect x="592" y="350" width="389" height="5" fill="#ececec"/>
+                <line x1="8" y1="358.5" x2="1000" y2="358.5" stroke="#e5e5e5"/>
+
+                <rect x="8" y="379" width="115" height="34" rx="3" fill="#ff9801"/>
+                <text x="65" y="401" font-size="14" fill="#fff" text-anchor="middle">CLIQUE AQUI</text>
+                <text x="127" y="399" font-size="12.5" fill="#444">- PARA VER A LISTA DE PONTUAÇÃO E PEDIDOS DE REMOÇÃO POR ESCOLA.</text>
+                <line x1="8" y1="433.5" x2="1000" y2="433.5" stroke="#e5e5e5"/>
+
+                <text x="13" y="464" font-size="12" font-weight="700" fill="#444">1º Fase - Escolha a escola desejada:</text>
+                <rect x="13.500" y="467.500" width="49" height="25" fill="#fff" stroke="#c9c9c9"/>
+                <rect x="63.500" y="467.500" width="417" height="25" fill="#ececec" stroke="#c9c9c9"/>
+                <path d="M481 468h23a4 4 0 0 1 4 4v17a4 4 0 0 1-4 4h-23z" fill="#ff9801"/>
+                <g fill="#fff"><rect x="489" y="474" width="3" height="3"/><rect x="494" y="474" width="3" height="3"/><rect x="499" y="474" width="3" height="3"/><rect x="489" y="479" width="3" height="3"/><rect x="494" y="479" width="3" height="3"/><rect x="499" y="479" width="3" height="3"/><rect x="489" y="484" width="3" height="3"/><rect x="494" y="484" width="3" height="3"/></g>
+
+                <rect y="530" width="1000" height="40" fill="#ff9801"/>
+                <text x="14" y="554" font-size="14" fill="#fff">Finalizar</text>
+                <text x="99" y="554" font-size="14" fill="#fff">Fechar</text>
+              </g>
+            </g>
+
+            <!-- painel do assistente (canto superior direito da página) -->
+            <g transform="translate(470 122)" style="filter: drop-shadow(0 8px 16px rgba(15,29,54,.28))">
+              <rect width="314" height="190" rx="16" fill="#f4f8fd"/>
+              <path d="M16 0h282a16 16 0 0 1 16 16v42H0V16A16 16 0 0 1 16 0z" fill="#fff"/>
+              <image href="design-system/assets/icone-app.svg" x="12" y="12" width="34" height="34"/>
+              <text x="58" y="28" class="pn-titulo">Assistente de Remoção</text>
+              <text x="58" y="46" class="pn-sub">Classificação 412 · lendo…</text>
+              <rect x="236" y="12" width="34" height="34" rx="9" fill="#ebf2fa"/>
+              <path d="M259 29a7 7 0 1 1-2.4-5.3M259 21v4h-4" fill="none" stroke="#164292" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M284 23l12 12M296 23l-12 12" stroke="#3d4757" stroke-width="1.8" stroke-linecap="round"/>
+              <rect x="12" y="70" width="290" height="70" rx="10" fill="#fff"/>
+              <text x="26" y="96" class="pn-txt">Lendo 6 de 15 escolas…</text>
+              <rect x="26" y="108" width="262" height="6" rx="3" fill="#dfe6f0"/>
+              <rect x="26" y="108" width="105" height="6" rx="3" fill="#164292"/>
+              <text x="157" y="166" class="pn-sub" text-anchor="middle">Só lê a APUS. Não escolhe escola nem envia nada.</text>
+            </g>
+
+            <!-- cursor clicando no favorito -->
+            <path d="M246 90l14 7-5.800 1.600L251 105z" fill="#0f1d36" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>
+          </g>
+          <rect x=".5" y=".5" width="799" height="559" rx="10" fill="none" stroke="#c4c7c5"/>
+        </svg>
+      </figure>
+    </li>
+  </ol>
+
+  <section class="uso">
+    <h2>Na remoção, passo a passo</h2>
+    <p>Com o painel aberto, siga estes passos durante a fase.</p>
+  </section>
+
+  <ol class="passos" style="counter-reset: passo 5">
+    <li class="surface-card">
+      <h2>Veja onde você entra</h2>
+      <p>Em <b>Escolas com possibilidade</b> estão as escolas com vaga em que a sua classificação basta agora, com a sua posição. A chance <b>Maior</b> quer dizer que sobra folga. A chance <b>Menor</b> quer dizer que você ocupa a última vaga: se alguém mais bem classificado pedir a escola, você sai.</p>
+      <figure class="print">
+        <img src="prints/onde.png" width="782" height="638" loading="lazy" alt="Painel sem pedido gravado, listando quatro escolas: duas com chance Maior e duas com chance Menor.">
+      </figure>
+    </li>
+
+    <li class="surface-card">
+      <h2>Escolha a escola na APUS e clique em Finalizar</h2>
+      <p>Selecione a escola no campo <b>Escolha a escola desejada</b>. Só selecionar não grava o pedido: enquanto faltar o <b>Finalizar</b>, o painel avisa <b>Não gravado</b>.</p>
+      <figure class="print">
+        <img src="prints/finalizar.png" width="782" height="656" loading="lazy" alt="Escola selecionada no campo da APUS, botão Finalizar em destaque e o painel avisando que o pedido ainda não vale.">
+      </figure>
+    </li>
+
+    <li class="surface-card">
+      <h2>Clique em atualizar para conferir</h2>
+      <p>Depois de finalizar, clique no botão de atualizar do painel. Com o pedido gravado, ele mostra a escola, a sua posição e se você está <b>Dentro</b> das vagas.</p>
+      <figure class="print">
+        <img src="prints/conferir.png" width="782" height="552" loading="lazy" alt="Inscrição finalizada na APUS e o painel, com o botão de atualizar em destaque, mostrando o pedido gravado e Dentro: 1º para 3 vagas.">
+      </figure>
+    </li>
+
+    <li class="surface-card">
+      <h2>Volte e atualize até a fase fechar</h2>
+      <p>Quem tem classificação melhor pode pedir a mesma escola até o fim da fase. Volte de vez em quando e clique em atualizar: o painel compara com a leitura anterior e lista as escolas que saíram.</p>
+      <figure class="print">
+        <img src="prints/mudou.png" width="782" height="545" loading="lazy" alt="Painel mostrando o pedido Fora: você é o 4º para 3 vagas, e duas escolas que saíram da lista. Botão Reiniciar da APUS em destaque.">
+      </figure>
+      <p class="depois-chrome">Ficou <b>Fora</b>? Para trocar de escola, clique em <b>Reiniciar</b> na APUS, escolha outra escola da lista e clique em <b>Finalizar</b>. Reiniciar sozinho não cancela o pedido: até finalizar a troca, vale o pedido antigo, e o painel avisa.</p>
+      <figure class="print">
+        <img src="prints/trocar.png" width="782" height="535" loading="lazy" alt="Outra escola selecionada na APUS, botão Finalizar em destaque e o painel avisando que o pedido gravado ainda é o anterior.">
+      </figure>
     </li>
   </ol>
 
@@ -166,7 +428,7 @@
     <h2>O que o assistente mostra</h2>
     <ul>
       <li><b>Seu pedido:</b> se ele está gravado, se ainda falta clicar em Finalizar e em que posição você está.</li>
-      <li><b>Onde você entra:</b> as escolas com vaga em que a sua classificação basta agora.</li>
+      <li><b>Escolas com possibilidade:</b> as escolas com vaga em que a sua classificação basta agora.</li>
       <li><b>O que mudou</b> desde a última vez que você atualizou.</li>
     </ul>
     <div class="aviso aviso-azul mostrar">
@@ -198,7 +460,28 @@
       var botao = this;
       navigator.clipboard.writeText(area.value).then(function () { botao.textContent = 'Copiado'; }, function () { area.select(); });
     });
-    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) document.getElementById('aviso-celular').classList.add('mostrar');
+    // A animação do passo 2 mira o favorito "Remoção" onde ele de fato fica na barra.
+    var demo = document.querySelector('.demo');
+    function medirDemo() {
+      var botao = demo.querySelector('.demo-botao').getBoundingClientRect();
+      var novo = demo.querySelector('.demo-novo').getBoundingClientRect();
+      if (!botao.width) return;
+      var gx = novo.left - botao.left;
+      var gy = (novo.top + novo.height / 2) - (botao.top + botao.height / 2);
+      demo.style.setProperty('--gx', gx + 'px');
+      demo.style.setProperty('--gy', gy + 'px');
+      // o cursor segura o botão a 66px da borda; com o fantasma a 62%, fica a ~41px.
+      demo.style.setProperty('--cx', (gx - 25) + 'px');
+      demo.style.setProperty('--cy', gy + 'px');
+    }
+    medirDemo();
+    window.addEventListener('resize', medirDemo);
+    // iPad recente se apresenta como Mac; o que o denuncia é a tela de toque.
+    var ipad = /Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
+    if (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || ipad) {
+      document.body.classList.add('celular');
+      document.getElementById('aviso-celular').classList.add('mostrar');
+    }
   })();
 </script>
 </body>

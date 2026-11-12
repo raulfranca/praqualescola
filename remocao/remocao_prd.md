@@ -24,14 +24,14 @@ pedido, e "Reiniciar" não o cancela.
 | # | Requisito |
 |---|---|
 | RF1 | Mostrar o **estado do pedido** da fase: sem pedido; escola selecionada mas não gravada ("Clique em Finalizar para valer"); gravado, com posição e se está dentro das vagas; selecionou outra escola mas o gravado é outro ("Clique em Finalizar para trocar"); leitura inconsistente. |
-| RF2 | Listar **"Onde você entra"**: escolas com vaga em que a classificação do professor basta agora, com posição ("2º de 3 vagas") e etiqueta Entra / Justo (posição = vagas). Maior folga primeiro. |
-| RF3 | Mostrar **o que mudou** desde a leitura anterior do mesmo professor, período e fase: "antes era Nº" no pedido, etiqueta "Nova" e linha "Saiu da lista desde HHhMM". |
+| RF2 | Listar **"Escolas com possibilidade"**: escolas com vaga em que a classificação do professor basta agora, com posição ("2º lugar em 3 vagas") e chance Maior / Menor (Menor quando posição = vagas). Maior folga primeiro. |
+| RF3 | Mostrar **o que mudou** desde a leitura anterior do mesmo professor, período e fase: linha "Saiu da lista desde HHhMM". |
 | RF4 | Ler tudo do servidor a cada atualização: vagas, interessados e classificação. Nada de uma fase vale na outra. |
 | RF5 | Atualizar só quando o professor abre o painel ou clica em atualizar. Nunca automaticamente. |
 | RF6 | Escola que não pôde ser lida **nunca** aparece como oportunidade; o painel avisa "Não consegui ler N escolas". |
 | RF7 | Avisos claros para: sem fase aberta, classificação não encontrada, lista de escolas ilegível, sessão expirada. |
-| RF8 | Favorito: fora da APUS leva ao login (`https://educ.apus.info/professor/pinda`); na APUS fora da remoção leva à remoção (`https://educ.apus.info/profWeb/atribRemocao/`); na remoção abre o painel. Antes de redirecionar, avisa que é preciso clicar de novo. |
-| RF9 | Página de passo a passo com animação do gesto de arrastar, o botão-favorito, instruções para criar o favorito à mão e aviso para celular. |
+| RF8 | Favorito: fora da APUS abre o login (`https://educ.apus.info/professor/pinda`) numa nova aba, sem tirar o professor da página em que está; na APUS fora da remoção leva à remoção (`https://educ.apus.info/profWeb/atribRemocao/`); na remoção abre o painel. Antes de redirecionar, avisa que é preciso clicar de novo. |
+| RF9 | Página de passo a passo com animação do gesto de arrastar, o botão-favorito, instruções para criar o favorito à mão, aviso para celular e prints do uso do painel durante a remoção (ver, escolher e finalizar, conferir, acompanhar, trocar). |
 | RF10 | **Só leitura.** Nunca escolher escola, finalizar, reiniciar ou enviar nada. |
 
 ## 4. Regras de negócio
