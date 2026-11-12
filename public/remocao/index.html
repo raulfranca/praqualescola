@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  // Endereço sem a barra final (/remocao): os caminhos relativos e o favorito apontariam para a raiz.
+  if (!/\/$|\.html$/.test(location.pathname)) location.replace(location.pathname + '/' + location.search + location.hash);
+</script>
+<title>Assistente de Remoção</title>
+<meta name="description" content="Veja em quais escolas a sua classificação basta, e se o seu pedido de remoção está valendo.">
+<link rel="icon" href="design-system/assets/icone-app.svg" type="image/svg+xml">
+<link rel="stylesheet" href="design-system/tokens.css">
+<style>
+  body { margin: 0; }
+  main { max-width: 680px; margin: 0 auto; padding: var(--space-10) var(--space-4) var(--space-16); }
+
+  .topo { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-6); }
+  .topo img { width: 48px; height: 48px; }
+  .topo .eyebrow { margin: 0; }
+  h1 { font-size: var(--text-display-sm); margin: var(--space-1) 0 var(--space-3); }
+  .lead { font-size: var(--text-body-lg); color: var(--on-surface-variant); margin: 0 0 var(--space-8); }
+
+  .aviso { display: none; gap: var(--space-3); align-items: flex-start; border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); font-size: var(--text-body); margin-bottom: var(--space-4); }
+  .aviso.mostrar { display: flex; }
+  .aviso.aviso-amarelo { background: var(--aviso-bg); color: var(--aviso-fg); }
+  .aviso.aviso-azul { background: var(--info-bg); color: var(--info-fg); }
+  .aviso svg { flex: none; margin-top: 2px; }
+
+  ol.passos { list-style: none; padding: 0; margin: 0; counter-reset: passo; display: flex; flex-direction: column; gap: var(--space-3); }
+  ol.passos > li { counter-increment: passo; padding: var(--space-5) var(--space-5) var(--space-5) 72px; position: relative; }
+  ol.passos > li::before { content: counter(passo); position: absolute; left: var(--space-5); top: var(--space-5); width: 32px; height: 32px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); font-weight: var(--weight-bold); display: grid; place-items: center; }
+  ol.passos h2 { font-size: var(--text-title); font-weight: var(--weight-semibold); letter-spacing: 0; margin: 4px 0 var(--space-1); }
+  ol.passos p { margin: 0; color: var(--on-surface-variant); font-size: var(--text-body); }
+  kbd { display: inline-block; background: var(--primary-soft); color: var(--primary); border-radius: var(--radius-md); padding: 1px 8px; font: 600 13px var(--font-mono); }
+
+  /* ---------- animação: arrastar até a barra de favoritos ---------- */
+  .demo { margin: var(--space-4) 0 var(--space-2); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface-container-high); box-shadow: inset 0 0 0 1px var(--ghost-border); user-select: none; }
+  .demo-abas { display: flex; gap: 6px; padding: 8px 10px 0; }
+  .demo-aba { width: 120px; height: 22px; border-radius: 8px 8px 0 0; background: var(--surface-container-lowest); }
+  .demo-endereco { background: var(--surface-container-lowest); padding: 6px 10px; }
+  .demo-endereco div { height: 22px; border-radius: 9999px; background: var(--surface-container-low); }
+  .demo-favoritos { position: relative; background: var(--surface-container-lowest); height: 30px; display: flex; align-items: center; gap: 14px; padding: 0 12px; box-shadow: inset 0 -1px 0 var(--ghost-border); }
+  .demo-favoritos .fav { height: 8px; width: 54px; border-radius: 4px; background: var(--surface-container-high); }
+  .demo-novo { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--on-surface); opacity: 0; animation: aparece 5s var(--ease-standard) infinite; }
+  .demo-novo img { width: 14px; height: 14px; }
+  .demo-pagina { position: relative; height: 136px; background: var(--surface); padding: 22px 24px; }
+  .demo-pagina .linha { height: 8px; border-radius: 4px; background: var(--surface-container-high); margin-bottom: 9px; }
+  .demo-botao { position: absolute; left: 24px; top: 82px; display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: var(--radius-md); background: var(--gradient-primary); color: #fff; font-size: 13px; font-weight: 600; }
+  .demo-fantasma { transform-origin: left center; position: absolute; left: 24px; top: 82px; display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: var(--radius-md); background: var(--gradient-primary); color: #fff; font-size: 13px; font-weight: 600; opacity: 0; animation: arrasta 5s var(--ease-standard) infinite; }
+  .demo-cursor { position: absolute; left: 90px; top: 100px; width: 22px; height: 22px; animation: cursor 5s var(--ease-standard) infinite; filter: drop-shadow(0 1px 1px rgba(15,29,54,.3)); }
+  @keyframes cursor {
+    0%   { transform: translate(40px, 40px); }
+    18%  { transform: translate(0, 0); }
+    24%  { transform: translate(0, 0) scale(.9); }
+    58%  { transform: translate(124px, -114px) scale(.9); }
+    64%  { transform: translate(124px, -114px) scale(1); }
+    86%  { transform: translate(124px, -114px); }
+    100% { transform: translate(40px, 40px); }
+  }
+  @keyframes arrasta {
+    0%, 22%  { opacity: 0; transform: translate(0, 0); }
+    26%      { opacity: .85; transform: translate(0, 0) scale(.92); }
+    58%      { opacity: .85; transform: translate(124px, -114px) scale(.62); }
+    62%, 100%{ opacity: 0; transform: translate(124px, -114px) scale(.62); }
+  }
+  @keyframes aparece {
+    0%, 60%  { opacity: 0; }
+    66%, 92% { opacity: 1; }
+    100%     { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .demo-cursor, .demo-fantasma { animation: none; display: none; }
+    .demo-novo { animation: none; opacity: 1; }
+  }
+  .legenda-demo { font-size: var(--text-label); color: var(--on-surface-faint); margin: 0 0 var(--space-4); }
+
+  /* ---------- o botão de verdade ---------- */
+  .alvo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--primary-soft); }
+  .favorito { display: inline-flex; align-items: center; gap: var(--space-2); height: 44px; padding: 0 var(--space-5); border-radius: var(--radius-md); background: var(--gradient-primary); color: var(--on-primary); font-weight: var(--weight-semibold); text-decoration: none; cursor: grab; box-shadow: var(--shadow-ambient); }
+  .favorito:active { cursor: grabbing; }
+  .favorito img { width: 20px; height: 20px; }
+  .alvo .dica { font-size: var(--text-body); color: var(--primary); }
+  .dica-clique { display: none; font-size: var(--text-body); color: var(--aviso-fg); background: var(--aviso-bg); border-radius: var(--radius-md); padding: 4px 10px; }
+  .dica-clique.mostrar { display: inline-block; }
+
+  details { margin-top: var(--space-4); font-size: var(--text-body); color: var(--on-surface-variant); }
+  summary { cursor: pointer; color: var(--primary); font-weight: var(--weight-semibold); }
+  details p { margin: var(--space-2) 0; }
+  textarea { width: 100%; height: 96px; font: 12px var(--font-mono); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-2); background: var(--surface-container-lowest); color: var(--on-surface); resize: vertical; }
+  .copiar { margin-top: var(--space-2); height: 36px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-md); background: var(--primary-soft); color: var(--primary); font: 600 14px var(--font-sans); cursor: pointer; }
+
+  .sobre { margin-top: var(--space-10); display: flex; flex-direction: column; gap: var(--space-3); }
+  .sobre h2 { font-size: var(--text-headline); letter-spacing: 0; }
+  .sobre ul { margin: 0; padding-left: 20px; color: var(--on-surface-variant); font-size: var(--text-body); }
+  .sobre li { margin-bottom: 6px; }
+  footer { margin-top: var(--space-10); font-size: var(--text-label); color: var(--on-surface-faint); }
+</style>
+</head>
+<body>
+<main>
+  <div class="topo">
+    <img src="design-system/assets/icone-app.svg" alt="">
+    <div>
+      <p class="eyebrow">Remoção da rede municipal</p>
+    </div>
+  </div>
+  <h1>Assistente de Remoção</h1>
+  <p class="lead">Veja em quais escolas a sua classificação basta, e se o seu pedido está valendo. Funciona dentro da página de remoção da APUS, no computador ou no Chromebook.</p>
+
+  <div class="aviso aviso-amarelo" id="aviso-celular">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+    <div>Use no computador ou no Chromebook. No celular o assistente não funciona bem.</div>
+  </div>
+
+  <ol class="passos">
+    <li class="surface-card">
+      <h2>Mostre a barra de favoritos</h2>
+      <p>Ela fica logo abaixo da barra de endereço. Se não aparecer, aperte <span style="white-space:nowrap"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd></span>.</p>
+    </li>
+
+    <li class="surface-card">
+      <h2>Arraste o botão até a barra de favoritos</h2>
+      <p>Segure o botão azul com o mouse ou o touchpad e solte na barra de favoritos. É só uma vez.</p>
+
+      <div class="demo" aria-hidden="true">
+        <div class="demo-abas"><div class="demo-aba"></div></div>
+        <div class="demo-endereco"><div></div></div>
+        <div class="demo-favoritos">
+          <div class="fav"></div><div class="fav"></div>
+          <div class="demo-novo"><img src="design-system/assets/icone-app.svg" alt="">Assistente de Remoção</div>
+        </div>
+        <div class="demo-pagina">
+          <div class="linha" style="width:45%"></div>
+          <div class="linha" style="width:70%"></div>
+          <div class="linha" style="width:58%"></div>
+          <div class="demo-botao">Assistente de Remoção</div>
+          <div class="demo-fantasma">Assistente de Remoção</div>
+          <svg class="demo-cursor" viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.6L10 19z" fill="#0f1d36" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <p class="legenda-demo">Animação: o botão vai da página até a barra de favoritos.</p>
+
+      <div class="alvo">
+        <a class="favorito" id="favorito" href="#" draggable="true"><img src="design-system/assets/coruja-branca.svg" alt="">Assistente de Remoção</a>
+        <span class="dica">← arraste para a barra de favoritos</span>
+        <span class="dica-clique" id="dica-clique">Arraste, não clique.</span>
+      </div>
+
+      <details>
+        <summary>Não consegui arrastar</summary>
+        <p>Crie o favorito à mão: aperte <kbd>Ctrl</kbd> + <kbd>D</kbd>, clique em <b>Mais</b>, troque o nome para <b>Assistente de Remoção</b> e cole o texto abaixo no campo do endereço (URL).</p>
+        <textarea id="codigo" readonly></textarea>
+        <button class="copiar" type="button" id="copiar">Copiar o texto</button>
+      </details>
+    </li>
+
+    <li class="surface-card">
+      <h2>Entre na APUS e clique no favorito</h2>
+      <p>Na página da remoção, clique em <b>Assistente de Remoção</b> na barra de favoritos. O painel abre no canto da tela e lê as escolas na hora. Para ler de novo, use o botão de atualizar do painel.</p>
+      <p style="margin-top:var(--space-2)">Se você clicar fora da remoção, o favorito leva você até lá (ou até o login). Quando a página abrir, clique nele de novo.</p>
+    </li>
+  </ol>
+
+  <section class="sobre">
+    <h2>O que o assistente mostra</h2>
+    <ul>
+      <li><b>Seu pedido:</b> se ele está gravado, se ainda falta clicar em Finalizar e em que posição você está.</li>
+      <li><b>Onde você entra:</b> as escolas com vaga em que a sua classificação basta agora.</li>
+      <li><b>O que mudou</b> desde a última vez que você atualizou.</li>
+    </ul>
+    <div class="aviso aviso-azul mostrar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+      <div>O assistente só lê a página da APUS com o seu login. Ele não escolhe escola, não finaliza e não envia nada. A escolha continua sendo sua, na própria APUS.</div>
+    </div>
+    <p class="caption">Usava a versão antiga pelo TamperMonkey? Desative-a para não ver dois painéis.</p>
+  </section>
+
+  <footer>Assistente de Remoção · versão 0.2.0</footer>
+</main>
+
+<script src="favorito.js"></script>
+<script>
+  (function () {
+    var base = new URL('./', location.href).href;
+    var codigo = 'void (' + favorito.toString().replace('__BASE__', base) + ')()';
+    var href = 'javascript:' + encodeURIComponent(codigo);
+    var link = document.getElementById('favorito');
+    link.setAttribute('href', href);
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      document.getElementById('dica-clique').classList.add('mostrar');
+    });
+    var area = document.getElementById('codigo');
+    area.value = 'javascript:' + codigo;
+    area.addEventListener('focus', function () { area.select(); });
+    document.getElementById('copiar').addEventListener('click', function () {
+      var botao = this;
+      navigator.clipboard.writeText(area.value).then(function () { botao.textContent = 'Copiado'; }, function () { area.select(); });
+    });
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) document.getElementById('aviso-celular').classList.add('mostrar');
+  })();
+</script>
+</body>
+</html>

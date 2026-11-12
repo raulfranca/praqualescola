@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel — estados de teste</title>
+<style>
+  body { margin: 0; padding: 24px; background: #fff; font: 14px system-ui, sans-serif; color: #0f1d36; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p { margin: 0 0 20px; color: #4a5a78; }
+  .grade { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+  .estado h2 { font-size: 13px; font-weight: 600; margin: 0 0 8px; color: #4a5a78; }
+</style>
+</head>
+<body>
+<h1>Assistente de Remoção — estados do painel</h1>
+<p>Página de teste. Dados inventados. Cada caixa é o painel real renderizado com um estado falso.</p>
+<div class="grade" id="grade"></div>
+
+<script>window.ASSISTENTE_REMOCAO_TESTE = true;</script>
+<script src="/remocao/assistente.js"></script>
+<script>
+  var A = window.AssistenteRemocaoTeste;
+  function op(codigo, nome, vagas, posicao) { return { codigo: codigo, nome: nome, vagas: vagas, posicao: posicao, justo: posicao === vagas }; }
+  var OPS = [op('1', 'EM Vila Esperança', 3, 2), op('2', 'EMEI Monteiro Lobato', 1, 1), op('3', 'EM Parque das Águas', 2, 2)];
+  function pronto(pedido, extra) {
+    extra = extra || {};
+    return {
+      tipo: 'pronto', classificacao: 412, fase: 1, hora: '15h10',
+      resultado: { erro: null, pedido: pedido, oportunidades: extra.ops || OPS, falhas: extra.falhas || [], lidas: 15 },
+      comparacao: extra.comp || { horaAnterior: null, posicaoAntes: null, novas: new Set(), sairam: [] }
+    };
+  }
+  var JARDIM = { codigo: '9', nome: 'EM Jardim das Flores' };
+  var ESTADOS = [
+    ['Gravado, dentro (com "antes era")', pronto({ estado: 'gravado', escola: JARDIM, escolaCampo: JARDIM, posicao: 1, vagas: 2, dentro: true },
+      { comp: { horaAnterior: '14h32', posicaoAntes: 2, novas: new Set(['2']), sairam: ['EM Santa Rita'] } })],
+    ['Gravado, fora', pronto({ estado: 'gravado', escola: JARDIM, escolaCampo: JARDIM, posicao: 2, vagas: 1, dentro: false },
+      { comp: { horaAnterior: '14h32', posicaoAntes: 1, novas: new Set(['2']), sairam: [] } })],
+    ['Selecionado, não gravado', pronto({ estado: 'nao-gravado', escola: null, escolaCampo: JARDIM, posicao: null, vagas: null, dentro: null })],
+    ['Trocar', pronto({ estado: 'trocar', escola: JARDIM, escolaCampo: { codigo: '2', nome: 'EMEI Monteiro Lobato' }, posicao: 1, vagas: 2, dentro: true })],
+    ['Nenhum pedido, lista vazia', pronto({ estado: 'nenhum', escola: null, escolaCampo: null, posicao: null, vagas: null, dentro: null }, { ops: [] })],
+    ['Com falhas de leitura', pronto({ estado: 'nenhum', escola: null, escolaCampo: null, posicao: null, vagas: null, dentro: null }, { falhas: ['EM X', 'EM Y'] })],
+    ['Inconsistente', pronto({ estado: 'inconsistente', escola: null, escolaCampo: null, posicao: null, vagas: null, dentro: null })],
+    ['Lendo', { tipo: 'lendo', feitos: 4, total: 15, classificacao: 412, fase: 1 }],
+    ['Lendo a tabela', { tipo: 'lendo', feitos: 0, total: 0, classificacao: 412, fase: 1 }],
+    ['Erro: sessão expirada', { tipo: 'erro', motivo: 'sessao-expirada' }],
+    ['Erro: tabela', { tipo: 'erro', motivo: 'tabela-vazia', classificacao: 412, fase: 1 }],
+    ['Sem fase aberta', { tipo: 'erro', motivo: 'sem-fase' }]
+  ];
+  var grade = document.getElementById('grade');
+  ESTADOS.forEach(function (par) {
+    var caixa = document.createElement('div');
+    caixa.className = 'estado';
+    var h = document.createElement('h2'); h.textContent = par[0];
+    var alvo = document.createElement('div');
+    caixa.appendChild(h); caixa.appendChild(alvo); grade.appendChild(caixa);
+    A.Painel._renderEm(alvo, par[1]);
+  });
+</script>
+</body>
+</html>

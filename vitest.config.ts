@@ -7,7 +7,7 @@ export default defineConfig({
     alias: { "@": path.resolve(__dirname, "./src") },
   },
   test: {
-    include: ["src/**/*.test.{ts,tsx}", "api/**/*.test.ts"],
+    include: ["src/**/*.test.{ts,tsx}", "api/**/*.test.ts", "remocao/tests/*.test.js"],
     exclude: ["node_modules", "dist", "e2e"],
     environment: "node",
   },

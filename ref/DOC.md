@@ -27,6 +27,8 @@ api/_lib/              Núcleo testável das funções (arquivo solto em api/ vi
 db/migrations/         SQL do schema praqualescola, aplicado à mão no Supabase "Dados" (não é pasta supabase/)
 db/campanhas/          Carga de cada campanha (CSV + SQL) e o passo a passo (README.md); PDFs de origem em ref/documentos/<ano>/
 public/version.json    Título e subtítulo do aviso de nova versão
+public/remocao/        Assistente de Remoção (página de passo a passo + favorito + script que roda na APUS). Estático, fora do app React
+remocao/               Documentação, PRD, changelog e testes do Assistente de Remoção (ler remocao/documentacao_remocao.md antes de mexer)
 src/main.tsx           Consulta /api/maintenance antes de montar o app; inicia o GA
 src/App.tsx            Providers, LoadScript do Google Maps, rotas
 src/pages/             Index (mapa), Lista, Favoritos, NotFound
@@ -58,6 +60,7 @@ e2e/                   Testes de navegador (Playwright)
 
 ## 5. Infraestrutura e ambientes
 
+- **Assistente de Remoção (`/remocao/`):** página estática servida de `public/remocao/`, com versão e changelog próprios (`remocao/`). O service worker do app não a guarda nem responde por ela (`globIgnores` e `navigateFallbackDenylist` em `vite.config.ts`); o middleware `paginaRemocao` do Vite entrega `/remocao/` como `index.html` no desenvolvimento e no e2e, como a Vercel faz. Detalhes em `remocao/documentacao_remocao.md`.
 - **Hospedagem:** Vercel. Todo push na `main` é publicado automaticamente. A `dev` é integração; publicar é mesclar `dev` na `main` (`git-deploy` na máquina, `publicar.yml` na nuvem).
 - **Variáveis de ambiente** (modelo em `.env.example`; o `.env` não vai para o git):
   - `VITE_GOOGLE_MAPS_API_KEY`: chave do Google Maps. É pública por natureza (vai no JavaScript do navegador); a proteção é a **restrição por referenciador** no Google Cloud Console. São **duas chaves**: a de produção (na Vercel, Production e Preview) aceita só o domínio de produção e o preview da branch `dev` (`https://praqualescola-git-dev-raulcabrals-projects.vercel.app/*`); a de desenvolvimento fica só no `.env` local, aceita `http://localhost:8080/*` e `http://127.0.0.1:8090/*` e nunca vai para a Vercel nem para o git.

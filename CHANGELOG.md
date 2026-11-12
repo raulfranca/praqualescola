@@ -4,6 +4,12 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [2.6.0] - 2026-11-12 - Assistente de remoção (separado do app)
+
+### Adicionado
+
+- Página do Assistente de Remoção em `/remocao/`: ensina a colocar um botão na barra de favoritos do Chrome que, aberto na remoção da APUS, mostra se o pedido do professor está valendo e em quais escolas a classificação dele basta. A página fica fora do app e não é guardada no aparelho junto com ele.
+
 ## [2.5.1] - 2026-11-11 - Ajustes de interface e correções de bugs
 
 ### Alterado

@@ -100,6 +100,11 @@ O endereço de casa sai do aparelho só para o servidor do app, que calcula as d
 - Aparece **uma vez por aparelho**. Concluir, pular ou fechar (tecla Esc) grava que foi visto, e ele não volta.
 - Enquanto o tour não foi fechado, nenhum outro aviso aparece (instalar, campanha, nova versão). Ordem dos avisos depois dele: seção 3.7.
 
+### 3.12 Assistente de Remoção (`/remocao/`)
+
+- Página à parte, fora do app, com o passo a passo para instalar um favorito no Chrome (computador e Chromebook). Clicado na página de remoção da APUS, o favorito abre um painel que mostra se o pedido do professor está valendo e em quais escolas a classificação dele basta. Só lê a APUS; não escolhe nem envia nada.
+- Requisitos próprios em `remocao/remocao_prd.md`. Integração com o app (mapa, favoritos) fica para depois.
+
 ## 4. Roadmap — ideias em análise
 
 - **Atualização silenciosa:** trocar o aviso de nova versão por uma atualização automática em segundo plano, sem recarregar a tela enquanto a pessoa digita. Resolveria também o navegador, onde hoje o aviso não aparece.

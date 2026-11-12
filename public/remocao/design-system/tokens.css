@@ -1,0 +1,190 @@
+/* ============================================================================
+   Pra Qual Escola — Design System Tokens
+   "Coruja e Mapa" — tudo derivado do logotipo (public/favicon.svg):
+     Azul Coruja #164292  (a coruja)
+     Céu         #ebf2fa  (o fundo do ícone)
+   Camadas tonais, sem linhas: a hierarquia vem do fundo, não de bordas.
+   A skill mock-canvas e o código de interface leem daqui.
+   ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&family=Work+Sans:wght@400;500;600&display=swap');
+
+:root {
+  /* ── Marca (do logotipo) ───────────────────────────────────────────────── */
+  --primary:            #164292;  /* Azul Coruja — ações principais, marca, links */
+  --primary-strong:     #0f2f6b;  /* hover / pressionado */
+  --primary-container:  #2a5cb8;  /* ponta clara do gradiente do botão principal */
+  --primary-soft:       #ebf2fa;  /* Céu — fundo do ícone; item selecionado, chip ativo */
+  --on-primary:         #ffffff;
+
+  /* Âmbar — o único acento quente; complemento do Azul Coruja (219° → 42°).
+     Reservado a "favorito" (estrela) e a destaques raros. Nunca texto sobre branco. */
+  --accent:             #f0b429;
+  --accent-strong:      #7a4d00;  /* âmbar legível como texto */
+
+  /* ── Superfícies (camadas tonais, todas puxadas para o azul) ───────────── */
+  --surface-container-lowest:  #ffffff;  /* cartões acima da página */
+  --surface:                   #f6f9fd;  /* fundo da página */
+  --surface-container-low:     #ebf2fa;  /* Céu — agrupamento, campos */
+  --surface-container-high:    #dde7f4;  /* containers de destaque, barra de navegação */
+
+  /* ── Texto ─────────────────────────────────────────────────────────────── */
+  --on-surface:          #0f1d36;  /* fg1 — tinta azul-noite, nunca preto puro */
+  --on-surface-variant:  #4a5a78;  /* fg2 — texto secundário */
+  --on-surface-faint:    #5e6d87;  /* fg3 — rótulos, legendas (passa 4.5:1 no fundo) */
+
+  /* ── Bordas — último recurso ───────────────────────────────────────────── */
+  --ghost-border:        rgba(22, 66, 146, 0.14);
+  --border-subtle:       #d3deed;  /* borda de campo de formulário */
+
+  /* ── Estados semânticos (fundo suave + texto forte, ambos ≥ 4.5:1) ─────── */
+  --sucesso-bg:  #e3f3ec;  --sucesso-fg:  #1f6f52;  /* distância calculada, salvo */
+  --aviso-bg:    #fdf1d8;  --aviso-fg:    #7a4d00;  /* limite diário, vagas poucas */
+  --erro-bg:     #fbe8e5;  --erro-fg:     #a8322a;  /* falha ao carregar, remover */
+  --info-bg:     #e4ecf8;  --info-fg:     #164292;  /* campanha ativa, dica */
+  --destructive: #a8322a;
+
+  /* ── Níveis de ensino (marcadores do mapa e etiquetas) ─────────────────── */
+  /* Três matizes que diferem também em luminosidade: água (clara), poente
+     (média), coruja (escura). Preenchimento = marcador; bg/fg = etiqueta.   */
+  --nivel-creche:         #3aa597;  --nivel-creche-bg:      #e2f3f0;  --nivel-creche-fg:      #17665d;
+  --nivel-pre:            #dc6f43;  --nivel-pre-bg:         #fbeae2;  --nivel-pre-fg:         #9a4a28;
+  --nivel-fundamental:    #164292;  --nivel-fundamental-bg: #e4ecf8;  --nivel-fundamental-fg: #164292;
+
+  /* Marcadores especiais */
+  --marcador-casa:        #0f1d36;  /* "Minha Casa" — tinta, com coruja branca */
+  --marcador-favorito:    #f0b429;  /* anel âmbar em volta da estrela */
+  --marcador-contorno:    #ffffff;
+
+  /* ── Famílias ───────────────────────────────────────────────────────────── */
+  --font-sans:   'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-label:  'Work Sans', system-ui, sans-serif;  /* rótulos em caixa alta, eixos */
+  --font-mono:   ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* ── Escala tipográfica (base 16) ──────────────────────────────────────── */
+  --text-display-lg:   3.5rem;   /* 56px — número de destaque, raro */
+  --text-display-md:   2.75rem;  /* 44px */
+  --text-display-sm:   2.25rem;  /* 36px — título de página */
+  --text-headline:     1.25rem;  /* 20px — título de seção */
+  --text-title:        1.125rem; /* 18px — título de cartão e de diálogo */
+  --text-body-lg:      1rem;     /* 16px — corpo */
+  --text-body:         0.875rem; /* 14px — texto padrão de interface */
+  --text-label:        0.75rem;  /* 12px — rótulos, legendas */
+  --text-micro:        0.65rem;  /* 10.4px — selo mínimo */
+
+  --leading-tight:   1.1;
+  --leading-snug:    1.25;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.6;
+
+  --tracking-tight:    -0.02em;
+  --tracking-normal:   0;
+  --tracking-eyebrow:  0.18em;
+  --tracking-wider:    0.05em;
+
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* ── Espaçamento (unidade 8) ───────────────────────────────────────────── */
+  --space-1:  0.25rem;  /*  4px */
+  --space-2:  0.5rem;   /*  8px */
+  --space-3:  0.75rem;  /* 12px */
+  --space-4:  1rem;     /* 16px */
+  --space-5:  1.25rem;  /* 20px */
+  --space-6:  1.5rem;   /* 24px */
+  --space-8:  2rem;     /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+
+  /* ── Raios ─────────────────────────────────────────────────────────────── */
+  --radius-sm:   0.25rem;  /*  4px — selos */
+  --radius-md:   0.375rem; /*  6px — botões */
+  --radius-lg:   0.5rem;   /*  8px — campos, diálogos */
+  --radius-xl:   0.75rem;  /* 12px — cartões */
+  --radius-icon: 25%;      /* ícone do app (o mesmo do favicon) */
+  --radius-full: 9999px;   /* chips, avatares, marcadores */
+
+  /* ── Elevação — camadas tonais; sombra azul-noite, nunca cinza ─────────── */
+  --shadow-ambient:  0 10px 30px rgba(15, 29, 54, 0.07);  /* cartões, folhas */
+  --shadow-floating: 0 10px 30px rgba(15, 29, 54, 0.14);  /* menus, cartão sobre o mapa */
+
+  --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary-container));
+
+  /* ── Layout ────────────────────────────────────────────────────────────── */
+  --content-max:   72rem;
+  --bottom-nav-h:  4rem;   /* barra inferior no celular */
+
+  /* ── Movimento ─────────────────────────────────────────────────────────── */
+  --duration-fast:   120ms;
+  --duration-base:   200ms;
+  --duration-slow:   320ms;
+  --ease-standard:   cubic-bezier(0.2, 0.0, 0.0, 1.0);
+}
+
+/* ── Tema escuro — a coruja à noite ─────────────────────────────────────── */
+.dark {
+  --primary:            #9dbcf2;  /* Azul Coruja clareado para fundo escuro */
+  --primary-strong:     #c3d6f7;
+  --primary-container:  #6f9be6;
+  --primary-soft:       #1c3361;
+  --on-primary:         #0b1528;
+
+  --surface-container-lowest:  #13223d;
+  --surface:                   #0b1528;
+  --surface-container-low:     #182a49;
+  --surface-container-high:    #20355a;
+
+  --on-surface:          #e6edf8;
+  --on-surface-variant:  #a7b4cb;
+  --on-surface-faint:    #8b99b3;
+
+  --ghost-border:        rgba(157, 188, 242, 0.16);
+  --border-subtle:       #2a4068;
+
+  --nivel-fundamental:   #6f9be6;  /* a coruja escura sumiria no fundo noite */
+  --marcador-casa:       #e6edf8;
+}
+
+/* ============================================================================
+   Estilos semânticos de elemento
+   ============================================================================ */
+
+html, body {
+  background: var(--surface);
+  color: var(--on-surface);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, .h1 { font-size: var(--text-display-sm); font-weight: var(--weight-bold);     letter-spacing: var(--tracking-tight); line-height: var(--leading-tight); margin: 0; }
+h2, .h2 { font-size: 1.875rem;               font-weight: var(--weight-semibold); letter-spacing: var(--tracking-tight); line-height: var(--leading-tight); margin: 0; }
+h3, .h3 { font-size: var(--text-headline);   font-weight: var(--weight-semibold); line-height: var(--leading-snug); margin: 0; }
+h4, .h4 { font-size: var(--text-title);      font-weight: var(--weight-semibold); line-height: var(--leading-snug); margin: 0; }
+
+p, .body { font-size: var(--text-body); line-height: var(--leading-normal); }
+.body-lg { font-size: var(--text-body-lg); color: var(--on-surface-variant); }
+
+.eyebrow {
+  font-family: var(--font-label);
+  font-size: var(--text-label);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+
+.caption { font-size: var(--text-label); color: var(--on-surface-variant); }
+
+.surface-card {
+  background: var(--surface-container-lowest);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-ambient);
+}
+
+.gradient-primary { background: var(--gradient-primary); color: var(--on-primary); }
+.ghost-border { border: 1px solid var(--ghost-border); }
