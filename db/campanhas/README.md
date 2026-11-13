@@ -24,7 +24,8 @@ agente; o painel `/admin` só edita nome, descrição, datas, o interruptor e o 
 5. **Gravar** `AAAA-MM-DD-<id>.csv` (`nome_na_fonte;codigo_inep;vagas`; campo com aspas vai entre aspas, com as
    internas dobradas) e `AAAA-MM-DD-<id>.sql`. **Início = o momento da carga** (`now()`): o professor consulta
    as vagas antes de o sistema da Secretaria abrir. **Fim** = fim do período de indicação daquela fase no
-   edital, com fuso `-03` (Brasília); se o documento não traz, perguntar. A campanha **nasce ligada**.
+   edital, com fuso `-03` (Brasília); se o documento não traz, perguntar. A campanha **nasce desligada**
+   (boa prática), salvo quando o usuário pedir explicitamente que já nasça ligada (`--ligar` no script).
 6. **Executar** o `.sql` no Supabase "Dados" e conferir:
 
    ```sql
@@ -34,10 +35,11 @@ agente; o painel `/admin` só edita nome, descrição, datas, o interruptor e o 
      left join dados_gerais.escolas e using (codigo_inep) where e.codigo_inep is null;  -- vazio
    ```
 
-7. **Conferir que está no ar:** `select public.pqe_campanha_no_ar() ->> 'id';` deve devolver o `<id>` novo.
+7. **Ligada a pedido do usuário, conferir que está no ar:** `select public.pqe_campanha_no_ar() ->> 'id';`
+   deve devolver o `<id>` novo.
    Se devolver outra campanha (uma anterior ainda dentro das datas e ligada, que vence por ter começado antes),
    avisar o usuário: desligar a anterior é decisão dele. O app passa a mostrar as vagas em até 1 minuto, sem
-   publicar o app nem abrir o painel.
+   publicar o app nem abrir o painel. Desligada, o usuário liga pelo painel quando quiser.
 
 > Pelo MCP do Supabase, `delete` cai numa confirmação que é recusada sozinha; por isso o `.sql` gerado não
 > usa `delete`. Escola que saiu da lista numa recarga continua no banco: apagar à mão no SQL Editor.
