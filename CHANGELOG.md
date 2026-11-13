@@ -4,6 +4,12 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [Unreleased]
+
+### Alterado
+
+- As vagas de cada nova fase passam a aparecer no aplicativo assim que a lista da Secretaria é carregada, sem esperar alguém ligá-las no painel, para que os professores possam consultá-las antes de o sistema de remoção abrir. A carga da lista em PDF ganhou um conferidor automático, que trava quando o documento vem num formato diferente do esperado.
+
 ## [2.6.3] - 2026-11-12 - Atalho /remocao
 
 ### Adicionado

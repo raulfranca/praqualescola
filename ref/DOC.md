@@ -25,7 +25,7 @@ api/campanha.ts        Campanha no ar com as vagas (GET público, cache de 60 s 
 api/admin/             Painel: login (senha → token HMAC de 8 h), painel (resumo, modo forçado), google (Cloud Monitoring, calibrar), campanhas (listar, editar, arquivar)
 api/_lib/              Núcleo testável das funções (arquivo solto em api/ vira função na Vercel)
 db/migrations/         SQL do schema praqualescola, aplicado à mão no Supabase "Dados" (não é pasta supabase/)
-db/campanhas/          Carga de cada campanha (CSV + SQL) e o passo a passo (README.md); PDFs de origem em ref/documentos/<ano>/
+db/campanhas/          Carga de cada campanha (CSV + SQL), o passo a passo (README.md) e o gerador gerar-carga.py; PDFs de origem em ref/documentos/<ano>/
 public/version.json    Título e subtítulo do aviso de nova versão
 public/remocao/        Assistente de Remoção (página de passo a passo + favorito + script que roda na APUS). Estático, fora do app React
 remocao/               Documentação, PRD, changelog e testes do Assistente de Remoção (ler remocao/documentacao_remocao.md antes de mexer)
@@ -86,7 +86,7 @@ Como rodar: `node .claude/scripts/portao.mjs`. Comandos em `.claude/loop.json`.
 - Textos de interface em português; muitos comentários e logs de console herdados estão em inglês.
 - **Logs:** `console.log`/`console.debug` servem só para depuração local; o build de produção os remove (`esbuild.pure` em `vite.config.ts`). `console.warn`/`console.error` vão para produção — use-os para o que precisa ser visto lá.
 - **Segurança das dependências:** `npm audit` deve ficar sem alertas *high*/*critical*. Os *moderate* restantes estão em ferramentas de build/lint (não chegam ao navegador) ou registrados em `.github/maintenance.yml`.
-- Nova campanha: o agente carrega no banco pelo passo a passo de `db/campanhas/README.md` (nasce desligada); o dono liga pelo painel `/admin`. Sem publicar o app. "Campanha" nunca aparece em texto que o professor vê.
+- Nova campanha: o agente carrega no banco pelo passo a passo de `db/campanhas/README.md` (atalho: `db/campanhas/gerar-carga.py`, PDF → CSV + SQL). Nasce ligada, com início na hora da carga; o painel `/admin` serve para ajustes. Sem publicar o app. "Campanha" nunca aparece em texto que o professor vê.
 - Nova versão publicada: atualizar `public/version.json` (`version`, `title`, `subtitle`) junto com o `CHANGELOG.md`.
 
 ## 8. Estado de implementação
