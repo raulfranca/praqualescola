@@ -25,7 +25,11 @@
       "PowerShell(git diff *)",
       "PowerShell(git log *)",
       "PowerShell(git show *)",
-      "PowerShell(git branch *)"
+      "PowerShell(git branch *)",
+      "mcp__Supabase__execute_sql",
+      "mcp__Supabase__list_tables",
+      "Bash(python3 db/campanhas/gerar-carga.py *)",
+      "Bash(pdftotext *)"
     ]
   },
   "hooks": {

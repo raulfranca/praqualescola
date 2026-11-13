@@ -6,6 +6,11 @@ agente; o painel `/admin` só edita nome, descrição, datas, o interruptor e o 
 
 ## Passo a passo
 
+> **Atalho:** `python3 db/campanhas/gerar-carga.py <pdf> --id … --data … --nome … --descricao … --fonte …
+> --inicio … --fim …` faz os passos 2 a 5 para listas no formato da APUS: extrai, casa os nomes pelos CSVs
+> anteriores, confere e grava o `.csv` e o `.sql`. Nome sem par anterior: ele para e lista (passo 3 à mão).
+> O `.sql` gerado não usa `delete` (atualiza com `on conflict`), então roda inteiro pelo MCP do Supabase.
+
 1. **Guardar o PDF** em `ref/documentos/<ano>/`.
 2. **Extrair** cada linha: nome como está no PDF e o número cru (zero e negativo também; só positivo é vaga).
 3. **Casar** cada nome com `dados_gerais.escolas.codigo_inep` (consulta só leitura). Ignorar acento, "EM/CMEI",
