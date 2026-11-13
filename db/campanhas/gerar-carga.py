@@ -3,7 +3,7 @@
 Uso:
   python3 db/campanhas/gerar-carga.py <pdf> --id remocao-2027-2a-fase --data 2026-11-20 \
       --nome "Remoção 2027 · 2ª fase" --descricao "..." --fonte "Lista da Secretaria de 20/11/2026" \
-      --fim "2026-11-19 07:00:00-03" [--inicio agora] [--esperadas 66] [--saida db/campanhas]
+      --fim "2026-11-19 07:00:00-03" [--inicio agora] [--esperadas 66] [--ligar] [--saida db/campanhas]
 
 Casa cada nome com o INEP pelos CSVs de campanhas anteriores (db/campanhas/*.csv). Nome sem par
 anterior: o script para e lista; o agente casa à mão (README, passo 3) e acrescenta no CSV gerado.
@@ -48,6 +48,7 @@ def main():
     for a in ("id", "data", "nome", "descricao", "fonte", "fim"):
         p.add_argument("--" + a, required=True)
     p.add_argument("--inicio", default="agora", help='"agora" (padrão) ou data com fuso, ex. "2026-11-18 06:00:00-03"')
+    p.add_argument("--ligar", action="store_true", help="nasce ligada (só quando o usuário pedir)")
     p.add_argument("--esperadas", type=int, default=66, help="escolas esperadas na lista (rede: 67, menos a terceirizada)")
     p.add_argument("--saida", default=os.path.dirname(os.path.abspath(__file__)))
     a = p.parse_args()
@@ -84,13 +85,13 @@ def main():
     sql = f"""-- {a.nome} — {a.descricao}
 -- Fonte: {os.path.relpath(a.pdf)} ({len(casadas)} escolas). Casamento nome → INEP: o .csv ao lado.
 -- Período no app: de {a.inicio} (início = quando as vagas ficam disponíveis) a {a.fim}.
--- Gerado por db/campanhas/gerar-carga.py. A campanha nasce ligada. Idempotente sem `delete`: rodar de
+-- Gerado por db/campanhas/gerar-carga.py. A campanha nasce {'ligada' if a.ligar else 'desligada'}. Idempotente sem `delete`: rodar de
 -- novo atualiza dados e vagas, mas não mexe no início, no interruptor nem no arquivamento.
 
 begin;
 
 insert into praqualescola.campanhas (id, nome, descricao, inicio, fim, ligada, fonte)
-values ({q(a.id)}, {q(a.nome)}, {q(a.descricao)}, {inicio}, {q(a.fim)}, true, {q(a.fonte)})
+values ({q(a.id)}, {q(a.nome)}, {q(a.descricao)}, {inicio}, {q(a.fim)}, {'true' if a.ligar else 'false'}, {q(a.fonte)})
 on conflict (id) do update
    set nome = excluded.nome, descricao = excluded.descricao, fim = excluded.fim, fonte = excluded.fonte, atualizada_em = now();
 

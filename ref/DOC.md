@@ -86,7 +86,7 @@ Como rodar: `node .claude/scripts/portao.mjs`. Comandos em `.claude/loop.json`.
 - Textos de interface em português; muitos comentários e logs de console herdados estão em inglês.
 - **Logs:** `console.log`/`console.debug` servem só para depuração local; o build de produção os remove (`esbuild.pure` em `vite.config.ts`). `console.warn`/`console.error` vão para produção — use-os para o que precisa ser visto lá.
 - **Segurança das dependências:** `npm audit` deve ficar sem alertas *high*/*critical*. Os *moderate* restantes estão em ferramentas de build/lint (não chegam ao navegador) ou registrados em `.github/maintenance.yml`.
-- Nova campanha: o agente carrega no banco pelo passo a passo de `db/campanhas/README.md` (atalho: `db/campanhas/gerar-carga.py`, PDF → CSV + SQL). Nasce ligada, com início na hora da carga; o painel `/admin` serve para ajustes. Sem publicar o app. "Campanha" nunca aparece em texto que o professor vê.
+- Nova campanha: o agente carrega no banco pelo passo a passo de `db/campanhas/README.md` (atalho: `db/campanhas/gerar-carga.py`, PDF → CSV + SQL). Início na hora da carga; nasce desligada (o dono liga pelo painel `/admin`), ou ligada se o dono pedir. Sem publicar o app. "Campanha" nunca aparece em texto que o professor vê.
 - Nova versão publicada: atualizar `public/version.json` (`version`, `title`, `subtitle`) junto com o `CHANGELOG.md`.
 
 ## 8. Estado de implementação
