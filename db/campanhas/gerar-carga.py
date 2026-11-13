@@ -3,11 +3,14 @@
 Uso:
   python3 db/campanhas/gerar-carga.py <pdf> --id remocao-2027-2a-fase --data 2026-11-20 \
       --nome "Remoção 2027 · 2ª fase" --descricao "..." --fonte "Lista da Secretaria de 20/11/2026" \
-      --inicio "2026-11-18 06:00:00-03" --fim "2026-11-19 07:00:00-03" [--saida db/campanhas]
+      --fim "2026-11-19 07:00:00-03" [--inicio agora] [--esperadas 66] [--saida db/campanhas]
 
 Casa cada nome com o INEP pelos CSVs de campanhas anteriores (db/campanhas/*.csv). Nome sem par
 anterior: o script para e lista; o agente casa à mão (README, passo 3) e acrescenta no CSV gerado.
 Precisa do `pdftotext` (poppler-utils).
+
+O script é só um atalho: o agente sempre lê o PDF ele mesmo e confere as contagens. Se o número de
+linhas lidas não bate com --esperadas, o script para (formato mudou, linha quebrada etc.).
 """
 import argparse, csv, glob, os, re, subprocess, sys, unicodedata
 
@@ -42,8 +45,10 @@ def q(s: str) -> str:
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("pdf")
-    for a in ("id", "data", "nome", "descricao", "fonte", "inicio", "fim"):
+    for a in ("id", "data", "nome", "descricao", "fonte", "fim"):
         p.add_argument("--" + a, required=True)
+    p.add_argument("--inicio", default="agora", help='"agora" (padrão) ou data com fuso, ex. "2026-11-18 06:00:00-03"')
+    p.add_argument("--esperadas", type=int, default=66, help="escolas esperadas na lista (rede: 67, menos a terceirizada)")
     p.add_argument("--saida", default=os.path.dirname(os.path.abspath(__file__)))
     a = p.parse_args()
 
@@ -60,7 +65,9 @@ def main():
     positivas = [v for *_, v in casadas if v > 0]
     print(f"linhas no PDF: {len(linhas)} | casadas: {len(casadas)} | sem par: {len(sem_par)}")
     print(f"escolas com vaga: {len(positivas)} | total de vagas: {sum(positivas)}")
-    if sem_par or repetidos:
+    if len(linhas) != a.esperadas:
+        print(f"  ESPERADAS {a.esperadas} LINHAS, LIDAS {len(linhas)}: conferir o PDF à mão")
+    if sem_par or repetidos or len(linhas) != a.esperadas:
         for nome, _, v in sem_par:
             print(f"  SEM PAR: {nome} ({v})")
         for i in repetidos:
@@ -72,20 +79,20 @@ def main():
         w.writerow(["nome_na_fonte", "codigo_inep", "vagas"])
         w.writerows(casadas)
 
+    inicio = "now()" if a.inicio == "agora" else q(a.inicio)
     valores = ",\n".join(f"  ({q(a.id)}, {q(i)}, {q(n)}, {v})" for n, i, v in casadas)
     sql = f"""-- {a.nome} — {a.descricao}
 -- Fonte: {os.path.relpath(a.pdf)} ({len(casadas)} escolas). Casamento nome → INEP: o .csv ao lado.
--- Período: {a.inicio} a {a.fim}.
--- Gerado por db/campanhas/gerar-carga.py. Idempotente sem `delete`: rodar de novo atualiza dados e
--- vagas, mas não mexe no interruptor nem no arquivamento (a campanha nasce desligada).
+-- Período no app: de {a.inicio} (início = quando as vagas ficam disponíveis) a {a.fim}.
+-- Gerado por db/campanhas/gerar-carga.py. A campanha nasce ligada. Idempotente sem `delete`: rodar de
+-- novo atualiza dados e vagas, mas não mexe no início, no interruptor nem no arquivamento.
 
 begin;
 
 insert into praqualescola.campanhas (id, nome, descricao, inicio, fim, ligada, fonte)
-values ({q(a.id)}, {q(a.nome)}, {q(a.descricao)}, {q(a.inicio)}, {q(a.fim)}, false, {q(a.fonte)})
+values ({q(a.id)}, {q(a.nome)}, {q(a.descricao)}, {inicio}, {q(a.fim)}, true, {q(a.fonte)})
 on conflict (id) do update
-   set nome = excluded.nome, descricao = excluded.descricao, inicio = excluded.inicio,
-       fim = excluded.fim, fonte = excluded.fonte, atualizada_em = now();
+   set nome = excluded.nome, descricao = excluded.descricao, fim = excluded.fim, fonte = excluded.fonte, atualizada_em = now();
 
 insert into praqualescola.campanha_vagas (campanha, codigo_inep, nome_na_fonte, vagas) values
 {valores}

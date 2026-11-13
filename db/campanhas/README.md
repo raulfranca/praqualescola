@@ -7,8 +7,10 @@ agente; o painel `/admin` só edita nome, descrição, datas, o interruptor e o 
 ## Passo a passo
 
 > **Atalho:** `python3 db/campanhas/gerar-carga.py <pdf> --id … --data … --nome … --descricao … --fonte …
-> --inicio … --fim …` faz os passos 2 a 5 para listas no formato da APUS: extrai, casa os nomes pelos CSVs
-> anteriores, confere e grava o `.csv` e o `.sql`. Nome sem par anterior: ele para e lista (passo 3 à mão).
+> --fim …` faz os passos 2 a 5 para listas no formato da APUS: extrai, casa os nomes pelos CSVs anteriores,
+> confere e grava o `.csv` e o `.sql`. Para (e o agente segue à mão) se o número de linhas lidas não bate com
+> o esperado ou se algum nome não tem par anterior. **O script não substitui a leitura:** o agente lê o PDF ele
+> mesmo e confere o resultado do script contra o documento (linhas, escolas com vaga, soma, nomes novos).
 > O `.sql` gerado não usa `delete` (atualiza com `on conflict`), então roda inteiro pelo MCP do Supabase.
 
 1. **Guardar o PDF** em `ref/documentos/<ano>/`.
@@ -20,8 +22,9 @@ agente; o painel `/admin` só edita nome, descrição, datas, o interruptor e o 
    A rede tem 67 escolas; as listas de remoção trazem 66, porque a EM Maria Apparecida Camargo de Souza
    (terceirizada) não tem vaga de remoção. Qualquer outra diferença: parar e perguntar.
 5. **Gravar** `AAAA-MM-DD-<id>.csv` (`nome_na_fonte;codigo_inep;vagas`; campo com aspas vai entre aspas, com as
-   internas dobradas) e `AAAA-MM-DD-<id>.sql` (modelo: o da Remoção 2027 · 1ª fase). Datas de início e fim vêm do
-   edital, com fuso `-03` (Brasília); se o documento não traz, perguntar. A campanha nasce `ligada = false`.
+   internas dobradas) e `AAAA-MM-DD-<id>.sql`. **Início = o momento da carga** (`now()`): o professor consulta
+   as vagas antes de o sistema da Secretaria abrir. **Fim** = fim do período de indicação daquela fase no
+   edital, com fuso `-03` (Brasília); se o documento não traz, perguntar. A campanha **nasce ligada**.
 6. **Executar** o `.sql` no Supabase "Dados" e conferir:
 
    ```sql
@@ -31,8 +34,10 @@ agente; o painel `/admin` só edita nome, descrição, datas, o interruptor e o 
      left join dados_gerais.escolas e using (codigo_inep) where e.codigo_inep is null;  -- vazio
    ```
 
-7. O usuário **liga a campanha pelo painel** quando quiser que o app mostre as vagas.
+7. **Conferir que está no ar:** `select public.pqe_campanha_no_ar() ->> 'id';` deve devolver o `<id>` novo.
+   Se devolver outra campanha (uma anterior ainda dentro das datas e ligada, que vence por ter começado antes),
+   avisar o usuário: desligar a anterior é decisão dele. O app passa a mostrar as vagas em até 1 minuto, sem
+   publicar o app nem abrir o painel.
 
-> Pelo MCP do Supabase, o `delete` do `.sql` (que o torna repetível) cai numa confirmação que é recusada
-> sozinha. Em carga nova, com a tabela vazia, rode só os `insert`. Para refazer uma carga, rode o arquivo
-> inteiro no SQL Editor do Supabase.
+> Pelo MCP do Supabase, `delete` cai numa confirmação que é recusada sozinha; por isso o `.sql` gerado não
+> usa `delete`. Escola que saiu da lista numa recarga continua no banco: apagar à mão no SQL Editor.
