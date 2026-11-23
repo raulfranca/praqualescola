@@ -22,7 +22,9 @@ import { School } from "@/types/school";
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null);
-  const [shouldCenterMap, setShouldCenterMap] = useState(false);
+  // Muda a cada busca nova (caixa vazia → começa a digitar) ou mudança de filtro:
+  // o mapa volta a se enquadrar sozinho mesmo que o usuário o tenha mexido antes
+  const [retomarEnquadramento, setRetomarEnquadramento] = useState(0);
   const [showHomeInput, setShowHomeInput] = useState(false);
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
   const [avisoAberto, setAvisoAberto] = useState(false);
@@ -227,16 +229,20 @@ const Index = () => {
     return filtered;
   }, [searchQuery, schoolsMatchingCriteria, hasDistances, maxDistanceFilter, maxDurationFilter, filterMetric]);
 
-  // When selecting from search bar - should center map
-  const handleSelectSchool = (school: School) => {
-    setSelectedSchool(school);
-    setShouldCenterMap(true);
+  const handleSearchChange = (value: string) => {
+    if (!searchQuery.trim() && value.trim()) {
+      setRetomarEnquadramento((n) => n + 1);
+    }
+    setSearchQuery(value);
   };
 
-  // When clicking on map marker - should NOT center map
-  const handleSchoolClickOnMap = (school: School) => {
+  useEffect(() => {
+    setRetomarEnquadramento((n) => n + 1);
+  }, [selectedLevels, selectedManagement, showOnlyVacancies, maxDistanceFilter, maxDurationFilter, filterMetric]);
+
+  // Abrir os detalhes (busca, marcador ou escola próxima) enquadra a escola no mapa
+  const handleSelectSchool = (school: School) => {
     setSelectedSchool(school);
-    setShouldCenterMap(false);
   };
 
   const handleFilterClick = () => {
@@ -272,7 +278,7 @@ const Index = () => {
           <div className="absolute top-4 left-4 right-4 md:left-20 z-50 flex flex-col md:flex-row gap-3 md:items-start">
             <SearchBar
               value={searchQuery} 
-              onChange={setSearchQuery}
+              onChange={handleSearchChange}
               schools={schools}
               onSelectSchool={handleSelectSchool}
             />
@@ -298,8 +304,8 @@ const Index = () => {
               favorites={favorites}
               onToggleFavorite={toggleFavorite}
               selectedSchool={selectedSchool}
-              onSchoolClick={handleSchoolClickOnMap}
-              shouldCenterMap={shouldCenterMap}
+              onSchoolClick={handleSelectSchool}
+              retomarEnquadramento={retomarEnquadramento}
               homeLocation={homeLocation}
               isActive={true}
             />

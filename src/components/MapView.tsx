@@ -29,7 +29,8 @@ interface MapViewProps {
   onToggleFavorite: (schoolId: string) => void;
   selectedSchool: School | null;
   onSchoolClick: (school: School) => void;
-  shouldCenterMap: boolean;
+  /** Muda a cada busca nova ou mudança de filtro: devolve ao app o enquadramento automático */
+  retomarEnquadramento: number;
   homeLocation: HomeLocation | null;
   isActive?: boolean; // Whether the map tab is currently active
 }
@@ -69,13 +70,23 @@ const mapOptions = {
   ],
 };
 
-export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolClick, shouldCenterMap, homeLocation, isActive = true }: MapViewProps) {
+export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, onSchoolClick, retomarEnquadramento, homeLocation, isActive = true }: MapViewProps) {
   const [currentZoom, setCurrentZoom] = useState(13);
   const mapRef = useRef<google.maps.Map | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const userInteractingRef = useRef(false);
+  // true quando o usuário mexeu no mapa (ou abriu uma escola): o app não reenquadra sozinho
+  // até a próxima busca nova ou mudança de filtro
+  const enquadramentoManualRef = useRef(false);
   const fitBoundsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const prevSchoolIdsRef = useRef<string>("");
+  const schoolsRef = useRef(schools);
+
+  useEffect(() => {
+    schoolsRef.current = schools;
+  }, [schools]);
+
+  useEffect(() => {
+    enquadramentoManualRef.current = false;
+  }, [retomarEnquadramento]);
 
   // Check if Google Maps is loaded
   useEffect(() => {
@@ -96,13 +107,15 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
     onSchoolClick(school);
   }, [onSchoolClick]);
 
-  // Only center map when shouldCenterMap is true (from search bar)
+  // Ao abrir os detalhes, enquadra a escola: fica em destaque quando o modal fecha.
+  // Esse enquadramento prevalece sobre o automático (ex.: a busca que se limpa ao escolher).
   useEffect(() => {
-    if (selectedSchool && shouldCenterMap && mapRef.current) {
-      mapRef.current.panTo({ lat: selectedSchool.lat, lng: selectedSchool.lng });
-      mapRef.current.setZoom(16);
-    }
-  }, [selectedSchool, shouldCenterMap]);
+    if (!selectedSchool || !mapRef.current) return;
+    enquadramentoManualRef.current = true;
+    if (fitBoundsTimeoutRef.current) clearTimeout(fitBoundsTimeoutRef.current);
+    mapRef.current.panTo({ lat: selectedSchool.lat, lng: selectedSchool.lng });
+    mapRef.current.setZoom(Math.max(mapRef.current.getZoom() ?? 0, 16));
+  }, [selectedSchool]);
 
   // Create stable school IDs string for comparison
   const schoolIdsString = useMemo(() => {
@@ -115,9 +128,9 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
 
   // Fit bounds to visible SCHOOL markers only (excludes home location)
   const fitBoundsToMarkers = useCallback(() => {
-    if (!mapRef.current || !isLoaded || userInteractingRef.current) return;
+    if (!mapRef.current || !isLoaded || enquadramentoManualRef.current) return;
 
-    const validSchools = schools.filter(s => s.lat && s.lng);
+    const validSchools = schoolsRef.current.filter(s => s.lat && s.lng);
     
     if (validSchools.length === 0) {
       // No markers - keep default view
@@ -137,7 +150,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       // Single marker - center on it with neighborhood zoom
       const school = validSchools[0];
       mapRef.current.panTo({ lat: school.lat, lng: school.lng });
-      mapRef.current.setZoom(14);
+      mapRef.current.setZoom(15);
       return;
     }
 
@@ -167,24 +180,14 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
 
     // Fit bounds to SCHOOL markers only - home marker is visible but doesn't affect zoom
     mapRef.current.fitBounds(bounds, padding);
-  }, [schools, isLoaded]);
+  }, [isLoaded]);
 
-  // Debounced fitBounds when schools change or tab becomes active
+  // Debounced fitBounds when the set of visible schools changes or a new search starts.
+  // Só reage a mudança real de conjunto (ids): digitar mais letras com o mesmo resultado
+  // não cancela o enquadramento pendente.
   useEffect(() => {
     if (!isLoaded || !isActive) return;
 
-    // Skip if schools haven't actually changed
-    if (prevSchoolIdsRef.current === schoolIdsString && prevSchoolIdsRef.current !== "") {
-      return;
-    }
-    prevSchoolIdsRef.current = schoolIdsString;
-
-    // Clear any pending timeout
-    if (fitBoundsTimeoutRef.current) {
-      clearTimeout(fitBoundsTimeoutRef.current);
-    }
-
-    // Debounce fitBounds to avoid rapid calls during filter changes
     fitBoundsTimeoutRef.current = setTimeout(() => {
       fitBoundsToMarkers();
     }, 300);
@@ -194,18 +197,13 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
         clearTimeout(fitBoundsTimeoutRef.current);
       }
     };
-  }, [schoolIdsString, isActive, isLoaded, fitBoundsToMarkers]);
+  }, [schoolIdsString, retomarEnquadramento, isActive, isLoaded, fitBoundsToMarkers]);
 
-  // Track user interaction to prevent fitBounds during manual pan/zoom
-  const handleUserInteractionStart = useCallback(() => {
-    userInteractingRef.current = true;
-  }, []);
-
-  const handleUserInteractionEnd = useCallback(() => {
-    // Small delay to ensure interaction is complete
-    setTimeout(() => {
-      userInteractingRef.current = false;
-    }, 100);
+  // Gesto do usuário no mapa (arrastar, roda do mouse, pinça, duplo clique): o app abre mão
+  // do enquadramento automático. Eventos do DOM, que fitBounds/setZoom do código não disparam.
+  const marcarEnquadramentoManual = useCallback(() => {
+    enquadramentoManualRef.current = true;
+    if (fitBoundsTimeoutRef.current) clearTimeout(fitBoundsTimeoutRef.current);
   }, []);
 
   // Determine school category
@@ -245,6 +243,10 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
       onLoad={(map) => {
         mapRef.current = map;
         setIsLoaded(true);
+        const div = map.getDiv();
+        for (const evento of ["wheel", "touchmove", "dblclick"]) {
+          div.addEventListener(evento, marcarEnquadramentoManual, { passive: true });
+        }
         // Trigger initial fitBounds after map loads
         setTimeout(() => {
           fitBoundsToMarkers();
@@ -258,8 +260,7 @@ export function MapView({ schools, favorites, onToggleFavorite, selectedSchool, 
           }
         }
       }}
-      onDragStart={handleUserInteractionStart}
-      onDragEnd={handleUserInteractionEnd}
+      onDragStart={marcarEnquadramentoManual}
     >
           {isLoaded && schools.map((school) => {
             if (!school.lat || !school.lng) return null;
