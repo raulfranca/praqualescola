@@ -8,6 +8,8 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ### Alterado
 
+- Ao buscar uma escola, o mapa se aproxima sozinho para enquadrar os resultados; com um único resultado, dá zoom nele. Se o usuário mexer no mapa (arrastar, zoom com a roda, pinça ou duplo clique), o app para de reenquadrar, mesmo que a digitação continue, e só volta a fazer isso numa busca nova (caixa vazia e digitação recomeçando) ou ao mudar um filtro.
+- Abrir os detalhes de uma escola, pela busca, pelo marcador ou pela lista de escolas próximas, aproxima o mapa sobre ela, que aparece em destaque ao fechar a janela.
 - As vagas de cada nova fase ficam disponíveis para consulta desde o momento em que a lista da Secretaria é carregada, antes de o sistema de remoção abrir, e podem entrar no ar já na carga, sem passar pelo painel, quando o administrador pedir. A carga da lista em PDF ganhou um conferidor automático, que trava quando o documento vem num formato diferente do esperado.
 
 ## [2.6.3] - 2026-11-12 - Atalho /remocao
